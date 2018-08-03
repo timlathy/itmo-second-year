@@ -2,6 +2,9 @@
   "autoload": {
     "classmap": ["src/"]
   },
+  "scripts": {
+    "test": "phpunit --testdox tests"
+  },
   "require": {
     "vlucas/bulletphp": "~1.7"
   },
