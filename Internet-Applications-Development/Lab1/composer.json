@@ -6,10 +6,10 @@
     "test": "phpunit --testdox tests"
   },
   "require": {
-    "vlucas/bulletphp": "~1.7"
+    "vlucas/bulletphp": "~1.7",
+    "meyfa/php-svg": "^0.9"
   },
   "require-dev": {
     "phpunit/phpunit": "^7"
   }
 }
-
