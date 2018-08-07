@@ -5,51 +5,46 @@ use SVG\SVG;
 
 final class PolygonGraph {
   private $graph;
-  private $max_x;
-  private $max_y;
+  private $graph_dim;
 
   const ARGB_ALPHA_MASK = 0xFF000000;
   const ARGB_ALPHA_SHIFT = 24;
 
-  function __construct(string $graph_svg, int $max_x, int $max_y) {
-    $this->graph = SVG::fromString($graph_svg)->toRasterImage(100, 100);
-    $this->max_x = $max_x;
-    $this->max_y = $max_y;
+  function __construct(string $graph_svg, int $graph_size) {
+    $this->graph_dim = $graph_size;
+
+    $this->graph = SVG::fromString($graph_svg)
+      ->toRasterImage($graph_size, $graph_size);
   }
 
   function is_point_inside_polygon(int $x, int $y): bool {
-    $abs_x = $x + ($this->max_x / 2);
-    $abs_y = $y + ($this->max_y / 2);
+    $abs_x = ($this->graph_dim / 2) + $x - 1;
+    $abs_y = ($this->graph_dim / 2) - $y - 1;
 
-    if ($abs_x > $this->max_x || $abs_y > $this->max_y) return false;
+    if ($abs_x >= $this->graph_dim || $abs_y >= $this->graph_dim)
+      return false;
 
-    return self::is_point_inside_polygon_abs($abs_x, $abs_y);
+    return self::ray_crossings_count($abs_x, $abs_y) == 1;
   }
 
-  private function is_point_inside_polygon_abs(int $x, int $y): bool {
-    $west_bound = false;
-    $x_w = $x;
-    while (!$west_bound && $x_w >= 0)
-      $west_bound = self::is_point_on_line($x_w--, $y);
-    if (!$west_bound) return false;
+  private function ray_crossings_count(int $x, int $y): int {
+    $is_point_on_edge = self::is_point_on_line($x, $y);
+    $isec_count = 0;
+    $prev_point_x = -1;
+    $adjacent_hits = 0;
+    while ($x > 0)
+      if (self::is_point_on_line($x--, $y)) {
+        /* Skip rasterization artifacts: several adjacent points
+         * being on a line should count as a single crossing */
+        if ($prev_point_x - 1 != $x) $isec_count++;
+        else $adjacent_hits++;
 
-    $east_bound = false;
-    $x_e = $x;
-    while (!$east_bound && $x_e < $this->max_x)
-      $east_bound = self::is_point_on_line($x_e++, $y);
-    if (!$east_bound) return false;
+        $prev_point_x = $x;
+      }
 
-    $north_bound = false;
-    $y_n = $y;
-    while (!$north_bound && $y_n >= 0)
-      $north_bound = self::is_point_on_line($x, $y_n--);
-    if (!$north_bound) return false;
-
-    $south_bound = false;
-    $y_s = $y;
-    while (!$south_bound && $y_s < $this->max_y)
-      $south_bound = self::is_point_on_line($x, $y_s++);
-    return $south_bound;
+    if ($isec_count % 2 == 0 && $is_point_on_edge) return 1;
+    else if ($adjacent_hits > 4) return $isec_count - 1;
+    return $isec_count;
   }
 
   private function is_point_on_line(int $x, int $y): bool {
