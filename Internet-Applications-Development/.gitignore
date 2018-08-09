@@ -1,0 +1,8 @@
+# npm
+node_modules/
+
+# BuckleScript
+**/lib/bs/
+*.bs.js
+.merlin
+.bsb.lock
