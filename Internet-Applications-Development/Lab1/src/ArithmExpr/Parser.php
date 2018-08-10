@@ -18,7 +18,7 @@ final class Parser {
    *            ;
    * number     = [-]?[0-9]+([.][0-9]+)?
    *            ;
-   * variable   = [A-Za-z]+
+   * variable   = [A-Za-z_]+
    *            ;
    */
 
@@ -63,7 +63,7 @@ final class Parser {
   }
 
   private static function variable($input) {
-    return self::regex_parse($input, '/^[A-Za-z]+/',
+    return self::regex_parse($input, '/^[A-Za-z_]+/',
       function($parsed) { return ['variable', $parsed]; });
   }
 

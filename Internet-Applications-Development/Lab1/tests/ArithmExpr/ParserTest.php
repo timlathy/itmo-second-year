@@ -76,6 +76,19 @@ final class ParserTest extends TestCase {
     );
   }
 
+  public function test_variables() {
+    $this->assertEquals(
+      ["+",
+        ["+",
+          ["+",
+            ["+", ["variable", "R"], ["literal", 2]],
+            ["variable", "long_mixedCase"]],
+          ["variable", "RS"]],
+        ["variable", "_p"]],
+      Parser::sexpr("R +2+   long_mixedCase    + RS  + _p")
+    );
+  }
+
   /**
   * @group errors
   */
