@@ -1,1 +1,11 @@
-/vendor
+# PHP
+vendor/
+
+# npm
+node_modules/
+
+# BuckleScript
+client/lib/bs/
+*.bs.js
+.merlin
+.bsb.lock
