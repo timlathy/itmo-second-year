@@ -9,7 +9,7 @@ final class PolygonGraphTest extends PHPUnit\Framework\TestCase {
       <path stroke="#000" d="M 99,74 H 49"/>
       <path stroke="#000" d="M 49,74 L 0,49"/>
       <path stroke="#000" d="M 0,49 H 24"/>
-      <path stroke="#000" d="M 24,49 C 24,34 35,25 49,24"/>
+      <path stroke="#000" d="M 24,49 Q 24,24 49,24"/>
     </g>
   </svg>';
 

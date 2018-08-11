@@ -30,7 +30,7 @@ let lineInputSectionHtml = (num: int, ~cls: option(string)=?,
   | None => ">"
   }) ++
   {j|<label for="lines$(num)_$prop">$label</label>|j} ++ 
-  {j|<input type="text" id="lines$num$prop" name="lines[$num][$prop]">|j} ++
+  {j|<input type="text" id="lines$(num)_$prop" name="lines[$num][$prop]">|j} ++
   "</section>";
 
 let lineInputRadioHtml = (num: int, prop: string, value: string,
@@ -95,10 +95,32 @@ let setupLineFieldsetEvents = (num: int): unit => {
   |> EventTarget.addEventListener("click", lineFieldsetClick);
 };
 
+[@bs.new] external formDataBody : Dom.element => Fetch.bodyInit = "FormData";
+
 onEvent(document, "DOMContentLoaded", (_) => {
   document
-  |> unsafeGetElementById("graph-lines")
+  |> unsafeGetElementById("line-input-container")
   |> Element.setInnerHTML(_, lineFieldsetHtml(0));
+
+  document
+  |> unsafeGetElementById("line-input-preview")
+  |> Element.asEventTarget
+  |> EventTarget.addEventListener("click", (e) => {
+       Event.preventDefault(e);
+
+       let form = document |> unsafeGetElementById("line-input-form");
+       let _ = Js.Promise.(
+         Fetch.fetchWithInit("/graphs/preview",
+           Fetch.RequestInit.make(~method_=Post, ~body=formDataBody(form), ()),
+         )
+         |> then_(Fetch.Response.text)
+         |> then_((t) => {
+             document
+             |> unsafeGetElementById("line-input-preview-container")
+             |> Element.setInnerHTML(_, t)
+             |> resolve;
+           }));
+     });
 
   setupLineFieldsetEvents(0);
 });

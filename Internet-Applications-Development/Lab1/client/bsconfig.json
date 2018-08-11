@@ -11,7 +11,8 @@
   },
   "suffix": ".bs.js",
   "bs-dependencies": [
-    "bs-webapi"
+    "bs-webapi",
+    "bs-fetch"
   ],
   "warnings": {
     "error" : "+101"
