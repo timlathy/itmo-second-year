@@ -1,27 +1,9 @@
 open Webapi.Dom;
 
-[@bs.send] external onEvent : (Dom.document, string, Dom.event => unit) => unit
-  = "addEventListener";
-
 [@bs.send.pipe : string] external stringSlice : (int) => string = "slice";
-
-[@bs.send.pipe : Dom.element] external unsafeQuerySelector :
-  (string) => Dom.element = "querySelector";
-
-[@bs.send.pipe : Dom.document] external unsafeGetElementById :
-  (string) => Dom.element = "getElementById";
 
 [@bs.send.pipe : Dom.element] external unsafeClosest :
   (string) => Dom.element = "closest";
-
-let elementClassList = (selector: string, parent: Dom.element) =>
-  parent |> unsafeQuerySelector(selector) |> Element.classList;
-
-let hide = (selector: string, parent: Dom.element) =>
-  parent |> elementClassList(selector) |> DomTokenList.add("hidden");
-
-let unhide = (selector: string, parent: Dom.element) =>
-  parent |> elementClassList(selector) |> DomTokenList.remove("hidden");
 
 let lineInputSectionHtml = (num: int, ~cls: option(string)=?,
                             prop: string, label: string): string =>
@@ -63,19 +45,19 @@ let lineFieldsetClick = (e: Dom.event): unit => {
   let target = e |> Event.target |> EventTarget.unsafeAsElement;
   let form = target |> unsafeClosest("form");
 
-  let hideAll = (s, f) => s |> Js.Array.forEach(hide(_, f));
-  let unhideAll = (s, f) => s |> Js.Array.forEach(unhide(_, f));
+  let hideAll = (s, f) => s |> Js.Array.forEach(Page.hide(_, f));
+  let unhideAll = (s, f) => s |> Js.Array.forEach(Page.unhide(_, f));
   
   target
   |> Element.id
   |> stringSlice(-6)
   |> fun
     | "type_h" => {
-      form |> unhide(".js-line-x2");
+      form |> Page.unhide(".js-line-x2");
       form |> hideAll([|".js-line-y2", ".js-line-x3", ".js-line-y3"|]);
     }
     | "type_v" => {
-      form |> unhide(".js-line-y2");
+      form |> Page.unhide(".js-line-y2");
       form |> hideAll([|".js-line-x2", ".js-line-x3", ".js-line-y3"|]);
     }
     | "type_l" => {
@@ -89,38 +71,49 @@ let lineFieldsetClick = (e: Dom.event): unit => {
 };
 
 let setupLineFieldsetEvents = (num: int): unit => {
-  document
-  |> unsafeGetElementById({j|lines$num|j})
-  |> Element.asEventTarget
-  |> EventTarget.addEventListener("click", lineFieldsetClick);
+  Page.onEvent({j|#lines$num|j}, "click", lineFieldsetClick);
 };
 
 [@bs.new] external formDataBody : Dom.element => Fetch.bodyInit = "FormData";
 
-onEvent(document, "DOMContentLoaded", (_) => {
-  document
-  |> unsafeGetElementById("line-input-container")
+Page.onDomContentLoaded((_) => {
+  "line-input-container"
+  |> Page.elementById
   |> Element.setInnerHTML(_, lineFieldsetHtml(0));
 
-  document
-  |> unsafeGetElementById("line-input-preview")
-  |> Element.asEventTarget
-  |> EventTarget.addEventListener("click", (e) => {
-       Event.preventDefault(e);
+  Page.onEvent("#line-input-preview", "click", (e) => {
+     Event.preventDefault(e);
 
-       let form = document |> unsafeGetElementById("line-input-form");
-       let _ = Js.Promise.(
-         Fetch.fetchWithInit("/graphs/preview",
-           Fetch.RequestInit.make(~method_=Post, ~body=formDataBody(form), ()),
-         )
-         |> then_(Fetch.Response.text)
-         |> then_((t) => {
-             document
-             |> unsafeGetElementById("line-input-preview-container")
-             |> Element.setInnerHTML(_, t)
-             |> resolve;
-           }));
-     });
+     let form = Page.elementById("line-input-form");
+     let _ = Js.Promise.(
+       Fetch.fetchWithInit("/graphs/preview",
+         Fetch.RequestInit.make(~method_=Post, ~body=formDataBody(form), ()),
+       )
+       |> then_(Fetch.Response.text)
+       |> then_((t) => {
+           "line-input-preview-container"
+           |> Page.elementById
+           |> Element.setInnerHTML(_, t)
+           |> resolve;
+         }));
+   });
+
+  Page.onEvent("#line-input-save", "click", (e) => {
+    Event.preventDefault(e);
+
+    "line-input-form"
+    |> Page.elementById
+    |> Page.formData
+    |> Page.forEachFormInput((v, k) => {
+      /* ...? */     
+      ();
+    });
+
+    let lines: array(GraphStorage.graphLine) = [| |];
+    let graph: GraphStorage.graph = {name: "h", lines};
+
+    GraphStorage.save(graph);
+  });
 
   setupLineFieldsetEvents(0);
 });
