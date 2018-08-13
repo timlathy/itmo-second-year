@@ -1,3 +1,5 @@
+/* NOTE: Server-side code depends on the declaration order in record types. */
+
 type graphLine = {type_: string, x1: string, x2: string, x3: string,
                                  y1: string, y2: string, y3: string};
 
@@ -6,10 +8,13 @@ type graph = {name: string, lines: array(graphLine)};
 /* JSON */
 
 [@bs.scope "JSON"] [@bs.val]
-external parseGraphArray : string => array(graph) = "parse";
+external graphsFromJson : string => array(graph) = "parse";
 
 [@bs.scope "JSON"] [@bs.val]
-external jsonStringify : 'a => string = "stringify";
+external graphAsJson : graph => string = "stringify";
+
+[@bs.scope "JSON"] [@bs.val]
+external graphsAsJson : array(graph) => string = "stringify";
 
 /* Local storage */
 
@@ -21,14 +26,17 @@ let localStorageGet = (key: string): option(string) =>
 
 let storageKey = "saved_graphs";
 
-let save = (graph: graph): unit => {
+let load = (): array(graph) => {
   storageKey
   |> localStorageGet
-  |> (fun
-    | Some(json) => parseGraphArray(json)
-    | _ => [||])
-  |> Js.Array.concat([|graph|])
-  |> jsonStringify
-  |> localStorageSet(storageKey);
+  |> fun
+    | Some(json) => graphsFromJson(json)
+    | _ => [||]
 };
 
+let append = (graph: graph): unit => {
+  load()
+  |> Js.Array.concat([|graph|])
+  |> graphsAsJson
+  |> localStorageSet(storageKey);
+};

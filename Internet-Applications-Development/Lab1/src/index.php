@@ -6,6 +6,12 @@ $app = new Bullet\App(array(
 ));
 
 $app->path('graphs', function() use ($app) {
+  $app->path('new', function($request) use ($app) {
+    $app->get(function() use ($app) {
+      return $app->template('graphs/new');
+    });
+  });
+
   $app->path('preview', function($request) use ($app) {
     $app->post(function() use($app) {
       $var_declarations = explode(",",
