@@ -20,6 +20,12 @@ let setInputValue = (value: string, element: Dom.element): unit =>
 
 let elementById = unsafeGetElementById(_, document);
 
+let setupElementById = (id: string, setupFn: (Dom.element => unit)): unit =>
+  switch (Document.getElementById(id, document)) {
+  | Some(element) => setupFn(element)
+  | _ => ();
+  }
+
 /* Classes */
 
 let elementClassList = (selector: string, parent: Dom.element) =>
@@ -49,8 +55,6 @@ let onEvent = (~container: Dom.element=doc, selector: string,
   |> Element.asEventTarget
   |> EventTarget.addEventListener(event, handler);
 };
-
-let onDomContentLoaded = onDocumentEvent(document, "DOMContentLoaded");
 
 /* Forms */
 
