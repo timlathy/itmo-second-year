@@ -12,6 +12,34 @@ $app->path('graphs', function() use ($app) {
     });
   });
 
+  $app->path('show', function($request) use ($app) {
+    $app->get(function() use ($request, $app) {
+      $graph_def = json_decode($request->param('g', ''));
+      if (is_array($graph_def) && count($graph_def) == 2) {
+        $title = $graph_def[0];
+        $variables = array_reduce($graph_def[1], function($acc, $line) {
+          $variables = array_map(function ($expr) {
+            if (empty($expr)) return [];
+            return \ArithmExpr\Evaluator::sexpr_variables(
+              \ArithmExpr\Parser::sexpr($expr));
+          }, array_slice($line, 1));
+
+          /* https://stackoverflow.com/a/1320259/1726690 */
+          $it = new RecursiveIteratorIterator(
+            new RecursiveArrayIterator($variables));
+          foreach($it as $var) {
+            if (!in_array($var, $acc)) $acc[]=$var;
+          }
+
+          return $acc;
+        }, []);
+
+        return $app->template('graphs/show', compact('title', 'variables'));
+      }
+      return 400;
+    });
+  });
+
   $app->path('preview', function($request) use ($app) {
     $app->post(function() use($app) {
       $var_declarations = explode(",",
