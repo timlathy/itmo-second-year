@@ -30,4 +30,17 @@ final class Evaluator {
         else throw new EvaluationException("Undefined variable '$var_name'");
     }
   } 
+
+  public static function sexpr_variables(array $expr): array {
+    if (count($expr) == 3) {
+      $l = self::sexpr_variables($expr[1]);
+      $r = self::sexpr_variables($expr[2]);
+      return array_merge($l, $r);
+    }
+
+    switch ($expr[0]) {
+      case "literal":  return [];
+      case "variable": return [$expr[1]];
+    }
+  }
 }

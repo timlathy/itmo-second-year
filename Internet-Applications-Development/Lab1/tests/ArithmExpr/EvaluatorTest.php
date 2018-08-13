@@ -15,7 +15,7 @@ final class EvaluatorTest extends TestCase {
     $this->assertEquals(10.0, Evaluator::eval_sexpr($expr, []));
   }
 
-  public function test_variables() {
+  public function test_variables_in_expressions() {
     $expr = 
       ["*",
         ["+",
@@ -23,6 +23,17 @@ final class EvaluatorTest extends TestCase {
           ["literal", 3.0]],
         ["literal", 4.0]];
     $this->assertEquals(20.4, Evaluator::eval_sexpr($expr, ["R" => 4.2]));
+  }
+
+  public function test_variable_listing() {
+    $expr =
+      ["+",
+        ["+",
+          ["+", ["variable", "R"], ["literal", 3.14]],
+          ["variable", "_Case_mishMash"]],
+        ["variable", "h"]];
+    $this->assertEquals(["R", "_Case_mishMash", "h"],
+      Evaluator::sexpr_variables($expr));
   }
 
   /**
