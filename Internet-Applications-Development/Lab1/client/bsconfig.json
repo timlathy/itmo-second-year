@@ -17,6 +17,9 @@
   "warnings": {
     "error" : "+101"
   },
+  "bsc-flags": [
+    "-bs-no-check-div-by-zero"
+  ],
   "namespace": true,
   "refmt": 3
 }

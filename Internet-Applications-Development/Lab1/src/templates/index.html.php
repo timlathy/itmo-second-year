@@ -8,6 +8,7 @@
   </head>
   <body>
     <form id="line-input-form">
+      <input type="text" name="graph-name" placeholder="Graph name" />
       <div id="line-input-container"></div>
       <label for="line-input-variables">Preview variables</label>
       <input type="text" id="line-input-variables" name="variables" placeholder="R = 2.3, S = ..." />

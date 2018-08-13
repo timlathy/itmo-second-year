@@ -12,7 +12,7 @@ let lineInputSectionHtml = (num: int, ~cls: option(string)=?,
   | None => ">"
   }) ++
   {j|<label for="lines$(num)_$prop">$label</label>|j} ++ 
-  {j|<input type="text" id="lines$(num)_$prop" name="lines[$num][$prop]">|j} ++
+  {j|<input type="text" class="js-line-input" name="lines[$num][$prop]">|j} ++
   "</section>";
 
 let lineInputRadioHtml = (num: int, prop: string, value: string,
@@ -26,6 +26,7 @@ let lineInputRadioHtml = (num: int, prop: string, value: string,
 let lineFieldsetHtml = (num: int): string => {
   let displayNum = num + 1;
   {j|<fieldset id="lines$num"><legend>Line #$displayNum</legend>|j} ++
+  {j|<input type="hidden" class="js-line-input js-line-input-type" />|j} ++
   lineInputSectionHtml(num, "x1", "From X = ") ++
   lineInputSectionHtml(num, "y1", "From Y = ") ++
   "<section>" ++
@@ -43,30 +44,32 @@ let lineFieldsetHtml = (num: int): string => {
 
 let lineFieldsetClick = (e: Dom.event): unit => {
   let target = e |> Event.target |> EventTarget.unsafeAsElement;
-  let form = target |> unsafeClosest("form");
+  let fields = target |> unsafeClosest("fieldset");
 
-  let hideAll = (s, f) => s |> Js.Array.forEach(Page.hide(_, f));
-  let unhideAll = (s, f) => s |> Js.Array.forEach(Page.unhide(_, f));
-  
   target
   |> Element.id
   |> stringSlice(-6)
   |> fun
     | "type_h" => {
-      form |> Page.unhide(".js-line-x2");
-      form |> hideAll([|".js-line-y2", ".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.unhide(".js-line-x2");
+      fields |> Page.hideAll([|".js-line-y2", ".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.querySel(".js-line-input-type") |> Page.setInputValue("h");
     }
     | "type_v" => {
-      form |> Page.unhide(".js-line-y2");
-      form |> hideAll([|".js-line-x2", ".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.unhide(".js-line-y2");
+      fields |> Page.hideAll([|".js-line-x2", ".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.querySel(".js-line-input-type") |> Page.setInputValue("v");
     }
     | "type_l" => {
-      form |> unhideAll([|".js-line-x2", ".js-line-y2"|]);
-      form |> hideAll([|".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.unhideAll([|".js-line-x2", ".js-line-y2"|]);
+      fields |> Page.hideAll([|".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.querySel(".js-line-input-type") |> Page.setInputValue("l");
     }
-    | "type_q" =>
-      form |> unhideAll([|".js-line-x2", ".js-line-y2",
-                          ".js-line-x3", ".js-line-y3"|])
+    | "type_q" => {
+      fields |> Page.unhideAll([|".js-line-x2", ".js-line-y2",
+                                 ".js-line-x3", ".js-line-y3"|]);
+      fields |> Page.querySel(".js-line-input-type") |> Page.setInputValue("q");
+    }
     | _ => ();
 };
 
@@ -77,14 +80,15 @@ let setupLineFieldsetEvents = (num: int): unit => {
 [@bs.new] external formDataBody : Dom.element => Fetch.bodyInit = "FormData";
 
 Page.onDomContentLoaded((_) => {
+  let form = Page.elementById("line-input-form");
+   
   "line-input-container"
   |> Page.elementById
-  |> Element.setInnerHTML(_, lineFieldsetHtml(0));
+  |> Element.setInnerHTML(_, lineFieldsetHtml(0) ++ lineFieldsetHtml(1));
 
   Page.onEvent("#line-input-preview", "click", (e) => {
      Event.preventDefault(e);
 
-     let form = Page.elementById("line-input-form");
      let _ = Js.Promise.(
        Fetch.fetchWithInit("/graphs/preview",
          Fetch.RequestInit.make(~method_=Post, ~body=formDataBody(form), ()),
@@ -101,18 +105,20 @@ Page.onDomContentLoaded((_) => {
   Page.onEvent("#line-input-save", "click", (e) => {
     Event.preventDefault(e);
 
-    "line-input-form"
-    |> Page.elementById
-    |> Page.formData
-    |> Page.forEachFormInput((v, k) => {
-      /* ...? */     
-      ();
-    });
+    let name = form |> Page.querySel("[name=graph-name]") |> Page.inputValue;
+    let lines: array(GraphStorage.graphLine) =
+      document
+      |> Document.querySelectorAll(".js-line-input")
+      |> Page.nodeListToArray
+      |> Js.Array.map(Page.inputValue)
+      |> Utils.chunkArray(7)
+      |> Js.Array.map(fun
+        | [|type_, x1, y1, x2, y2, x3, y3|] =>
+          GraphStorage.{type_, x1, y1, x2, y2, x3, y3}
+        | _ =>
+          Js.Exn.raiseError("Malformed input form"));
 
-    let lines: array(GraphStorage.graphLine) = [| |];
-    let graph: GraphStorage.graph = {name: "h", lines};
-
-    GraphStorage.save(graph);
+    GraphStorage.save(GraphStorage.{name, lines});
   });
 
   setupLineFieldsetEvents(0);
