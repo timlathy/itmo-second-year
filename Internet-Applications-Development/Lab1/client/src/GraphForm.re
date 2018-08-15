@@ -77,8 +77,6 @@ let setupLineFieldsetEvents = (num: int): unit => {
   Page.onEvent({j|#lines$num|j}, "click", lineFieldsetClick);
 };
 
-[@bs.new] external formDataBody : Dom.element => Fetch.bodyInit = "FormData";
-
 let init = () => Page.setupElementById("line-input-form", (form) => {
   "line-input-container"
   |> Page.elementById
@@ -88,9 +86,8 @@ let init = () => Page.setupElementById("line-input-form", (form) => {
      Event.preventDefault(e);
 
      let _ = Js.Promise.(
-       Fetch.fetchWithInit("/graphs/preview",
-         Fetch.RequestInit.make(~method_=Post, ~body=formDataBody(form), ()),
-       )
+       Fetch.fetchWithInit("/graphs/preview", Fetch.RequestInit.make(
+          ~method_=Post, ~body=Page.formDataBody(form), ()))
        |> then_(Fetch.Response.text)
        |> then_((t) => {
            "line-input-preview-container"

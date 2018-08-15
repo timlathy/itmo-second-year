@@ -84,10 +84,12 @@ $app->path('graphs', function() use ($app) {
         return $acc + (float) $raw_v;
       }, 0);
       $y = (float) $request->param('Y', '');
+      $params = ["X" => $x, "Y" => $y] + $variables;
       try {
         $svg = (new GraphBuilder($lines, $variables))->build_graph_svg();
-        $g = new PolygonGraph($svg, 100);
-        var_dump($g->is_point_inside_polygon($x, $y));
+        $is_inside = (new PolygonGraph($svg, 100))->is_point_inside_polygon($x, $y);
+        return $app->template('graphs/point_in_polygon',
+          compact('is_inside', 'params', 'graph'));
       }
       /* TODO: Client-side error display */
       catch (\ArithmExpr\ParseException $e) {

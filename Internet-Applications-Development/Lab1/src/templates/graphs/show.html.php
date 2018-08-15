@@ -1,10 +1,6 @@
 <?php include __DIR__ . '/../_head.html.php'; ?>
 
-<form method="get" action="/graphs/point_in_polygon">
-  <?php foreach ($vars as $var) { ?>
-    <input name="v[<?=$var?>]" placeholder="<?=$var?>" />
-  <?php } ?>
-
+<form id="js-point-in-polygon-form" method="get" action="/graphs/point_in_polygon">
   <div id="js-graph-view"></div>
 
   <fieldset><legend>X</legend>
@@ -16,10 +12,18 @@
     <input type="number" name="Y" value="0" step="0.5" /> 
   </fieldset>
 
+  <fieldset><legend>Line variables</legend>
+    <?php foreach ($vars as $var) { ?>
+      <label><?=$var?> <input name="v[<?=$var?>]" placeholder="0" /></label>
+    <?php } ?>
+  </fieldset>
+
   <input type="hidden" name="g" value="<?=
     htmlspecialchars($graph, ENT_QUOTES) ?>" />
 
   <button type="submit">Compute</button>
 </form>
+
+<div id="js-point-in-polygon-result"></div>
 
 <?php include __DIR__ . '/../_footer.html.php'; ?>

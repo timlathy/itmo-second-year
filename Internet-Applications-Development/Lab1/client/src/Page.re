@@ -8,6 +8,8 @@ open Webapi.Dom;
 [@bs.send.pipe : Dom.element] external querySel :
   (string) => Dom.element = "querySelector";
 
+[@bs.get] external formAction : (Dom.element) => string = "action";
+
 [@bs.get] external inputValue : (Dom.element) => string = "value";
 
 [@bs.set] external setInputValueFlip : (Dom.element, string) => unit = "value";
@@ -61,3 +63,5 @@ let onEvent = (~container: Dom.element=doc, selector: string,
 type formData;
 
 [@bs.new] external formData : Dom.element => formData = "FormData";
+
+[@bs.new] external formDataBody : Dom.element => Fetch.bodyInit = "FormData";
