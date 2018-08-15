@@ -48,7 +48,7 @@ final class GraphBuilder {
           $svg .= ' ' . $line["x3"] . ',' . $line["y3"];
           break;
       }
-      $svg .= '">';
+      $svg .= '"/>';
     }
     $svg .= '</g></svg>';
     return $svg;
