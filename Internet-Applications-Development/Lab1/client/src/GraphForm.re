@@ -5,14 +5,20 @@ open Webapi.Dom;
 [@bs.send.pipe : Dom.element] external unsafeClosest :
   (string) => Dom.element = "closest";
 
+let lineColors = [|
+  "orange",
+  "blue",
+  "green"
+|];
+
 let lineInputSectionHtml = (num: int, ~cls: option(string)=?,
                             prop: string, label: string): string =>
   "<section" ++ (switch(cls) {
   | Some(className) => " class=\"" ++ className ++ "\">"
   | None => ">"
   }) ++
-  {j|<label for="lines$(num)_$prop">$label</label>|j} ++ 
-  {j|<input type="text" class="js-line-input" name="lines[$num][$prop]">|j} ++
+  {j|<label class="input-label" for="lines$(num)_$prop">$label</label>|j} ++ 
+  {j|<input type="text" class="input js-line-input" name="lines[$num][$prop]">|j} ++
   "</section>";
 
 let lineInputRadioHtml = (num: int, prop: string, value: string,
@@ -24,11 +30,13 @@ let lineInputRadioHtml = (num: int, prop: string, value: string,
 };
 
 let lineFieldsetHtml = (num: int): string => {
+  let color = lineColors[num];
   let displayNum = num + 1;
-  {j|<fieldset id="lines$num"><legend>Line #$displayNum</legend>|j} ++
+  {j|<fieldset id="lines$num" class="fieldset"><div class="fieldset__faux-legend">|j} ++
+  {j|<div class="color-swatch color-swatch--$color"></div>Line #$displayNum</div>|j} ++
   {j|<input type="hidden" class="js-line-input js-line-input-type" />|j} ++
-  lineInputSectionHtml(num, "x1", "From X = ") ++
-  lineInputSectionHtml(num, "y1", "From Y = ") ++
+  lineInputSectionHtml(num, "x1", "X1 (starting point): ") ++
+  lineInputSectionHtml(num, "y1", "Y1 (starting point): ") ++
   "<section>" ++
   lineInputRadioHtml(num, "type", "h", "Horizontal") ++
   lineInputRadioHtml(num, "type", "v", "Vertical") ++

@@ -1,0 +1,163 @@
+:root {
+  --header-font: 'Arvo', sans-serif;
+  --body-font: 'Merriweather', serif;
+
+  --header-bg: #ffffff;
+  --body-bg: #fafafa;
+  --border-fg: #e0e0e0;
+}
+
+body {
+  margin: 0;
+
+  font-family: var(--body-font);
+}
+
+.container {
+  padding: 16px;
+
+  background: var(--body-bg);
+}
+
+.hidden {
+  display: none;
+}
+
+.column-layout {
+  display: flex;
+}
+
+.column-layout__fixed {
+  flex: 0 0 auto;
+}
+
+.column-layout__fixed--narrow {
+  width: 380px;
+}
+
+.column-layout__flexible {
+  flex: 1 1 auto;
+}
+
+.column-layout__gap {
+  flex: 0 0 auto;
+  padding-left: 16px;
+}
+
+/* Header */
+
+.header {
+  display: flex;
+
+  border-bottom: 1px solid var(--border-fg);
+  background: var(--header-bg);
+  font-family: var(--header-font);
+}
+
+.header__title {
+  padding: 0 12px;
+  line-height: 64px;
+
+  font-size: 22px;
+  font-weight: bold;
+}
+
+
+.header__right {
+  padding: 0 12px;
+  margin-left: auto;
+  line-height: 64px;
+}
+
+/* Inputs */
+
+.input-label {
+  display: block;
+  padding: 12px 0 4px;
+}
+
+.input {
+  display: block;
+  padding: 8px 0;
+  margin-bottom: 12px;
+}
+
+.title-input, .input {
+  border: 0;
+  border-bottom: 2px solid #afafaf;
+
+  &:hover {
+    border-color: #70b1d2;
+  }
+
+  &:focus {
+    border-color: #129de4;
+    box-shadow: 0px 2px 5px -4px #8ecffa;
+  }
+}
+
+.title-input {
+  padding: 12px;
+  margin-bottom: 12px;
+
+  font-family: var(--header-font);
+  font-size: 32px;
+  font-weight: bold;
+  background: var(--body-bg);
+
+  &::placeholder {
+    opacity: 1;
+    color: #bababa;
+  }
+}
+
+.fieldset {
+  padding: 12px;
+  margin: 0 0 12px 0;
+  border: 1px solid var(--border-fg);
+  background: #fff;
+}
+
+.fieldset__faux-legend {
+  padding-bottom: 12px;
+  font-size: 18px;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 4px;
+
+  border: 1px solid var(--border-fg);
+  background: #fff;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.button--primary {
+  background: #129de4;
+  color: #fff;
+
+  &:hover {
+    background: #0991d7;
+  }
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+
+  border-radius: 100%;
+  border: 2px solid black;
+}
+
+.color-swatch--orange {
+  background: #e4822f;
+}
+
+.color-swatch--blue {
+  background: #597ad0;
+}
