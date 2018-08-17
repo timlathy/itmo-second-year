@@ -9,3 +9,6 @@ client/lib/bs/
 *.bs.js
 .merlin
 .bsb.lock
+
+# Compiled assets
+client/dist/
