@@ -25,8 +25,8 @@ let lineInputRadioHtml = (num: int, prop: string, value: string,
                           label: string): string => {
   let inputId = {j|lines$(num)_$(prop)_$value|j};
   let inputName = {j|lines[$num][$prop]|j};
-  {j|<input type="radio" id="$inputId" name="$inputName" value="$value">|j} ++
-  {j|<label for="$inputId">$label</label>|j}
+  {j|<input class="radio-switch__input" type="radio" id="$inputId" name="$inputName" value="$value">|j} ++
+  {j|<label class="radio-switch__label" for="$inputId">$label</label>|j}
 };
 
 let lineFieldsetHtml = (num: int): string => {
@@ -34,15 +34,15 @@ let lineFieldsetHtml = (num: int): string => {
   let displayNum = num + 1;
   {j|<fieldset id="lines$num" class="fieldset"><div class="fieldset__faux-legend">|j} ++
   {j|<div class="color-swatch color-swatch--$color"></div>Line #$displayNum</div>|j} ++
-  {j|<input type="hidden" class="js-line-input js-line-input-type" />|j} ++
-  lineInputSectionHtml(num, "x1", "X1 (starting point): ") ++
-  lineInputSectionHtml(num, "y1", "Y1 (starting point): ") ++
-  "<section>" ++
+  {j|<section class="radio-switch">|j} ++
   lineInputRadioHtml(num, "type", "h", "Horizontal") ++
   lineInputRadioHtml(num, "type", "v", "Vertical") ++
   lineInputRadioHtml(num, "type", "l", "Slanting") ++
   lineInputRadioHtml(num, "type", "q", "Curved") ++
   "</section>" ++
+  {j|<input type="hidden" class="js-line-input js-line-input-type" />|j} ++
+  lineInputSectionHtml(num, "x1", "X1 (starting point): ") ++
+  lineInputSectionHtml(num, "y1", "Y1 (starting point): ") ++
   lineInputSectionHtml(num, ~cls="js-line-x2 hidden", "x2", "To X = ") ++
   lineInputSectionHtml(num, ~cls="js-line-y2 hidden", "y2", "To Y = ") ++
   lineInputSectionHtml(num, ~cls="js-line-x3 hidden", "x3", "Curve X = ") ++

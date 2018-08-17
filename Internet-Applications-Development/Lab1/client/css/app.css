@@ -130,8 +130,14 @@ body {
   border: 1px solid var(--border-fg);
   background: #fff;
 
+  transition: border-color 0.1s ease-in-out, color 0.1s ease-in-out;
+
   &:hover {
     cursor: pointer;
+
+    background: #f6fafd;
+    border-color: #129de4;
+    color: #129de4;
   }
 }
 
@@ -141,6 +147,7 @@ body {
 
   &:hover {
     background: #0991d7;
+    color: #fff;
   }
 }
 
@@ -151,13 +158,61 @@ body {
   margin-right: 8px;
 
   border-radius: 100%;
-  border: 2px solid black;
 }
 
 .color-swatch--orange {
-  background: #e4822f;
+  background: #e5aa20;
 }
 
 .color-swatch--blue {
-  background: #597ad0;
+  background: #129de4;
+}
+
+.color-swatch--green {
+  background: #26ab2e;
+}
+
+.radio-switch {
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.radio-switch__input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.radio-switch__input:checked + .radio-switch__label {
+  background: #129de4;
+  color: #fff;
+}
+
+.radio-switch__label:first-of-type {
+  padding-left: 16px;
+  border-radius: 16px 0 0 16px;
+}
+
+.radio-switch__label:last-of-type {
+  padding-right: 16px;
+  border-radius: 0 16px 16px 0;
+}
+
+.radio-switch__label {
+  padding: 6px 12px;
+
+  border: 1px solid #e0e0e0;
+
+  transition: border-color 0.1s ease-in-out,
+    background 0.1s ease-in-out,
+    color 0.1s ease-in-out;
+  
+  &:hover {
+    cursor: pointer;
+
+    background: #f6fafd;
+    border-color: #129de4;
+    color: #129de4;
+  }
 }
