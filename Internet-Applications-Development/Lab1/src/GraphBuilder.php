@@ -28,7 +28,7 @@ final class GraphBuilder {
   }
 
   function build_graph_svg(): string {
-    $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">';
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">';
     $svg .= '<g fill="none" stroke-width="1px">';
     foreach ($this->evaluated_lines as $line) {
       $this->require_keys_evaluated($line, self::REQUIRED_KEYS[$line["type"]]);
