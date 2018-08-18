@@ -16,6 +16,11 @@ final class GraphBuilder {
     "q" => ["x1", "y1", "x2", "y2", "x3", "y3"]
   ];
 
+  const LINE_COLORS = [
+    "#e5aa20", "#129de4", "#26ab2e", "#e35832",
+    "#c21fdb", "#9f3dff", "#23cfc1", "#d7db32"
+  ];
+
   function __construct(array $lines, array $variables) {
     $lines = array_filter($lines, function($line) {
       return array_key_exists("type", $line) &&
@@ -30,9 +35,10 @@ final class GraphBuilder {
   function build_graph_svg(): string {
     $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">';
     $svg .= '<g fill="none" stroke-width="1px">';
-    foreach ($this->evaluated_lines as $line) {
+    foreach ($this->evaluated_lines as $line_i => $line) {
       $this->require_keys_evaluated($line, self::REQUIRED_KEYS[$line["type"]]);
-      $svg .= '<path stroke="#000" d="M ' . $line["x1"] . ',' . $line["y1"];
+      $color = self::LINE_COLORS[$line_i];
+      $svg .= '<path stroke="' . $color . '" d="M ' . $line["x1"] . ',' . $line["y1"];
       switch ($line["type"]) {
         case "h":
           $svg .= ' H ' . $line["x2"];

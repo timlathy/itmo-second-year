@@ -5,21 +5,22 @@ open Webapi.Dom;
 [@bs.send.pipe : Dom.element] external unsafeClosest :
   (string) => Dom.element = "closest";
 
-let lineColors = [|
-  "orange",
-  "blue",
-  "green"
-|];
+/* Depends on the number of .color-swatch--n CSS definitions */
+let maxLines = 8;
 
 let lineInputSectionHtml = (num: int, ~cls: option(string)=?,
-                            prop: string, label: string): string =>
-  "<section" ++ (switch(cls) {
-  | Some(className) => " class=\"" ++ className ++ "\">"
-  | None => ">"
-  }) ++
-  {j|<label class="input-label" for="lines$(num)_$prop">$label</label>|j} ++ 
-  {j|<input type="text" class="input js-line-input" name="lines[$num][$prop]">|j} ++
-  "</section>";
+                            prop: string, label: string): string => {
+  let sectionClass = switch (cls) {
+  | Some(className) => " class=\"" ++ className ++ "\""
+  | _ => ""
+  };
+  let inputId = {j|lines$(num)_$prop|j};
+  let inputName = {j|lines[$num][$prop]|j};
+  {j|<section$sectionClass>|j} ++
+  {j|<label class="input-label" for="$inputId">$label</label>|j} ++ 
+  {j|<input type="text" id="$inputId" class="input js-line-input" name="$inputName">|j} ++
+  "</section>"
+}
 
 let lineInputRadioHtml = (num: int, prop: string, value: string,
                           label: string): string => {
@@ -30,10 +31,9 @@ let lineInputRadioHtml = (num: int, prop: string, value: string,
 };
 
 let lineFieldsetHtml = (num: int): string => {
-  let color = lineColors[num];
   let displayNum = num + 1;
-  {j|<fieldset id="lines$num" class="fieldset"><div class="fieldset__faux-legend">|j} ++
-  {j|<div class="color-swatch color-swatch--$color"></div>Line #$displayNum</div>|j} ++
+  {j|<fieldset id="js-line-fieldset-$num" class="fieldset"><div class="fieldset__faux-legend">|j} ++
+  {j|<div class="color-swatch color-swatch--$num"></div>Line #$displayNum</div>|j} ++
   {j|<section class="radio-switch">|j} ++
   lineInputRadioHtml(num, "type", "h", "Horizontal") ++
   lineInputRadioHtml(num, "type", "v", "Vertical") ++
@@ -81,16 +81,25 @@ let lineFieldsetClick = (e: Dom.event): unit => {
     | _ => ();
 };
 
-let setupLineFieldsetEvents = (num: int): unit => {
-  Page.onEvent({j|#lines$num|j}, "click", lineFieldsetClick);
+let insertNewLine = (): unit => {
+  let container = Page.elementById("js-graph-form-line-container");
+  let lineNo = Element.childElementCount(container);
+
+  if (lineNo < maxLines) {
+    Element.insertAdjacentHTML(BeforeEnd, lineFieldsetHtml(lineNo), container);
+    Page.onEvent({j|#js-line-fieldset-$lineNo|j}, "click", lineFieldsetClick);
+  }
 };
 
-let init = () => Page.setupElementById("line-input-form", (form) => {
-  "line-input-container"
-  |> Page.elementById
-  |> Element.setInnerHTML(_, lineFieldsetHtml(0) ++ lineFieldsetHtml(1));
+let init = () => Page.setupElementById("js-graph-form", (form) => {
+  insertNewLine();
 
-  Page.onEvent("#line-input-preview", "click", (e) => {
+  Page.onEvent("#js-graph-form-new-line", "click", (e) => {
+    Event.preventDefault(e);
+    insertNewLine();
+  });
+
+  Page.onEvent("#js-graph-form-preview", "click", (e) => {
      Event.preventDefault(e);
 
      let _ = Js.Promise.(
@@ -98,14 +107,14 @@ let init = () => Page.setupElementById("line-input-form", (form) => {
           ~method_=Post, ~body=Page.formDataBody(form), ()))
        |> then_(Fetch.Response.text)
        |> then_((t) => {
-           "line-input-preview-container"
+           "js-graph-form-preview-container"
            |> Page.elementById
            |> Element.setInnerHTML(_, t)
            |> resolve;
          }));
    });
 
-  Page.onEvent("#line-input-save", "click", (e) => {
+  Page.onEvent("#js-graph-form-save", "click", (e) => {
     Event.preventDefault(e);
 
     let name = form |> Page.querySel("[name=graph-name]") |> Page.inputValue;
@@ -123,6 +132,4 @@ let init = () => Page.setupElementById("line-input-form", (form) => {
 
     GraphStorage.append(GraphStorage.{name, lines});
   });
-
-  setupLineFieldsetEvents(0);
 });
