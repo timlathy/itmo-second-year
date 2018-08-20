@@ -1,0 +1,27 @@
+.color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+
+  border-radius: 100%;
+}
+
+/* These colors must be mirrored in GraphBuilder.php */
+.color-swatch--0 { background: #e5aa20; }
+.color-swatch--1 { background: #129de4; }
+.color-swatch--2 { background: #26ab2e; }
+.color-swatch--3 { background: #e35832; }
+.color-swatch--4 { background: #c21fdb; }
+.color-swatch--5 { background: #9f3dff; }
+.color-swatch--6 { background: #23cfc1; }
+.color-swatch--7 { background: #d7db32; }
+
+/* View-specific styles */
+
+.graph-preview {
+  width: 200px;
+  height: 200px;
+  
+  border: 1px solid var(--border-fg);
+}

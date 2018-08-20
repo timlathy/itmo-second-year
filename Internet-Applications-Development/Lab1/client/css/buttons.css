@@ -1,0 +1,44 @@
+.button {
+  padding: 8px 16px;
+  border-radius: 4px;
+
+  border: 1px solid var(--border-fg);
+  background: #fff;
+
+  transition: var(--color-border-transition);
+
+  &:hover {
+    cursor: pointer;
+
+    background: var(--accent-bg);
+    border-color: var(--accent-fg);
+    color: var(--accent-fg);
+  }
+}
+
+.button--primary {
+  background: var(--accent-fg);
+  color: #fff;
+
+  &:hover {
+    background: var(--accent-hover-bg);
+    color: #fff;
+  }
+}
+
+.button--inline {
+  display: inline-block;
+  vertical-align: middle;
+  width: 34px;
+  height: 34px;
+  margin: 0 8px;
+  border-radius: 50%;
+}
+
+.button--refresh, .button--refresh:hover, .button--refresh:focus {
+  background: var(--font-awesome-refresh-svg) center center / 16px 16px no-repeat;
+}
+
+.button--plus, .button--plus:hover, .button--plus:focus {
+  background: var(--font-awesome-plus-svg) center center / 16px 16px no-repeat;
+}

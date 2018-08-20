@@ -10,7 +10,7 @@
 <body>
 <header class="header-container">
   <div class="header">
-    <div class="header__title">Point-in-Polygon</div>
+    <a class="header__link header__link--title" href="/">Point-in-Polygon</a>
     <div class="header__right">P3202 Lab1</div>
   <div>
 </header>
