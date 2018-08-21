@@ -26,17 +26,27 @@ let localStorageGet = (key: string): option(string) =>
 
 let storageKey = "saved_graphs";
 
-let load = (): array(graph) => {
+let load = (): array(graph) =>
   storageKey
   |> localStorageGet
   |> fun
     | Some(json) => graphsFromJson(json)
-    | _ => [||]
-};
+    | _ => [||];
 
-let append = (graph: graph): unit => {
+let append = (graph: graph): unit =>
   load()
   |> Js.Array.concat([|graph|])
   |> graphsAsJson
   |> localStorageSet(storageKey);
-};
+
+let nameExists = (name: string): bool =>
+  load() |> Js.Array.some((g) => g.name == name);
+
+let previewKey = (graphName: string) =>
+  "graph_preview_" ++ Js.Global.encodeURIComponent(graphName);
+
+let loadPreviewByName = (graphName: string) =>
+  graphName |> previewKey |> localStorageGet;
+
+let setPreviewByName = (graphName: string, preview: string): unit =>
+  localStorageSet(previewKey(graphName), preview);

@@ -32,7 +32,7 @@ let lineInputRadioHtml = (num: int, prop: string, value: string,
 
 let lineFieldsetHtml = (num: int): string => {
   let displayNum = num + 1;
-  {j|<fieldset id="js-line-fieldset-$num" class="fieldset"><div class="fieldset__faux-legend">|j} ++
+  {j|<fieldset id="js-line-fieldset-$num" class="card"><div class="card__title">|j} ++
   {j|<div class="color-swatch color-swatch--$num"></div>Line #$displayNum</div>|j} ++
   {j|<section class="radio-switch">|j} ++
   lineInputRadioHtml(num, "type", "h", "Horizontal") ++
@@ -91,33 +91,30 @@ let insertNewLine = (): unit => {
   }
 };
 
-let init = () => Page.setupElementById("js-graph-form", (form) => {
-  insertNewLine();
+let loadPreview = (): unit => {
+  let form = Page.elementById("js-graph-form");
+  let _ = Js.Promise.(
+    Fetch.fetchWithInit("/graphs/preview", Fetch.RequestInit.make(
+       ~method_=Post, ~body=Page.formDataBody(form), ()))
+    |> then_(Fetch.Response.text)
+    |> then_((t) => {
+        "js-graph-form-preview-container"
+        |> Page.elementById
+        |> Element.setInnerHTML(_, t)
+        |> resolve;
+      }));
+};
 
-  Page.onEvent("#js-graph-form-new-line", "click", (e) => {
-    Event.preventDefault(e);
-    insertNewLine();
-  });
+let saveGraph = (): unit => {
+  loadPreview();
+  let previewSvg =
+    "js-graph-form-preview-container"
+    |> Page.elementById
+    |> Element.innerHTML;
 
-  Page.onEvent("#js-graph-form-preview", "click", (e) => {
-     Event.preventDefault(e);
-
-     let _ = Js.Promise.(
-       Fetch.fetchWithInit("/graphs/preview", Fetch.RequestInit.make(
-          ~method_=Post, ~body=Page.formDataBody(form), ()))
-       |> then_(Fetch.Response.text)
-       |> then_((t) => {
-           "js-graph-form-preview-container"
-           |> Page.elementById
-           |> Element.setInnerHTML(_, t)
-           |> resolve;
-         }));
-   });
-
-  Page.onEvent("#js-graph-form-save", "click", (e) => {
-    Event.preventDefault(e);
-
-    let name = form |> Page.querySel("[name=graph-name]") |> Page.inputValue;
+  let name = Page.doc |> Page.querySel("[name=graph-name]") |> Page.inputValue;
+  
+  if (!GraphStorage.nameExists(name)) {
     let lines: array(GraphStorage.graphLine) =
       document
       |> Document.querySelectorAll(".js-line-input")
@@ -131,5 +128,18 @@ let init = () => Page.setupElementById("js-graph-form", (form) => {
           Js.Exn.raiseError("Malformed input form"));
 
     GraphStorage.append(GraphStorage.{name, lines});
-  });
+    GraphStorage.setPreviewByName(name, previewSvg);
+  }
+  else {
+    /* TODO: error handling */
+    ()
+  }
+};
+
+let init = () => Page.setupElementById("js-graph-form", (_) => {
+  insertNewLine();
+
+  Page.overrideClick("#js-graph-form-new-line", insertNewLine);
+  Page.overrideClick("#js-graph-form-preview", loadPreview);
+  Page.overrideClick("#js-graph-form-save", saveGraph);
 });

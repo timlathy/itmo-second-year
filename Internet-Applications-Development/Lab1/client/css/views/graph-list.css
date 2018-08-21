@@ -1,0 +1,14 @@
+.graph-item {
+  display: flex;
+}
+
+.graph-item__preview {
+  max-width: 200px;
+  max-height: 200px;
+
+  border: 1px solid var(--border-fg);
+}
+
+.graph-item__info {
+  margin-left: 16px;
+}

@@ -1,5 +1,10 @@
 open Webapi.Dom;
 
+let graphUrl = (g: GraphStorage.graph): string => {
+  let encoded = g |> GraphStorage.graphAsJson |> Js.Global.encodeURIComponent;
+  {j|/graphs/show?g=$encoded|j}
+};
+
 let formDataAsUrlParams: (Page.formData) => string = [%bs.raw {|
   function (formData) {
     var params = new URLSearchParams();

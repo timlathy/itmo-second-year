@@ -38,18 +38,6 @@
   }
 }
 
-.fieldset {
-  padding: 12px;
-  margin: 0 0 12px 0;
-  border: 1px solid var(--border-fg);
-  background: #fff;
-}
-
-.fieldset__faux-legend {
-  padding-bottom: 12px;
-  font-size: 18px;
-}
-
 /* Radio switch */
 
 .radio-switch {

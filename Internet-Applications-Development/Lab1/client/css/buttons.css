@@ -3,7 +3,9 @@
   border-radius: 4px;
 
   border: 1px solid var(--border-fg);
+  color: var(--input-fg);
   background: #fff;
+  text-decoration: none;
 
   transition: var(--color-border-transition);
 

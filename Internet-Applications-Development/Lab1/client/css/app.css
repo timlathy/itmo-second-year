@@ -1,8 +1,10 @@
 @import "layout.css";
+@import "cards.css";
 @import "forms.css";
 @import "buttons.css";
 
 @import "views/graph-form.css";
+@import "views/graph-list.css";
 
 :root {
   --header-font: 'Arvo', sans-serif;
@@ -10,7 +12,10 @@
 
   --header-bg: #ffffff;
   --body-bg: #fafafa;
+
+  --input-fg: #5c616c;
   --border-fg: #e0e0e0;
+
   --accent-fg: #129de4;
   --accent-bg: #f6fafd; /* lighter than fg */
   --accent-hover-bg: #0991d7;

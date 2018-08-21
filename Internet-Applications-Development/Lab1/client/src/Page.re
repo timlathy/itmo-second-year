@@ -58,6 +58,13 @@ let onEvent = (~container: Dom.element=doc, selector: string,
   |> EventTarget.addEventListener(event, handler);
 };
 
+let overrideClick = (~container: Dom.element=doc, selector: string,
+                     handler: (unit) => unit): unit =>
+  onEvent(~container, selector, "click", (e) => {
+    Event.preventDefault(e);
+    handler();
+  });
+
 /* Forms */
 
 type formData;
