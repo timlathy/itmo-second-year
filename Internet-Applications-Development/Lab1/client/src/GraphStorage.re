@@ -45,8 +45,11 @@ let nameExists = (name: string): bool =>
 let previewKey = (graphName: string) =>
   "graph_preview_" ++ Js.Global.encodeURIComponent(graphName);
 
-let loadPreviewByName = (graphName: string) =>
-  graphName |> previewKey |> localStorageGet;
+let loadPreviewByName = (graphName: string): string =>
+  switch (graphName |> previewKey |> localStorageGet) {
+  | Some(preview) => preview
+  | _ => ""
+  };
 
 let setPreviewByName = (graphName: string, preview: string): unit =>
   localStorageSet(previewKey(graphName), preview);

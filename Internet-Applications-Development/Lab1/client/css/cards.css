@@ -6,7 +6,11 @@
 }
 
 .card__title {
-  padding-bottom: 12px;
+  padding-bottom: 16px;
   font-size: 18px;
+}
+
+.card__title--extra {
+  margin-top: 32px;
 }
 

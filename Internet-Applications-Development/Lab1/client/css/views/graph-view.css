@@ -1,0 +1,21 @@
+.graph-header {
+  display: flex;
+  padding-bottom: 32px;
+  margin-bottom: 16px;
+
+  border-bottom: 1px solid var(--border-fg);
+}
+
+.graph-header__preview {
+  width: 100px;
+  height: 100px;
+  margin-right: 16px;
+
+  border: 1px solid var(--border-fg);
+  background: #fff;
+}
+
+.graph-header__title {
+  margin: 0;
+  line-height: 100px;
+}

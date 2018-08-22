@@ -13,21 +13,34 @@ let formDataAsUrlParams: (Page.formData) => string = [%bs.raw {|
   }
 |}];
 
-let init = () => Page.setupElementById("js-point-in-polygon-form", (form) => {
-  Page.onEvent(~container=form, "button[type=submit]", "click", (e) => {
-    Event.preventDefault(e);
+let fetchPipResult = (form: Dom.element): unit => {
+  let _ = Js.Promise.(
+    Fetch.fetchWithInit(
+      Page.formAction(form) ++ "?" ++ formDataAsUrlParams(Page.formData(form)),
+      Fetch.RequestInit.make(~method_=Get, ())
+    )
+    |> then_(Fetch.Response.text)
+    |> then_((result) => {
+        "js-pip-history"
+        |> Page.elementById
+        |> Element.insertAdjacentHTML(BeforeEnd, result)
+        |> resolve;
+      }));
+}
 
-    let _ = Js.Promise.(
-      Fetch.fetchWithInit(
-        Page.formAction(form) ++ "?" ++ formDataAsUrlParams(Page.formData(form)),
-        Fetch.RequestInit.make(~method_=Get, ())
-      )
-      |> then_(Fetch.Response.text)
-      |> then_((t) => {
-          "js-point-in-polygon-result"
-          |> Page.elementById
-          |> Element.setInnerHTML(_, t)
-          |> resolve;
-        }));
+let init = () => Page.setupElementById("js-pip-form", (form) => {
+  Page.overrideClick(~container=form, "button[type=submit]",
+                     () => fetchPipResult(form));
+  Page.overrideClick("#js-pip-history-clear", () => {
+    "js-pip-history"
+    |> Page.elementById
+    |> Element.setInnerHTML(_, "");
   });
+
+  let graphName: string =
+    "js-pip-graph-name" |> Page.elementById |> Element.textContent;
+
+  "js-pip-preview"
+  |> Page.elementById
+  |> Element.setInnerHTML(_, GraphStorage.loadPreviewByName(graphName));
 });

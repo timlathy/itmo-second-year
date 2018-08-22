@@ -44,3 +44,7 @@
 .button--plus, .button--plus:hover, .button--plus:focus {
   background: var(--font-awesome-plus-svg) center center / 16px 16px no-repeat;
 }
+
+.button--trash, .button--trash:hover, .button--trash:focus {
+  background: var(--font-awesome-trash-svg) center center / 16px 16px no-repeat;
+}
