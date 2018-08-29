@@ -62,15 +62,10 @@ $app->path('graphs', function() use ($app) {
         }, []
       );
       try {
-        $gb = new GraphBuilder($_POST['lines'], $variables);
-        return $gb->build_graph_svg();
+        return (new GraphBuilder($_POST['lines'], $variables))->build_graph_svg();
       }
-      /* TODO: Client-side error display */
-      catch (\ArithmExpr\ParseException $e) {
-        return $e->getMessage();
-      }
-      catch (\ArithmExpr\EvaluationException $e) {
-        return $e->getMessage();
+      catch (\LineException $e) {
+        return $app->response(422, $e->js_error_object());
       }
     });
   });

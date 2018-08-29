@@ -10,7 +10,8 @@
     <div class="column-layout__gap"></div>
     <div class="column-layout__flexible">
       <h2>Preview<button id="js-graph-form-preview" class="button button--inline button--refresh"></button></h2>
-      <div class="graph-preview" id="js-graph-form-preview-container"></div>
+      <section class="card card--error" id="js-graph-form-error"></section>
+      <section class="graph-preview" id="js-graph-form-preview-container"></section>
       <label class="input-label" for="line-input-variables">Preview variables</label>
       <input class="input" type="text" id="line-input-variables" name="variables" placeholder="R = 2.3, S = ..." />
       <button id="js-graph-form-save" class="button button--primary" type="submit">Save</button>

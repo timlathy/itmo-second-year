@@ -96,12 +96,25 @@ let loadPreview = (): unit => {
   let _ = Js.Promise.(
     Fetch.fetchWithInit("/graphs/preview", Fetch.RequestInit.make(
        ~method_=Post, ~body=Page.formDataBody(form), ()))
+    |> then_(Error.checkResponse)
     |> then_(Fetch.Response.text)
     |> then_((t) => {
+        Page.hide("#js-graph-form-error", Page.doc);
+
         "js-graph-form-preview-container"
         |> Page.elementById
         |> Element.setInnerHTML(_, t)
         |> resolve;
+      })
+    |> catch((e) => {
+        let errorHtml = e |> Error.lineErrorFromPromise |> Error.lineErrorHtml;
+        Page.unhide("#js-graph-form-error", Page.doc);
+
+        "js-graph-form-error"
+        |> Page.elementById
+        |> Element.setInnerHTML(_, errorHtml);
+
+        resolve(());
       }));
 };
 

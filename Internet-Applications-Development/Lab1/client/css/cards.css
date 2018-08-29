@@ -1,8 +1,13 @@
 .card {
   padding: 12px;
-  margin: 0 0 12px 0;
+  margin-bottom: 16px;
   border: 1px solid var(--border-fg);
   background: #fff;
+}
+
+.card--error {
+  background: var(--error-bg);
+  border-color: var(--error-border-fg);
 }
 
 .card__title {
