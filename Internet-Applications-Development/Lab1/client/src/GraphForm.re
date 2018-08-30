@@ -91,61 +91,60 @@ let insertNewLine = (): unit => {
   }
 };
 
-let loadPreview = (): unit => {
+let fetchAndDisplayPreview = (): Js.Promise.t(option(string)) => {
   let form = Page.elementById("js-graph-form");
-  let _ = Js.Promise.(
+  Js.Promise.(
     Fetch.fetchWithInit("/graphs/preview", Fetch.RequestInit.make(
        ~method_=Post, ~body=Page.formDataBody(form), ()))
     |> then_(Error.checkResponse)
     |> then_(Fetch.Response.text)
     |> then_((t) => {
-        Page.hide("#js-graph-form-error", Page.doc);
+        Error.hide();
 
         "js-graph-form-preview-container"
         |> Page.elementById
-        |> Element.setInnerHTML(_, t)
-        |> resolve;
-      })
+        |> Element.setInnerHTML(_, t);
+
+        resolve(Some(t));
+    })
     |> catch((e) => {
-        let errorHtml = e |> Error.lineErrorFromPromise |> Error.lineErrorHtml;
-        Page.unhide("#js-graph-form-error", Page.doc);
+        e |> Error.lineErrorFromPromise |> Error.lineErrorHtml |> Error.show;
 
-        "js-graph-form-error"
-        |> Page.elementById
-        |> Element.setInnerHTML(_, errorHtml);
-
-        resolve(());
-      }));
+        resolve(None : option(string));
+    }))
 };
 
 let saveGraph = (): unit => {
-  loadPreview();
-  let previewSvg =
-    "js-graph-form-preview-container"
-    |> Page.elementById
-    |> Element.innerHTML;
-
   let name = Page.doc |> Page.querySel("[name=graph-name]") |> Page.inputValue;
-  
-  if (!GraphStorage.nameExists(name)) {
-    let lines: array(GraphStorage.graphLine) =
-      document
-      |> Document.querySelectorAll(".js-line-input")
-      |> Page.nodeListToArray
-      |> Js.Array.map(Page.inputValue)
-      |> Utils.chunkArray(7)
-      |> Js.Array.map(fun
-        | [|type_, x1, y1, x2, y2, x3, y3|] =>
-          GraphStorage.{type_, x1, y1, x2, y2, x3, y3}
-        | _ =>
-          Js.Exn.raiseError("Malformed input form"));
 
-    GraphStorage.append(GraphStorage.{name, lines});
-    GraphStorage.setPreviewByName(name, previewSvg);
+  if (GraphStorage.nameExists(name)) {
+    Error.show({j|<strong>An error has occurred:</strong> The name "$name" is already taken|j});
   }
   else {
-    /* TODO: error handling */
-    ()
+    fetchAndDisplayPreview()
+    |> Js.Promise.then_(fun
+        | Some(previewSvg) => {
+          let lines: array(GraphStorage.graphLine) =
+            document
+            |> Document.querySelectorAll(".js-line-input")
+            |> Page.nodeListToArray
+            |> Js.Array.map(Page.inputValue)
+            |> Utils.chunkArray(7)
+            |> Js.Array.map(fun
+              | [|type_, x1, y1, x2, y2, x3, y3|] =>
+                GraphStorage.{type_, x1, y1, x2, y2, x3, y3}
+              | _ =>
+                Js.Exn.raiseError("Malformed input form"));
+          let graph = GraphStorage.{name, lines};
+
+          GraphStorage.append(graph);
+          GraphStorage.setPreviewByName(name, previewSvg);
+          Window.setLocation(window, GraphView.graphUrl(graph));
+          Js.Promise.resolve(());
+        }
+        | _ => Js.Promise.resolve(())
+    )
+    |> ignore;
   }
 };
 
@@ -153,6 +152,6 @@ let init = () => Page.setupElementById("js-graph-form", (_) => {
   insertNewLine();
 
   Page.overrideClick("#js-graph-form-new-line", insertNewLine);
-  Page.overrideClick("#js-graph-form-preview", loadPreview);
+  Page.overrideClick("#js-graph-form-preview", () => ignore(fetchAndDisplayPreview()));
   Page.overrideClick("#js-graph-form-save", saveGraph);
 });

@@ -66,7 +66,7 @@ final class GraphBuilder {
   }
 
   private function evaluate_line(int $line_i, array &$line, array $variables): void {
-    array_walk($line, function(&$raw_value, $key) use ($variables) {
+    array_walk($line, function(&$raw_value, $key) use ($line_i, $variables) {
       switch ($key) {
         case "x1": case "x2": case "x3": case "y1": case "y2": case "y3":
           if (empty($raw_value)) return;
@@ -74,7 +74,7 @@ final class GraphBuilder {
             $raw_value = Evaluator::eval_sexpr(Parser::sexpr($raw_value), $variables);
           }
           catch (\ArithmExpr\ParseException | \ArithmExpr\EvaluationException $e) {
-            throw new \LineException($e->getMessage(), $line_i);
+            throw new \LineException($e->getMessage() . " in $key", $line_i);
           }
         default:
           break;
