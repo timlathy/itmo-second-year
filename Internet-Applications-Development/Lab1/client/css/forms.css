@@ -1,3 +1,19 @@
+.borderless-fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.borderless-fieldset__label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.borderless-fieldset__label--succ {
+  margin-top: 12px;
+}
+
 .input-label {
   display: block;
   padding: 6px 0;
@@ -7,6 +23,8 @@
   display: block;
   padding: 8px 0;
   margin-bottom: 12px;
+
+  background: inherit;
 }
 
 .title-input, .input {

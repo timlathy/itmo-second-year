@@ -26,7 +26,7 @@ let fetchPipResult = (form: Dom.element): unit => {
 
         "js-pip-history"
         |> Page.elementById
-        |> Element.insertAdjacentHTML(BeforeEnd, result)
+        |> Element.insertAdjacentHTML(AfterBegin, result)
         |> resolve;
       })
     |> catch((e) => {

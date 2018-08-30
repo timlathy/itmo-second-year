@@ -19,3 +19,7 @@
   margin-top: 32px;
 }
 
+/* TODO: find a less hacky way to remove the redundant space at the bottom of the card */
+.card > p:last-child {
+  margin-bottom: 0px;
+}

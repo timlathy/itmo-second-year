@@ -2,6 +2,7 @@
 @import "cards.css";
 @import "forms.css";
 @import "buttons.css";
+@import "tables.css";
 
 @import "views/graph-form.css";
 @import "views/graph-list.css";
