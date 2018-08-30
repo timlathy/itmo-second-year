@@ -5,6 +5,10 @@ body {
   background: var(--body-bg);
 }
 
+h2 {
+  line-height: 36px;
+}
+
 .column-layout {
   display: flex;
 }

@@ -74,7 +74,8 @@ final class GraphBuilder {
             $raw_value = Evaluator::eval_sexpr(Parser::sexpr($raw_value), $variables);
           }
           catch (\ArithmExpr\ParseException | \ArithmExpr\EvaluationException $e) {
-            throw new \LineException($e->getMessage() . " in $key", $line_i);
+            $msg = $e->getMessage() . " in $key (" . $raw_value . ")";
+            throw new \LineException($msg, $line_i);
           }
         default:
           break;

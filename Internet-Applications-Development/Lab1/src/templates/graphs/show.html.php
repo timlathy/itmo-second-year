@@ -30,7 +30,8 @@
     <div class="column-layout__gap"></div>
     <div class="column-layout__flexible">
       <h2>History<button id="js-pip-history-clear" class="button button--inline button--trash"></button></h2>
-      <div id="js-pip-history"></div>
+      <section class="card card--error hidden" id="js-error-container"></section>
+      <section id="js-pip-history"></section>
     </div>
   <input type="hidden" name="g" value="<?=
     htmlspecialchars($graph, ENT_QUOTES) ?>" />

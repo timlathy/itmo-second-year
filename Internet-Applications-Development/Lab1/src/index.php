@@ -75,7 +75,7 @@ $app->path('graphs', function() use ($app) {
       list($title, $lines) = parse_js_graph($request->param('g', ''));
       $variables = array_map(function($v) { return (float) $v; },
         $request->param('v', []));
-      $x = array_reduce($request->param('X', ''), function($acc, $raw_v) {
+      $x = array_reduce($request->param('X', []), function($acc, $raw_v) {
         return $acc + (float) $raw_v;
       }, 0);
       $y = (float) $request->param('Y', '');
@@ -86,12 +86,8 @@ $app->path('graphs', function() use ($app) {
         return $app->template('graphs/point_in_polygon',
           compact('is_inside', 'params', 'graph'));
       }
-      /* TODO: Client-side error display */
-      catch (\ArithmExpr\ParseException $e) {
-        return $e->getMessage();
-      }
-      catch (\ArithmExpr\EvaluationException $e) {
-        return $e->getMessage();
+      catch (\LineException $e) {
+        return $app->response(422, $e->js_error_object());
       }
     });
   });

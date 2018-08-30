@@ -19,13 +19,20 @@ let fetchPipResult = (form: Dom.element): unit => {
       Page.formAction(form) ++ "?" ++ formDataAsUrlParams(Page.formData(form)),
       Fetch.RequestInit.make(~method_=Get, ())
     )
+    |> then_(Error.checkResponse)
     |> then_(Fetch.Response.text)
     |> then_((result) => {
+        Error.hide();
+
         "js-pip-history"
         |> Page.elementById
         |> Element.insertAdjacentHTML(BeforeEnd, result)
         |> resolve;
-      }));
+      })
+    |> catch((e) => {
+        e |> Error.lineErrorFromPromise |> Error.lineErrorHtml |> Error.show;
+        resolve(());
+    }));
 }
 
 let init = () => Page.setupElementById("js-pip-form", (form) => {
