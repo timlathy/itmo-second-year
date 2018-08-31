@@ -1,6 +1,6 @@
 let checkResponse: (Fetch.response) => Js.Promise.t(Fetch.response) = [%bs.raw {|
   function(response) {
-    return response.ok ? response : response.json().then((j) => { throw j; });
+    return response.ok ? response : response.json().then(function(j) { throw j; });
   }
 |}];
 

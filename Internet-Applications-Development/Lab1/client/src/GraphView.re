@@ -8,7 +8,7 @@ let graphUrl = (g: GraphStorage.graph): string => {
 let formDataAsUrlParams: (Page.formData) => string = [%bs.raw {|
   function (formData) {
     var params = new URLSearchParams();
-    for (var e of formData) params.append(e[0], e[1]);
+    for (var kv of formData) { params.append(kv[0], kv[1]); };
     return params.toString();
   }
 |}];
