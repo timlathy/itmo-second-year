@@ -8,6 +8,8 @@
 @import "views/graph-list.css";
 @import "views/graph-view.css";
 
+@custom-media --mobile-device (max-width: 920px);
+
 :root {
   --header-font: 'Arvo', sans-serif;
   --body-font: 'Merriweather', serif;

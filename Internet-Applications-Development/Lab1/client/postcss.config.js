@@ -10,7 +10,8 @@ module.exports = {
     'postcss-preset-env': {
       features: {
         'custom-properties': { preserve: false },
-        'nesting-rules': true
+        'nesting-rules': true,
+        'custom-media-queries': true
       }
     },
 

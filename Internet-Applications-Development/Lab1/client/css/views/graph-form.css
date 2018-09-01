@@ -17,11 +17,15 @@
 .color-swatch--6 { background: #23cfc1; }
 .color-swatch--7 { background: #d7db32; }
 
-/* View-specific styles */
-
-.graph-preview {
+.graph-form__preview {
   width: 200px;
   height: 200px;
   
   border: 1px solid var(--border-fg);
+}
+
+@media (--mobile-device) {
+  .graph-form {
+    margin: 0 2vw;
+  }
 }

@@ -56,6 +56,13 @@
   }
 }
 
+@media (--mobile-device) {
+  .title-input {
+    text-align: center;
+    width: 100%;
+  }
+}
+
 /* Radio switch */
 
 .radio-switch {
@@ -76,17 +83,17 @@
 }
 
 .radio-switch__label:first-of-type {
-  padding-left: 16px;
-  border-radius: 16px 0 0 16px;
+  padding-left: 14px;
+  border-radius: 14px 0 0 14px;
 }
 
 .radio-switch__label:last-of-type {
-  padding-right: 16px;
-  border-radius: 0 16px 16px 0;
+  padding-right: 14px;
+  border-radius: 0 14px 14px 0;
 }
 
 .radio-switch__label {
-  padding: 6px 12px;
+  padding: 5px 10px;
 
   border: 1px solid var(--border-fg);
 
