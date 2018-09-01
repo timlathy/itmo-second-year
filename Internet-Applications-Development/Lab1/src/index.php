@@ -72,6 +72,8 @@ $app->path('graphs', function() use ($app) {
 
   $app->path('point_in_polygon', function($request) use ($app) {
     $app->get(function() use ($request, $app) {
+      $script_start_time = microtime(true);
+
       list($title, $lines) = parse_js_graph($request->param('g', ''));
       $variables = array_map(function($v) { return (float) $v; },
         $request->param('v', []));
@@ -83,8 +85,12 @@ $app->path('graphs', function() use ($app) {
       try {
         $svg = (new GraphBuilder($lines, $variables))->build_graph_svg();
         $is_inside = (new PolygonGraph($svg, 100))->is_point_inside_polygon($x, $y);
+
+        $script_end_time = microtime(true);
+        $running_time_micros = round(($script_end_time - $script_start_time) * 1000000);
+
         return $app->template('graphs/point_in_polygon',
-          compact('is_inside', 'params', 'graph'));
+          compact('is_inside', 'params', 'graph', 'running_time_micros'));
       }
       catch (\LineException $e) {
         return $app->response(422, $e->js_error_object());
