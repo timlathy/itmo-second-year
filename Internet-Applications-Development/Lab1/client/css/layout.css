@@ -109,3 +109,13 @@ h2 {
 .header__right {
   margin-left: auto;
 }
+
+/* Nested layout to place components in a row. Does not change orientation
+ * (from row to column) on mobile devices. */
+.row-layout {
+  display: flex;
+}
+
+.row-layout__item:not(:first-child) {
+  margin-left: 16px;
+}

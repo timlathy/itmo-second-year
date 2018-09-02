@@ -31,7 +31,8 @@
     <div class="column-layout__flexible">
       <h2>History<button id="js-pip-history-clear" class="button button--inline button--trash"></button></h2>
       <section class="card card--error hidden" id="js-error-container"></section>
-      <section id="js-pip-history"></section>
+      <section class="pip-history" id="js-pip-history"></section>
+      <section class="card card--info pip-history-tip">Your calculations will appear here.</section>
     </div>
   <input type="hidden" name="g" value="<?=
     htmlspecialchars($graph, ENT_QUOTES) ?>" />

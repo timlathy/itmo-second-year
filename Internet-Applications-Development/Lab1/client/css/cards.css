@@ -10,6 +10,11 @@
   border-color: var(--error-border-fg);
 }
 
+.card--info {
+  background: var(--info-bg);
+  border-color: var(--info-border-fg);
+}
+
 .card__title {
   display: block;
   margin-bottom: 16px;

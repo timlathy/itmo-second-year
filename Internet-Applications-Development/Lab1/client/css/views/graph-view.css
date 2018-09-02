@@ -27,3 +27,11 @@
     min-width: var(--fixed-column-width);
   }
 }
+
+.pip-history-tip {
+  display: none;
+}
+
+.pip-history:empty + .pip-history-tip {
+  display: block;
+}

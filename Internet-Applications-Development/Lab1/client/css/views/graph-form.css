@@ -18,8 +18,8 @@
 .color-swatch--7 { background: #d7db32; }
 
 .graph-form__preview {
-  width: 200px;
-  height: 200px;
+  width: 250px;
+  height: 250px;
   
   border: 1px solid var(--border-fg);
 }
