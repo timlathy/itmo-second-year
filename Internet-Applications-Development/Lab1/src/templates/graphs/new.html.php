@@ -1,14 +1,14 @@
 <?php include __DIR__ . '/../_head.html.php'; ?>
 
 <form id="js-graph-form" class="graph-form">
-  <input type="text" class="title-input" name="graph-name" placeholder="New Graph" />
+  <input type="text" class="title-input" name="graph-name" placeholder="Graph name" />
   <div class="column-layout">
-    <div class="column-layout__fixed column-layout__fixed--narrow">
+    <div class="column-layout__fixed">
       <h2>Lines<button id="js-graph-form-new-line" class="button button--inline button--plus"></button></h2>
       <div id="js-graph-form-line-container"></div>
     </div>
     <div class="column-layout__gap"></div>
-    <div class="column-layout__fixed column-layout__fixed--narrow">
+    <div class="column-layout__flexible">
       <h2>Preview<button id="js-graph-form-preview" class="button button--inline button--refresh"></button></h2>
       <section class="card card--error hidden" id="js-error-container"></section>
       <section class="graph-form__preview" id="js-graph-form-preview-container"></section>

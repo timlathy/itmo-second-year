@@ -19,3 +19,11 @@
   margin: 0;
   line-height: 100px;
 }
+
+@media (--mobile-device) {
+  .graph-header {
+    margin: 0 auto 16px;
+    width: var(--mobile-column-width);
+    min-width: var(--fixed-column-width);
+  }
+}

@@ -7,21 +7,21 @@
 
 <form id="js-pip-form" method="get" action="/graphs/point_in_polygon">
   <div class="column-layout">
-    <div class="column-layout__fixed column-layout__fixed--narrow">
+    <div class="column-layout__fixed">
       <h2>Point coordinates</h2>
-      <fieldset class="borderless-fieldset">
-        <label class="borderless-fieldset__label">X</label>
+      <fieldset class="card">
+        <label class="card__title">X</label>
         <?php foreach (["-2", "-1.5", "-1", "-0.5", "0", "0.5", "1", "1.5", "2"] as $i => $v) { ?>
         <label><input type="checkbox" name="X[<?=$i?>]" value="<?=$v?>" /><?=$v?></label>
         <?php } ?>
 
-        <label class="borderless-fieldset__label borderless-fieldset__label--succ" for="y">Y</label>
+        <label class="card__title card__title--extra" for="y">Y</label>
         <input type="number" id="y" name="Y" value="0" step="0.5" />
       </fieldset>
       <h2>Graph variables</h2>
-      <fieldset class="borderless-fieldset">
+      <fieldset class="card">
         <?php foreach ($vars as $var) { ?>
-          <label class="borderless-fieldset__label" for="v_<?=$var?>"><?=$var?></label>
+          <label class="card__title" for="v_<?=$var?>"><?=$var?></label>
           <input class="input" id="v_<?=$var?>" name="v[<?=$var?>]" placeholder="0" />
         <?php } ?>
       </fieldset>

@@ -11,8 +11,10 @@
 <body>
 <header class="header-container">
   <div class="header">
+    <a class="header__icon" href="/"></a>
     <a class="header__link header__link--title" href="/">Point-in-Polygon</a>
-    <div class="header__right">P3202 Lab1</div>
+    <a class="header__link header__link--secondary" href="/graphs/new">New Graph</a>
+    <div class="header__right">P3202 Lab1 #18208</div>
   <div>
 </header>
 <div class="narrow-layout">
