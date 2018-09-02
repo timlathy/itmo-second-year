@@ -32,7 +32,7 @@ final class GraphBuilder {
   }
 
   function build_graph_svg(): string {
-    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">';
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 101 101">';
     $svg .= '<g fill="none" stroke-width="1px">';
     foreach ($this->evaluated_lines as $line_i => $line) {
       $this->require_keys_evaluated($line_i, $line, self::REQUIRED_KEYS[$line["type"]]);
@@ -69,7 +69,7 @@ final class GraphBuilder {
     array_walk($line, function(&$raw_value, $key) use ($line_i, $variables) {
       switch ($key) {
         case "x1": case "x2": case "x3": case "y1": case "y2": case "y3":
-          if (empty($raw_value)) return;
+          if ($raw_value == "") return;
           try {
             $raw_value = Evaluator::eval_sexpr(Parser::sexpr($raw_value), $variables);
           }
