@@ -154,4 +154,10 @@ let init = () => Page.setupElementById("js-graph-form", (_) => {
   Page.overrideClick("#js-graph-form-new-line", insertNewLine);
   Page.overrideClick("#js-graph-form-preview", () => ignore(fetchAndDisplayPreview()));
   Page.overrideClick("#js-graph-form-save", saveGraph);
+  Page.overrideClick("#js-graph-form-help-toggle", () => {
+    "js-graph-form-help"
+    |> Page.elementById
+    |> Element.classList
+    |> DomTokenList.add("hidden");
+  });
 });

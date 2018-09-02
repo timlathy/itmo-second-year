@@ -22,7 +22,7 @@
       <fieldset class="card">
         <?php foreach ($vars as $var) { ?>
           <label class="card__title" for="v_<?=$var?>"><?=$var?></label>
-          <input class="input" id="v_<?=$var?>" name="v[<?=$var?>]" placeholder="0" />
+          <input class="input" data-pip-variable="<?=$var?>" id="v_<?=$var?>" name="v[<?=$var?>]" placeholder="0" />
         <?php } ?>
       </fieldset>
       <button class="button button--primary" type="submit">Compute</button>
