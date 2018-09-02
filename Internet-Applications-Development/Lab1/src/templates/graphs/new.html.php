@@ -11,10 +11,19 @@
     <div class="column-layout__flexible">
       <h2>Graph<button id="js-graph-form-preview" class="button button--inline button--refresh"></button></h2>
       <section class="card card--error hidden" id="js-error-container"></section>
-      <section class="card card--info">
-        The graph has two axes, X and Y, extending from -50 to 50. You can use arithmetic expressions like
-        <em>5 * (3 + R)</em> to define the lines making up a polygon. One or more letters represent a variable,
-        which are specified at computation time; you also need to provide dummy values to render a preview.
+      <section id="js-graph-form-help" class="card card--info">
+        <p>
+          The graph has two axes, X and Y, extending from -50 to 50. You can use arithmetic expressions like
+          <em>5 * (3 + R)</em> to define the lines making up a polygon.
+        </p>
+        <p>
+          One or more letters represent a variable,
+          which are specified at computation time; you also need to provide dummy values to render a preview.
+        </p>
+        <p>
+          <em>R</em> (stands for <em>radius</em>) is a special variable that is restricted to non-negative values.
+        </p>
+        <a id="js-graph-form-help-toggle" class="card__link card__link--info">Hide this message</a>
       </section>
       <div class="row-layout">
         <section class="graph-form__preview row-layout__item" id="js-graph-form-preview-container"></section>

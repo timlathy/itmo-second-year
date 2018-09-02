@@ -25,7 +25,20 @@
   margin-top: 16px;
 }
 
-/* TODO: find a less hacky way to remove the redundant space at the bottom of the card */
-.card > p:last-child {
-  margin-bottom: 0px;
+.card__link {
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    font-weight: bold;
+  }
+}
+
+.card__link--info {
+  color: var(--info-link-fg); 
+}
+
+/* TODO: find a less hacky way to remove redundant margins inside cards */
+.card > p:first-child {
+  margin-top: 0px;
 }
