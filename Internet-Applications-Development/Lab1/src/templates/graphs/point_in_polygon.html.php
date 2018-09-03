@@ -14,7 +14,6 @@
   </table>
   <?php $result = $is_inside ? "inside" : "not inside" ?>
   <p>The point defined by (X, Y) is <strong><?= $result ?></strong> the polygon.</p>
-  <p>
-    Running time: <?= $running_time_micros ?>μs
-  </p>
+  <p>Running time: <?= $running_time_micros ?>μs</p>
+  <p>Server time: <?= $server_time ?></p>
 </section>

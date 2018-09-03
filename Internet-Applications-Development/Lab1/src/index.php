@@ -93,9 +93,10 @@ $app->path('graphs', function() use ($app) {
 
         $script_end_time = microtime(true);
         $running_time_micros = round(($script_end_time - $script_start_time) * 1000000);
+        $server_time = date('d.m.Y h:i:s a') . " [" . date_default_timezone_get() . "]";
 
         return $app->template('graphs/point_in_polygon',
-          compact('is_inside', 'params', 'graph', 'running_time_micros'));
+          compact('is_inside', 'params', 'graph', 'running_time_micros', 'server_time'));
       }
       catch (\LineException $e) {
         return $app->response(422, $e->js_error_object());
