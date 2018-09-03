@@ -14,6 +14,8 @@ let formDataAsUrlParams: (Page.formData) => string = [%bs.raw {|
 |}];
 
 let fetchPipResult = (form: Dom.element): unit => {
+  let Some(graphName) = Element.getAttribute("data-graph-name", form);
+
   let _ = Js.Promise.(
     Fetch.fetchWithInit(
       Page.formAction(form) ++ "?" ++ formDataAsUrlParams(Page.formData(form)),
@@ -23,6 +25,8 @@ let fetchPipResult = (form: Dom.element): unit => {
     |> then_(Fetch.Response.text)
     |> then_((result) => {
         Error.hide();
+
+        GraphStorage.appendHistory(graphName, result);
 
         "js-pip-history"
         |> Page.elementById
@@ -34,6 +38,16 @@ let fetchPipResult = (form: Dom.element): unit => {
         resolve(());
     }));
 }
+
+let loadHistory = (form: Dom.element): unit => {
+  let Some(graphName) = Element.getAttribute("data-graph-name", form);
+  let history = Page.elementById("js-pip-history");
+
+  graphName
+  |> GraphStorage.loadHistory
+  |> Js.Array.joinWith("")
+  |> Element.setInnerHTML(history, _);
+};
 
 let setupInputPersistence = (form: Dom.element): unit => {
   let Some(graphName) = Element.getAttribute("data-graph-name", form);
@@ -117,6 +131,8 @@ let inputValid = (form: Dom.element): bool => {
 };
 
 let init = () => Page.setupElementById("js-pip-form", (form) => {
+  let Some(graphName) = Element.getAttribute("data-graph-name", form);
+
   Page.overrideClick(~container=form, "button[type=submit]", () => {
     if (inputValid(form)) fetchPipResult(form)
   });
@@ -124,6 +140,8 @@ let init = () => Page.setupElementById("js-pip-form", (form) => {
     "js-pip-history"
     |> Page.elementById
     |> Element.setInnerHTML(_, "");
+
+    GraphStorage.clearHistory(graphName);
   });
 
   let graphName: string =
@@ -134,4 +152,5 @@ let init = () => Page.setupElementById("js-pip-form", (form) => {
   |> Element.setInnerHTML(_, GraphStorage.loadPreviewByName(graphName));
 
   setupInputPersistence(form);
+  loadHistory(form);
 });

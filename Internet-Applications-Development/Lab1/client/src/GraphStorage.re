@@ -16,6 +16,12 @@ external graphAsJson : graph => string = "stringify";
 [@bs.scope "JSON"] [@bs.val]
 external graphsAsJson : array(graph) => string = "stringify";
 
+[@bs.scope "JSON"] [@bs.val]
+external historyFromJson : string => array(string) = "parse";
+
+[@bs.scope "JSON"] [@bs.val]
+external historyAsJson : array(string) => string = "stringify";
+
 /* Local storage */
 
 let localStorageSet = (key: string, value: string): unit =>
@@ -77,3 +83,20 @@ let isInputChecked = (graphNameEnc: string, inputName: string): bool =>
   | Some(_) => true
   | _ => false
   };
+
+let loadHistory = (graphNameEnc: string): array(string) =>
+  {j|hist_$(graphNameEnc)|j}
+  |> localStorageGet
+  |> fun
+    | Some(json) => historyFromJson(json)
+    | _ => [||];
+
+let appendHistory = (graphNameEnc: string, item: string): unit =>
+  graphNameEnc
+  |> loadHistory
+  |> Js.Array.concat([|item|])
+  |> historyAsJson
+  |> localStorageSet({j|hist_$(graphNameEnc)|j});
+
+let clearHistory = (graphNameEnc: string): unit =>
+  localStorageRemove({j|hist_$(graphNameEnc)|j});
