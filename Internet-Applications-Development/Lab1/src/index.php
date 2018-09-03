@@ -28,6 +28,7 @@ $app->path('graphs', function() use ($app) {
     $app->get(function() use ($request, $app) {
       $graph = $request->param('g', '');
       list($title, $lines) = parse_js_graph($graph);
+      $name_enc = urlencode($title);
 
       $vars = array_reduce($lines, function($acc, $exprs) {
         $vs = array_map(function ($expr) {
@@ -45,7 +46,7 @@ $app->path('graphs', function() use ($app) {
         return $acc;
       }, []);
 
-      return $app->template('graphs/show', compact('title', 'vars', 'graph'));
+      return $app->template('graphs/show', compact('title', 'name_enc', 'vars', 'graph'));
     });
   });
 
@@ -82,6 +83,13 @@ $app->path('graphs', function() use ($app) {
       }, 0);
       $y = (float) $request->param('Y', '');
       $params = ["X" => $x, "Y" => $y] + $variables;
+
+      foreach ($variables as $k => $v) {
+        if ($k == "R" && ($v < 1 || $v > 4))
+          return $app->response(422, "$k is expected to be within a range of [1; 4]");
+      }
+      if ($y < -5 || $y > 3)
+        return $app->response(422, "Y is expected to be within a range of [-5; 3]");
 
       $x = $x * 10;
       $y = $y * 10;

@@ -24,6 +24,9 @@ let localStorageSet = (key: string, value: string): unit =>
 let localStorageGet = (key: string): option(string) =>
   Dom.Storage.localStorage |> Dom.Storage.getItem(key);
 
+let localStorageRemove = (key: string): unit =>
+  Dom.Storage.localStorage |> Dom.Storage.removeItem(key);
+
 let storageKey = "saved_graphs";
 
 let load = (): array(graph) =>
@@ -53,3 +56,24 @@ let loadPreviewByName = (graphName: string): string =>
 
 let setPreviewByName = (graphName: string, preview: string): unit =>
   localStorageSet(previewKey(graphName), preview);
+
+let savedInputKey = (graphNameEnc: string, inputName: string): string =>
+  {j|saved_input_$(graphNameEnc)_$(inputName)|j};
+
+let setInputValue = (graphNameEnc: string, inputName: string, value: string): unit =>
+  localStorageSet(savedInputKey(graphNameEnc, inputName), value);
+
+let getInputValue = (graphNameEnc: string, inputName: string): option(string) =>
+  localStorageGet(savedInputKey(graphNameEnc, inputName));
+
+let toggleInput = (graphNameEnc: string, inputName: string, checked: bool): unit => {
+  let key = savedInputKey(graphNameEnc, inputName);
+
+  if (checked) localStorageSet(key, "checked") else localStorageRemove(key);
+};
+
+let isInputChecked = (graphNameEnc: string, inputName: string): bool =>
+  switch (localStorageGet(savedInputKey(graphNameEnc, inputName))) {
+  | Some(_) => true
+  | _ => false
+  };

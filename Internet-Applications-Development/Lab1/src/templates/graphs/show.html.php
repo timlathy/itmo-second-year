@@ -5,7 +5,7 @@
   <h1 id="js-pip-graph-name" class="graph-header__title"><?=$title?></h1>
 </section>
 
-<form id="js-pip-form" method="get" action="/graphs/point_in_polygon">
+<form id="js-pip-form" data-graph-name="<?=$name_enc?>" method="get" action="/graphs/point_in_polygon">
   <div class="column-layout">
     <div class="column-layout__fixed">
       <h2>Point coordinates</h2>

@@ -12,6 +12,8 @@ open Webapi.Dom;
 
 [@bs.get] external inputValue : (Dom.element) => string = "value";
 
+[@bs.get] external isChecked : (Dom.element) => bool = "checked";
+
 [@bs.set] external setInputValueFlip : (Dom.element, string) => unit = "value";
 
 [@bs.val] external nodeListToArray : Dom.nodeList => array(Dom.element) =

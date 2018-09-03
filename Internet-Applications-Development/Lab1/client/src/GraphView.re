@@ -35,6 +35,46 @@ let fetchPipResult = (form: Dom.element): unit => {
     }));
 }
 
+let setupInputPersistence = (form: Dom.element): unit => {
+  let Some(graphName) = Element.getAttribute("data-graph-name", form);
+
+  form
+  |> Element.querySelectorAll("[data-input]")
+  |> Page.nodeListToArray
+  |> Js.Array.forEach((input) => {
+      let Some(inputName) = Element.getAttribute("data-input", input);
+
+      switch (GraphStorage.getInputValue(graphName, inputName)) {
+      | Some(saved) => Element.setAttribute("value", saved, input)
+      | _ => ()
+      };
+
+      input
+      |> Element.asEventTarget
+      |> EventTarget.addEventListener("change", (_) => {
+          input
+          |> Page.inputValue
+          |> GraphStorage.setInputValue(graphName, inputName);
+        });
+    });
+
+  form
+  |> Element.querySelectorAll("input[type=checkbox]")
+  |> Page.nodeListToArray
+  |> Js.Array.forEach((checkbox) => {
+      let Some(checkName) = Element.getAttribute("name", checkbox);
+      
+      if (GraphStorage.isInputChecked(graphName, checkName))
+        Element.setAttribute("checked", "true", checkbox);
+
+      checkbox
+      |> Element.asEventTarget
+      |> EventTarget.addEventListener("change", (_) => {
+          checkbox |> Page.isChecked |> GraphStorage.toggleInput(graphName, checkName);
+        });
+    });
+};
+
 let inputValid = (form: Dom.element): bool => {
   let isValid = 
     form
@@ -92,4 +132,6 @@ let init = () => Page.setupElementById("js-pip-form", (form) => {
   "js-pip-preview"
   |> Page.elementById
   |> Element.setInnerHTML(_, GraphStorage.loadPreviewByName(graphName));
+
+  setupInputPersistence(form);
 });
