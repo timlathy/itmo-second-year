@@ -38,23 +38,34 @@ let fetchPipResult = (form: Dom.element): unit => {
 let inputValid = (form: Dom.element): bool => {
   let isValid = 
     form
-    |> Element.querySelectorAll("[data-pip-variable]")
+    |> Element.querySelectorAll("[data-input]")
     |> Page.nodeListToArray
     |> Js.Array.reduce((pastValid, input) => {
         if (!pastValid) false
         else {
-          let name = Element.getAttribute("data-pip-variable", input);
+          let name = Element.getAttribute("data-input", input);
           let rawValue = input |> Page.inputValue;
           let value = Js.Float.fromString(rawValue);
 
-          let isNonNegative = name == Some("R");
+          let min = switch (Element.getAttribute("min", input)) {
+          | Some(v) => Js.Float.fromString(v);
+          | _ => -5.0;
+          }
+          let max = switch (Element.getAttribute("max", input)) {
+          | Some(v) => Js.Float.fromString(v);
+          | _ => 5.0;
+          }
 
           if (Js.Float.isNaN(value)) {
             Error.show({j|<strong>Please check your input data:</strong> "$rawValue" is not a valid numerical value for $name.|j});
             false
           }
-          else if (isNonNegative && value < 0.0) {
-            Error.show({j|<strong>Please check your input data:</strong> A non-negative value is expected for $name.|j});
+          else if (value < min) {
+            Error.show({j|<strong>Please check your input data:</strong> Smallest possible value for $name is $min.|j});
+            false
+          }
+          else if (value > max) {
+            Error.show({j|<strong>Please check your input data:</strong> Largest possible value for $name is $max.|j});
             false
           }
           else true

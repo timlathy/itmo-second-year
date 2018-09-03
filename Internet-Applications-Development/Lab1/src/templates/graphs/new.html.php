@@ -13,15 +13,18 @@
       <section class="card card--error hidden" id="js-error-container"></section>
       <section id="js-graph-form-help" class="card card--info">
         <p>
-          The graph has two axes, X and Y, extending from -50 to 50. You can use arithmetic expressions like
-          <em>5 * (3 + R)</em> to define the lines making up a polygon.
+          The graph has two axes, X and Y, extending from -50 to 50. Coordinates are multiplied by 10, so you can
+          effectively the area ranging from -5 to 5, with a floating point precision of 0.1.
+        </p>
+        <p>          
+          Use arithmetic expressions like <em>5 * (3 + R)</em> to define the lines making up a polygon.
         </p>
         <p>
           One or more letters represent a variable,
           which are specified at computation time; you also need to provide dummy values to render a preview.
         </p>
         <p>
-          <em>R</em> (stands for <em>radius</em>) is a special variable that is restricted to non-negative values.
+          <em>R</em> (stands for <em>radius</em>) is a special variable that is restricted to a [1; 4] range.
         </p>
         <a id="js-graph-form-help-toggle" class="card__link card__link--info">Hide this message</a>
       </section>

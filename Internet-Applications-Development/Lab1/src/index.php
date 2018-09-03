@@ -82,9 +82,14 @@ $app->path('graphs', function() use ($app) {
       }, 0);
       $y = (float) $request->param('Y', '');
       $params = ["X" => $x, "Y" => $y] + $variables;
+
+      $x = $x * 10;
+      $y = $y * 10;
+      $variables = array_map(function ($v) { return $v * 10; }, $variables);
+
       try {
         $svg = (new GraphBuilder($lines, $variables))->build_graph_svg();
-        $is_inside = (new PolygonGraph($svg, 100))->is_point_inside_polygon($x, $y);
+        $is_inside = (new PolygonGraph($svg, 102))->is_point_inside_polygon($x, $y);
 
         $script_end_time = microtime(true);
         $running_time_micros = round(($script_end_time - $script_start_time) * 1000000);

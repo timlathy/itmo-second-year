@@ -42,3 +42,7 @@
 .card > p:first-child {
   margin-top: 0px;
 }
+
+.card > p:last-child {
+  margin-bottom: 0px;
+}
