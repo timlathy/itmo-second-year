@@ -94,7 +94,7 @@ let loadHistory = (graphNameEnc: string): array(string) =>
 let appendHistory = (graphNameEnc: string, item: string): unit =>
   graphNameEnc
   |> loadHistory
-  |> Js.Array.concat([|item|])
+  |> Js.Array.concat(_, [|item|]) /* prepend */
   |> historyAsJson
   |> localStorageSet({j|hist_$(graphNameEnc)|j});
 
