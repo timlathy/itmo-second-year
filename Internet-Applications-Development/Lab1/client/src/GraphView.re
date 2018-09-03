@@ -98,7 +98,7 @@ let inputValid = (form: Dom.element): bool => {
         if (!pastValid) false
         else {
           let name = Element.getAttribute("data-input", input);
-          let rawValue = input |> Page.inputValue;
+          let rawValue = input |> Page.inputValue |> Js.String.replace(",", ".");
           let value = Js.Float.fromString(rawValue);
 
           let min = switch (Element.getAttribute("min", input)) {

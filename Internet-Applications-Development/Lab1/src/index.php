@@ -76,12 +76,12 @@ $app->path('graphs', function() use ($app) {
       $script_start_time = microtime(true);
 
       list($title, $lines) = parse_js_graph($request->param('g', ''));
-      $variables = array_map(function($v) { return (float) $v; },
+      $variables = array_map(function($v) { return (float) str_replace(",", ".", $v); },
         $request->param('v', []));
       $x = array_reduce($request->param('X', []), function($acc, $raw_v) {
         return $acc + (float) $raw_v;
       }, 0);
-      $y = (float) $request->param('Y', '');
+      $y = (float) str_replace(",", ".", $request->param('Y', ''));
       $params = ["X" => $x, "Y" => $y] + $variables;
 
       foreach ($variables as $k => $v) {

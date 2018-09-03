@@ -16,14 +16,14 @@
         <?php } ?>
 
         <label class="card__title card__title--extra" for="y">Y</label>
-        <input type="number" class="input" data-input="Y" min="-5" max="3" step="0.5" placeholder="0"
+        <input type="text" class="input" data-input="Y" min="-5" max="3" step="0.5" placeholder="0"
                id="Y" name="Y" />
       </fieldset>
       <h2>Graph variables</h2>
       <fieldset class="card">
         <?php foreach ($vars as $var) { ?>
           <label class="card__title" for="v_<?=$var?>"><?=$var?></label>
-          <input type="number" class="input" data-input="<?=$var?>" min="1" max="4"
+          <input type="text" class="input" data-input="<?=$var?>" min="1" max="4"
                  id="v_<?=$var?>" name="v[<?=$var?>]" value="1" step="0.5" />
         <?php } ?>
       </fieldset>
