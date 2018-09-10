@@ -97,15 +97,24 @@ print_string:
 ; Prints a single character using the sys_write system call.
 ;
 ; Inputs:
-; * rdi — the character to be printed
+; * dil — the character to be printed
 print_char:
-    push rdi
+    dec rsp
+    mov [rsp], dil
     mov rsi, rsp
     mov rdx, 1   ; buffer length = 1
     mov rdi, 1   ; print to stdout
     mov rax, 1   ; sys_write
     syscall
-    add rsp, 8
+    inc rsp
+    ret
+
+; ===== print_char =====
+;
+; Prints a newline character (0xa) using the sys_write system call.
+print_newline:
+    mov dil, 0xa
+    call print_char
     ret
 
 ; ===== convert_uint_to_string =====
