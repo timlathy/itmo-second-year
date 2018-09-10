@@ -40,6 +40,31 @@ string_copy_loop:
 string_copy_ret:
     ret
 
+; ===== string_equals =====
+;
+; Compares two strings character by character.
+;
+; Inputs:
+; * rdi — pointer to the first string buffer
+; * rsi — pointer to the second string buffer
+; Outputs:
+; * rax — 1 if the strings are equal, 0 otherwise
+string_equals:
+    xor rcx, rcx           ; rcx is the character index
+string_equals_next_char:
+    mov al, byte [rdi+rcx]
+    cmp al, byte [rsi+rcx]
+    jne string_equals_false
+    inc rcx
+    cmp al, 0
+    jne string_equals_next_char
+string_equals_true:
+    mov rax, 1
+    ret
+string_equals_false:
+    xor rax, rax
+    ret
+
 ; ===== print_string =====
 ;
 ; Prints a string using the sys_write system call.
