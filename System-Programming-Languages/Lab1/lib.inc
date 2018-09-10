@@ -74,37 +74,49 @@ print_char:
     add rsp, 8
     ret
 
-; ===== print_uint =====
+; ===== convert_uint_to_string =====
 ;
-; Prints an unsigned 64-bit integer.
-;
-; The routine first converts the number to a string,
-; repeatedly dividing it by 10 (radix) and pushing the remainders on stack,
-; then performs a single syscall to output the whole string.
+; Converts an unsigned 64-bit integer to string,
+; repeatedly dividing it by 10 (radix) and
+; pushing the ASCII codes of remainders on stack.
 ;
 ; Inputs:
-; * rdi — the number to be printed
-print_uint:
-    push rbx          ; we save rsp to rbx to clear the stack later
-    mov rbx, rsp
-    dec rsp           ; now we push the NULL terminator to the bottom of the stack,
+; * rdi — the number to be converted
+; Outputs:
+; The string (NULL-terminated) is placed on stack.
+convert_uint_to_string:
+    pop rcx           ; store the return address
+    mov rax, rsp
+    dec rsp           ; first, we push the NULL terminator to the bottom of the stack,
     mov byte [rsp], 0 ;   where the string will end (doing it manually because PUSH
                       ;   only works with words)
     mov rax, rdi      ; rax is the lower 64 bits of the dividend (the input number)
     mov rdi, 10       ; 10 is the radix
-print_uint_convert_loop:
+convert_uint_to_string_loop:
     xor rdx, rdx      ; rdx is the higher 64 bits of the dividend (always 0)
     div rdi           ; rax <- quotient (remaining number),
                       ; rdx <- remainder (current digit)
-    add rdx, 0x30     ; the ASCII character codes for digits start with 0x30
+    add rdx, 0x30     ; ASCII character codes for digits start with 0x30
     dec rsp
     mov [rsp], dl     ; move the digit (lower 8 bits) to _the bottom_ of the stack,
                       ; since diving by radix yields the digits in reverse order.
     cmp rax, 0        ; if the quotient is 0, we have converted the whole number
-    jne print_uint_convert_loop
-print_uint_output_string:
-    mov rdi, rsp
+    jne convert_uint_to_string_loop
+    push rcx          ; restore the return address
+    ret
+
+; ===== print_uint =====
+;
+; Prints an unsigned 64-bit integer using a single sys_write call.
+;
+; Inputs:
+; * rdi — the number to be converted
+print_uint:
+    push rbx
+    mov rbx, rsp                ; we save rsp to rbx to clear the stack later
+    call convert_uint_to_string ; the string is at the top of the stack now
+    mov rdi, rsp                ; print_string expects the string pointer in rdi
     call print_string
-    mov rsp, rbx      ; clear the stack
-    pop rbx           ; restore rbx (callee-saved reg)
+    mov rsp, rbx                ; clear the stack
+    pop rbx                     ; restore rbx (callee-saved)
     ret
