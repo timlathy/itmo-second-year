@@ -27,17 +27,26 @@ string_length_ret:
 ; Inputs:
 ; * rdi — pointer to the source buffer
 ; * rsi — pointer to the target buffer
-; * rdx — length of the string
+; * rdx — buffer size
+; Outputs:
+; * rax — pointer to the target buffer if the string
+;         fits within the buffer, otherwise 0
 string_copy:
-    xor rcx, rcx
-string_copy_loop:
-    cmp rcx, rdx
-    je string_copy_ret
+    xor rcx, rcx ; rcx is the number of characters copied
+string_copy_next_char:
+    cmp rcx, rdx ; if we've reached the end of the buffer without encountering
+                 ; the NULL terminator, we've hit an overflow
+    je string_copy_len_overflow
     mov al, byte [rdi+rcx]
     mov byte [rsi+rcx], al
     inc rcx
-    jmp string_copy_loop
+    cmp al, 0
+    jne string_copy_next_char
 string_copy_ret:
+    mov rax, rsi
+    ret
+string_copy_len_overflow:
+    xor rax, rax
     ret
 
 ; ===== string_equals =====
