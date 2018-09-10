@@ -231,3 +231,64 @@ read_word_ret:
     pop r13
     pop r12
     ret
+
+; ===== parse_uint =====
+;
+; Attempts to parse an uninsigned int from the given string
+; up to the first non-digit character encountered.
+;
+; Inputs:
+; * rdi — pointer to the string
+;
+; Outputs:
+; * rax — the parsed number (0 if the string did not contain a number,
+;         check rdx to verify if the string contained a number)
+; * rdx — the number of characters parsed
+parse_uint:
+    xor rax, rax     ; rax is the number accumulated by adding and shifting digits
+    xor rdx, rdx     ; rdx is the higher 64 bits of the MUL operand (needs to be 0)
+    xor rcx, rcx     ; rcx is the number of digits parsed
+    mov r8, 10       ; r8 is radix
+    xor rsi, rsi     ; rsi is a character buffer for iterating the string
+parse_uint_loop:
+    mov sil, [rdi+rcx]
+    cmp sil, 0x30    ; digit character codes start with 0x30
+    jl parse_uint_ret
+    cmp sil, 0x39    ; digit character codes end with 0x39
+    jg parse_uint_ret
+    sub sil, 0x30
+    mul r8           ; multiply the number by radix (10) to shift the digits
+    add rax, rsi     ; append the lower digit
+    inc rcx
+    jmp parse_uint_loop
+parse_uint_ret:
+    mov rdx, rcx
+    ret
+
+; ===== parse_int =====
+;
+; Attempts to parse a nsigned int from the given string
+; up to the first non-digit character encountered.
+;
+; Inputs:
+; * rdi — pointer to the string
+;
+; Outputs:
+; * rax — the parsed number (0 if the string did not contain a number,
+;         check rdx to verify if the string contained a number)
+; * rdx — the number of characters parsed
+parse_int:
+    cmp byte [rdi], '-'
+    je parse_int_negative
+    call parse_uint ; if the string does not contain a '-' sign,
+                    ; we just treat the number as unsigned
+    ret
+parse_int_negative:
+    inc rdi         ; otherwise, we need to skip the '-' sign we've read
+    call parse_uint
+    test rdx, rdx   ; and if the number of digits parsed is more than 0
+    je parse_int_ret
+    neg rax         ; we should negate the result
+    inc rdx         ; and add up the '-' sign to the parsed character count
+parse_int_ret:
+    ret
