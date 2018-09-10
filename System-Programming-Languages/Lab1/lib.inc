@@ -120,3 +120,33 @@ print_uint:
     mov rsp, rbx                ; clear the stack
     pop rbx                     ; restore rbx (callee-saved)
     ret
+
+; ===== print_int =====
+;
+; Prints a signed 64-bit integer.
+;
+; The routine is similar to print_uint, except that
+; it additionally checks if the number is negative
+; and prints a leading '-' if it is.
+;
+; Inputs:
+; * rdi — the number to be printed
+print_int:
+    push rbx
+    mov rbx, rsp
+    test rdi, rdi
+    jns print_int_positive
+print_int_negative:
+    neg rdi
+    call convert_uint_to_string
+    dec rsp
+    mov byte [rsp], '-'
+    jmp print_int_epilogue
+print_int_positive:
+    call convert_uint_to_string
+print_int_epilogue:
+    mov rdi, rsp
+    call print_string
+    mov rsp, rbx
+    pop rbx
+    ret
