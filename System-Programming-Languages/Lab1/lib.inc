@@ -150,3 +150,84 @@ print_int_epilogue:
     mov rsp, rbx
     pop rbx
     ret
+
+; ===== read_char =====
+;
+; Reads a single character from stdin into al.
+;
+; Outputs:
+; * al — the character read from stdin,
+;        or 0x0 if stdin has been closed/an error has occurred
+read_char:
+    xor rax, rax ; sys_read is system call #0
+    xor rdi, rdi ; fd = 0 (stdin)
+    mov rdx, 1   ; read 1 char
+    dec rsp      ; reserve one byte on the stack, which we'll use a buffer 
+    mov rsi, rsp ; rsp now points to our single-character buffer
+    syscall
+    cmp rax, 1   ; sys_read returns the number of bytes read;
+                 ; if it's 0, the stdin has been closed,
+                 ; if it's -1, an error has occurred (see man 2 read)
+    jne read_char_error
+read_char_success:
+    mov al, [rsp]
+    inc rsp
+    ret
+read_char_error:
+    xor rax, rax
+    inc rsp
+    ret
+
+; ===== read_word =====
+;
+; Reads a word from stdin character by character,
+; skipping leading whitespace. Accepts a word size limit;
+; if the word read from stdin exceeds it, returns 0,
+; otherwise returns the word buffer pointer.
+;
+; Inputs:
+; * rdi — pointer to the word buffer
+; * rsi — maximum word size
+;
+; Outputs:
+; * rax — the word buffer pointer if the word fits
+;         within the character limit, otherwise 0
+; * rdx — the number of characters in a word (0 if the limit is exceeded)
+read_word:
+    push r12
+    push r13
+    push r14
+    mov r12, rsi            ; r12 is the maximum word size
+    mov r13, rdi            ; r13 is the word buffer pointer
+    xor r14, r14            ; r14 is the word length counter
+read_word_skip_spaces:
+    call read_char
+    cmp al, ' '
+    je read_word_skip_spaces
+    jmp read_word_write_to_buf
+read_word_loop:
+    call read_char
+    cmp al, ' '
+    je read_word_success
+read_word_write_to_buf:
+    cmp al, 0x0             ; stdin closed
+    je read_word_success
+    cmp al, 0x9             ; tab
+    je read_word_success
+    mov [r13+r14], al
+    inc r14
+    cmp r14, r12
+    jle read_word_loop
+read_word_count_exceeded:
+    xor rax, rax
+    xor rdx, rdx
+    jmp read_word_ret
+read_word_success:
+    mov byte [r13+r14], 0x0 ; null-terminate the string
+    mov rax, r13
+    mov rdx, r14
+read_word_ret:
+    pop r14
+    pop r13
+    pop r12
+    ret
