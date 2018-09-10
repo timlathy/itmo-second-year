@@ -39,3 +39,37 @@ string_copy_loop:
     jmp string_copy_loop
 string_copy_ret:
     ret
+
+; ===== print_string =====
+;
+; Prints a string using the sys_write system call.
+;
+; Inputs:
+; * rdi — pointer to the first character of a null-terminated string
+print_string:
+    push rsi     ; rsi is a callee-saved register that we use later on
+    call string_length
+    mov rdx, rax ; rdx specifies the number of characters in a string
+    mov rsi, rdi ; rsi points to the buffer sys_write reads from
+    mov rdi, 1   ; 1 = stdout
+    mov rax, 1   ; syscall #1 is sys_write
+    syscall
+    mov rdi, rsi ; we've moved rdi to rsi, now we must restore it
+    pop rsi      ; restore rsi
+    ret
+
+; ===== print_char =====
+;
+; Prints a single character using the sys_write system call.
+;
+; Inputs:
+; * rdi — the character to be printed
+print_char:
+    push rdi
+    mov rsi, rsp
+    mov rdx, 1   ; buffer length = 1
+    mov rdi, 1   ; print to stdout
+    mov rax, 1   ; sys_write
+    syscall
+    add rsp, 8
+    ret
