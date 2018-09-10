@@ -81,15 +81,12 @@ string_equals_false:
 ; Inputs:
 ; * rdi — pointer to the first character of a null-terminated string
 print_string:
-    push rsi     ; rsi is a callee-saved register that we use later on
     call string_length
     mov rdx, rax ; rdx specifies the number of characters in a string
     mov rsi, rdi ; rsi points to the buffer sys_write reads from
     mov rdi, 1   ; 1 = stdout
     mov rax, 1   ; syscall #1 is sys_write
     syscall
-    mov rdi, rsi ; we've moved rdi to rsi, now we must restore it
-    pop rsi      ; restore rsi
     ret
 
 ; ===== print_char =====
