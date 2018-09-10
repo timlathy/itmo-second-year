@@ -85,25 +85,26 @@ print_char:
 ; Inputs:
 ; * rdi — the number to be printed
 print_uint:
-    xor rcx, rcx        ; rcx is the number of digits in the resulting string,
-                        ; used as an offset to push 8-bit characters on stack
-                        ; (PUSH works with words only)
-    mov rax, rdi        ; rax is the lower 64 bits of the dividend (the input number)
-    mov rdi, 10         ; 10 is the radix
+    push rbx          ; we save rsp to rbx to clear the stack later
+    mov rbx, rsp
+    dec rsp           ; now we push the NULL terminator to the bottom of the stack,
+    mov byte [rsp], 0 ;   where the string will end (doing it manually because PUSH
+                      ;   only works with words)
+    mov rax, rdi      ; rax is the lower 64 bits of the dividend (the input number)
+    mov rdi, 10       ; 10 is the radix
 print_uint_convert_loop:
-    xor rdx, rdx        ; rdx is the higher 64 bits of the dividend (always 0)
-    div rdi             ; rax <- quotient (remaining number),
-                        ; rdx <- remainder (current digit)
-    add rdx, 0x30       ; the ASCII character codes for digits start with 0x30
-    mov [rsp+rcx-1], dl ; move the digit (lower 8 bits) to _the bottom_ of the stack,
-                        ; since diving by radix yields the digits in reverse order.
-                        ; also subtract 1 to leave the space for NULL terminator
-    dec rcx             ; the stack grows toward lower addresses
-    cmp rax, 0          ; if the quotient is 0, we have converted the whole number
+    xor rdx, rdx      ; rdx is the higher 64 bits of the dividend (always 0)
+    div rdi           ; rax <- quotient (remaining number),
+                      ; rdx <- remainder (current digit)
+    add rdx, 0x30     ; the ASCII character codes for digits start with 0x30
+    dec rsp
+    mov [rsp], dl     ; move the digit (lower 8 bits) to _the bottom_ of the stack,
+                      ; since diving by radix yields the digits in reverse order.
+    cmp rax, 0        ; if the quotient is 0, we have converted the whole number
     jne print_uint_convert_loop
 print_uint_output_string:
-    mov byte [rsp], 0   ; terminate the string with NULL
-    add rsp, rcx        ; reserve the space we've used on the stack
     mov rdi, rsp
     call print_string
+    mov rsp, rbx      ; clear the stack
+    pop rbx           ; restore rbx (callee-saved reg)
     ret
