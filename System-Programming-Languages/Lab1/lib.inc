@@ -259,7 +259,7 @@ read_word_write_to_buf:
     mov [r13+r14], al
     inc r14
     cmp r14, r12
-    jle read_word_loop
+    jbe read_word_loop
 read_word_count_exceeded:
     xor rax, rax
     xor rdx, rdx
@@ -295,9 +295,9 @@ parse_uint:
 parse_uint_loop:
     mov sil, [rdi+rcx]
     cmp sil, 0x30    ; digit character codes start with 0x30
-    jl parse_uint_ret
+    jb parse_uint_ret
     cmp sil, 0x39    ; digit character codes end with 0x39
-    jg parse_uint_ret
+    ja parse_uint_ret
     sub sil, 0x30
     mul r8           ; multiply the number by radix (10) to shift the digits
     add rax, rsi     ; append the lower digit
