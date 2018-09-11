@@ -13,8 +13,9 @@ section .text
 string_length:
     xor rax, rax
 string_length_loop:
-    cmp byte [rdi+rax], 0
-    je string_length_ret
+    cmp byte [rdi+rax], 0 ; compare each character against the NULL terminator
+    je string_length_ret  ; once it's reached, return the index _before_ incrementing
+                          ; the counter so the terminator isn't counted toward length
     inc rax
     jmp string_length_loop
 string_length_ret:
@@ -40,7 +41,7 @@ string_copy_next_char:
     mov al, byte [rdi+rcx]
     mov byte [rsi+rcx], al
     inc rcx
-    cmp al, 0
+    cmp al, 0    ; return successfully once the terminator is found and copied
     jne string_copy_next_char
 string_copy_ret:
     mov rax, rsi
@@ -59,13 +60,14 @@ string_copy_len_overflow:
 ; Outputs:
 ; * rax — 1 if the strings are equal, 0 otherwise
 string_equals:
-    xor rcx, rcx           ; rcx is the character index
+    xor rcx, rcx            ; rcx is the character index
 string_equals_next_char:
     mov al, byte [rdi+rcx]
     cmp al, byte [rsi+rcx]
-    jne string_equals_false
+    jne string_equals_false ; if two characters are equal...
     inc rcx
-    cmp al, 0
+    cmp al, 0               ; ...and one of them is a NULL terminator,
+                            ; we consider the strings equal
     jne string_equals_next_char
 string_equals_true:
     mov rax, 1
@@ -81,11 +83,11 @@ string_equals_false:
 ; Inputs:
 ; * rdi — pointer to the first character of a null-terminated string
 print_string:
-    call string_length
-    mov rdx, rax ; rdx specifies the number of characters in a string
-    mov rsi, rdi ; rsi points to the buffer sys_write reads from
-    mov rdi, 1   ; 1 = stdout
-    mov rax, 1   ; syscall #1 is sys_write
+    call string_length ; compute the length of the string
+    mov rdx, rax       ; string length
+    mov rsi, rdi       ; pointer to the string buffer
+    mov rdi, 1         ; file descriptor (1 = stdout)
+    mov rax, 1         ; syscall (1 = write)
     syscall
     ret
 
@@ -96,14 +98,14 @@ print_string:
 ; Inputs:
 ; * dil — the character to be printed
 print_char:
-    dec rsp
-    mov [rsp], dil
-    mov rsi, rsp
-    mov rdx, 1   ; buffer length = 1
-    mov rdi, 1   ; print to stdout
-    mov rax, 1   ; sys_write
+    dec rsp        ; reserve 1 byte on the stack for the character
+    mov [rsp], dil ; (PUSH only works with words)
+    mov rsi, rsp   ; the character's on top of the stack now
+    mov rdx, 1     ; buffer length = 1
+    mov rdi, 1     ; fd (1 = stdout)
+    mov rax, 1     ; syscall (1 = write)
     syscall
-    inc rsp
+    inc rsp        ; free the space we've reserved on stack
     ret
 
 ; ===== print_char =====
