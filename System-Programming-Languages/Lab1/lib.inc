@@ -1,6 +1,26 @@
-; vim: syntax=asm
+; vim: syntax=nasm
 
 section .text
+
+global string_length
+global string_copy
+global string_equals
+
+global print_string
+global print_char
+global print_newline
+
+global exit
+global panic
+
+global read_char
+global read_word
+
+global print_int
+global print_uint
+
+global parse_int
+global parse_uint
 
 ; ===== string_length =====
 ;
@@ -90,6 +110,32 @@ print_string:
     mov rax, 1         ; syscall (1 = write)
     syscall
     ret
+
+; ===== exit =====
+;
+; Terminates the program with an exit code of 0 (indicating success).
+exit:
+    mov rax, 60        ; syscall (60 = exit)
+    mov rdi, 0         ; return code
+    syscall
+
+; ===== panic =====
+;
+; Prints an error string to stderr and terminates the program
+; with an exit code of 1.
+;
+; Inputs:
+; * rdi — pointer to the first character of a null-terminated error string
+panic:
+    call string_length ; compute the length of the string
+    mov rdx, rax       ; string length
+    mov rsi, rdi       ; pointer to the string buffer
+    mov rdi, 2         ; file descriptor (2 = stderr)
+    mov rax, 1         ; syscall (1 = write)
+    syscall
+    mov rax, 60        ; syscall (60 = exit)
+    mov rdi, 1         ; return code
+    syscall
 
 ; ===== print_char =====
 ;
@@ -255,6 +301,8 @@ read_word_write_to_buf:
     cmp al, 0x0             ; stdin closed
     je read_word_success
     cmp al, 0x9             ; tab
+    je read_word_success
+    cmp al, 0xA             ; newline
     je read_word_success
     mov [r13+r14], al
     inc r14

@@ -1,0 +1,6 @@
+#!/usr/bin/sh
+
+nasm -f elf64 lib.inc
+nasm -f elf64 dict.asm
+nasm -f elf64 main.asm
+ld -o lab2 main.o dict.o lib.o
