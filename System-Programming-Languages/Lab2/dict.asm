@@ -5,16 +5,12 @@ extern string_equals
 
 ; ===== find_word =====
 ;
-; Dictionary is a linked-list with each item consisting of an 8-byte pointer
-; to the previous word (the _tail_ pointer), a null-terminated word name string,
-; and an arbitrary sized word definition blob.
-;
-; This routine finds a word given a dictionary head pointer and a
-; null-terminated name to be found.
+; This routine looks up a word given a null-terminated string key
+; and the dictionary head.
 ;
 ; Inputs:
-; * rdi — pointer to the first character of a null-terminated word name string
-; * rsi — pointer to the head of the dictionary
+; * rdi — pointer to a null-terminated string key
+; * rsi — pointer to the last defined entry in the dictionary
 ; Outputs:
 ; * rax — pointer to a word if found, 0 otherwise
 section .text

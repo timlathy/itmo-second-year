@@ -64,142 +64,15 @@ of the course.
 
 \subsection*{Word Definition Macro}
 
-\begin{lstlisting}[basicstyle=\scriptsize]
-; Dictionary entries are called _words_, referencing
-; the basic data structure of the Forth programming language.
-;
-; Each _word_ consists of a pointer to the previous element,
-; a null-terminated name string, and an arbitrary value.
-;
-; Here's the structure, visualized:
-; | 8-byte tail pointer | null-terminated word name | word contents
-;
-; The tail pointer and the name of the word together make up the _word header_.
-
-; ===== colon =====
-;
-; Inserts a word header, to be followed up by word contents.
-; Accepts two arguments: a word name string (without the NULL terminator) and
-; an assembly label inserted before the word contents, i.e. after the head.
-
-%define colon_head 0 ; colon_head is the current head of the dictionary,
-                     ; i.e. the pointer to the last defined element
-
-%macro colon 2
-%%word_head: dq colon_head     ; %%word_head is unique for every macro invocation
-db %1, 0                       ; null-terminate the word name string
-%2:                            ; insert an assembly label for word contents
-
-%define colon_head %%word_head ; %%word_head will point to _this_ word's header
-%endmacro
-
-; =====
-; A couple of words are defined to test the implementation:
-
-colon "head", word_head
-db "Mami Tomoe", 0
-
-colon "madoka", word_madoka
-db "Homura Akemi", 0
-\end{lstlisting}
+\lstinputlisting[firstline=3, basicstyle=\scriptsize]{colon.inc}
 
 \subsection*{Dictionary Lookup}
 
-\begin{lstlisting}[basicstyle=\scriptsize]
-global find_word
-extern string_equals
-
-; ===== find_word =====
-;
-; This routine looks up a word given a null-terminated string key
-; and the dictionary head.
-;
-; Inputs:
-; * rdi — pointer to a null-terminated string key
-; * rsi — pointer to the last defined entry in the dictionary
-; Outputs:
-; * rax — pointer to a word if found, 0 otherwise
-section .text
-find_word:
-  push r12
-  push r13
-  mov r12, rdi
-  mov r13, rsi
-  xor rax, rax           ; if rsi is NULL, we need to return 0 as well
-find_word_loop:
-  test r13, r13          ; r13 a pointer to the current word; if it's NULL,
-                         ; we've reached the end of the dictionary without
-                         ; finding the word we're looking for
-  jz find_word_not_found
-  mov rdi, r12           ; we'll call string_equals to check if the current
-                         ; word's name matches what we're looking for (rdi)
-  lea rsi, [r13 + 8]     ; the first 8 bytes of the word are occupied
-                         ; by the tail pointer; skip them
-  call string_equals
-  test rax, rax          ; if the name matches, rax will contain 1
-  jnz find_word_found
-  mov r13, [r13]         ; otherwise, we advance to the next word by following
-                         ; the tail pointer
-  jmp find_word_loop
-find_word_found:
-  mov rax, r13
-find_word_not_found:     ; string_equals sets rax to 0 if names aren't equal
-  pop r13
-  pop r12
-  ret
-\end{lstlisting}
+\lstinputlisting[firstline=3, basicstyle=\scriptsize]{dict.asm}
 
 \subsection*{Testing Routine}
 
-\begin{lstlisting}[basicstyle=\scriptsize]
-global _start
-extern find_word
-extern string_length
-extern read_word
-extern print_string
-extern print_newline
-extern panic
-extern exit
-
-section .data
-msg_word_not_found: db "Word not found", 10, 0
-msg_input_too_long: db "Exceeded maximum word name length (up to 255 characters allowed)", 10, 0
-
-%include "colon.inc"
-
-section .text
-_start:
-  sub rsp, 256             ; allocate 256 bytes on the stack
-                           ; to store the user-supplied word name
-  mov rsi, 255             ; read up to 255 characters
-                           ; (one byte is reserved for the NULL terminator)
-  mov rdi, rsp
-  call read_word           
-  test rax, rax            ; read_word returns 0 if the input exceeds the buffer,
-  jz main_input_too_long  
-  mov rdi, rsp
-  mov rsi, colon_head      ; colon_head is the dictionary head pointer, see "colon.inc"
-  call find_word
-  test rax, rax            ; find_word returns 0 if the word was not found
-  jz main_word_not_found  
-  lea rdi, [rax + 8]       ; if the word _is_ found, we want to print its contents.
-                           ; find_word returns a pointer to the word header, so we
-                           ; need to skip the tail pointer (first 8 bytes) and
-                           ; the name string (indeterminate length, null-terminated).
-  call string_length
-  lea rdi, [rdi + rax + 1] ; word contents = word name pointer + name length + null terminator
-  call print_string
-  call print_newline
-  call exit
-main_input_too_long:
-  mov rdi, msg_input_too_long
-  call panic
-main_word_not_found:
-  mov rdi, msg_word_not_found
-  call panic
-\end{lstlisting}
-
-
+\lstinputlisting[firstline=3, basicstyle=\scriptsize]{main.asm}
 
 \section*{Lessons Learned}
 
