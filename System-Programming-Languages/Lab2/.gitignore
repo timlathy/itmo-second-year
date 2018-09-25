@@ -1,2 +1,6 @@
-*.o
-lab2
+*
+!assemble
+!*.inc
+!*.asm
+!*.c
+!report.tex
