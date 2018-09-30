@@ -54,39 +54,58 @@ static PyObject* nonlineq_bisect_solve_interval(PyObject *self, PyObject *args) 
    * interval start (*int_start*) and end (*int_end*) (C doubles),
    * and *delta* (C double). */
   double a, b, c, d, int_start, int_end, delta;
-  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta))
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta)) {
     return NULL;
+  }
+  if (cubic(a, b, c, d, int_start) * cubic(a, b, c, d, int_end) >= 0) {
+    PyErr_SetString(PyExc_ValueError, "Expected an isolating interval");
+    return NULL;
+  }
 
   result res = find_root_bisect(a, b, c, d, int_start, int_end, delta);
 
   return Py_BuildValue("(ddi)", res.approx_root, res.approx_root_value, res.iter_num);
 }
 
-static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args) {
-  /* Accepts *a*, *b*, *c*, *d* coefficients (C doubles),
-   * interval start (*int_start*) and end (*int_end*) (C doubles),
-   * and *delta* (C double). */
+static PyObject* nonlineq_bisect_solve_interval_log(PyObject *self, PyObject *args) {
   double a, b, c, d, int_start, int_end, delta;
-  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta))
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta)) {
     return NULL;
+  }
+  if (cubic(a, b, c, d, int_start) * cubic(a, b, c, d, int_end) >= 0) {
+    PyErr_SetString(PyExc_ValueError, "Expected an isolating interval");
+    return NULL;
+  }
+
+  return find_root_bisect_log(a, b, c, d, int_start, int_end, delta);
+}
+
+static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args) {
+  double a, b, c, d, int_start, int_end, delta;
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta)) {
+    return NULL;
+  }
+  if (cubic(a, b, c, d, int_start) * cubic_deriv2(a, b, int_start) <= 0
+      && cubic(a, b, c, d, int_end) * cubic_deriv2(a, b, int_end) <= 0) {
+    PyErr_SetString(PyExc_ValueError, "Cannot determine the initial guess");
+    return NULL;
+  }
 
   result res = find_root_newton(a, b, c, d, int_start, int_end, delta);
 
   return Py_BuildValue("(ddi)", res.approx_root, res.approx_root_value, res.iter_num);
 }
 
-static PyObject* nonlineq_bisect_solve_interval_log(PyObject *self, PyObject *args) {
-  double a, b, c, d, int_start, int_end, delta;
-  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta))
-    return NULL;
-
-  return find_root_bisect_log(a, b, c, d, int_start, int_end, delta);
-}
-
 static PyObject* nonlineq_newton_solve_interval_log(PyObject *self, PyObject *args) {
   double a, b, c, d, int_start, int_end, delta;
-  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta))
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta)) {
     return NULL;
+  }
+  if (cubic(a, b, c, d, int_start) * cubic_deriv2(a, b, int_start) <= 0
+      && cubic(a, b, c, d, int_end) * cubic_deriv2(a, b, int_end) <= 0) {
+    PyErr_SetString(PyExc_ValueError, "Cannot determine the initial guess");
+    return NULL;
+  }
 
   return find_root_newton_log(a, b, c, d, int_start, int_end, delta);
 }
