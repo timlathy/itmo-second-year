@@ -48,8 +48,8 @@ PyObject* find_root_bisect_log(double a, double b, double c, double d,
     double f_start = cubic(a, b, c, d, int_start);
     double f_end = cubic(a, b, c, d, int_end);
 
-    PyList_Append(log, Py_BuildValue("(iddddddd)",
-      iter_num, int_start_old, int_end_old, x_0, f_start, f_end, f_x, fabs(int_start_old - int_end_old)));
+    PyList_Append(log, Py_BuildValue("(ddddddd)",
+      int_start_old, int_end_old, x_0, f_start, f_end, f_x, fabs(int_start_old - int_end_old)));
 
     if (fabs(f_end) <= delta || fabs(f_start) <= delta) return log;
   }

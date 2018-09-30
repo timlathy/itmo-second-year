@@ -39,7 +39,7 @@ PyObject* find_root_newton_log(double a, double b, double c, double d,
     double f_prime_x = cubic_deriv(a, b, c, x);
     double new_x = x - f_x / f_prime_x;
 
-    PyList_Append(log, Py_BuildValue("(iddddd)", iter_num, x, f_x, f_prime_x, new_x, fabs(x - new_x)));
+    PyList_Append(log, Py_BuildValue("(ddddd)", x, f_x, f_prime_x, new_x, fabs(x - new_x)));
 
     if (fabs(cubic(a, b, c, d, new_x)) <= delta) return log;
 
