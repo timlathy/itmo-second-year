@@ -8,16 +8,26 @@ static char module_docstring[] =
 static char bisect_solve_interval_docstring[] =
   "Finds the root in an isolating interval using the bisection method.";
 static char newton_solve_interval_docstring[] =
-  "Finds the root in an isolating interval using the Newton method.";
+  "Finds the root in an isolating interval using the Newton's method.";
+static char bisect_solve_interval_log_docstring[] =
+  "Finds the root in an isolating interval using the bisection method, returning a detailed log of iterations.";
+static char newton_solve_interval_log_docstring[] =
+  "Finds the root in an isolating interval using the Newton's method, returning a detailed log of iterations.";
 
 static PyObject* nonlineq_bisect_solve_interval(PyObject *self, PyObject *args);
 static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args);
+static PyObject* nonlineq_bisect_solve_interval_log(PyObject *self, PyObject *args);
+static PyObject* nonlineq_newton_solve_interval_log(PyObject *self, PyObject *args);
 
 static PyMethodDef module_methods[] = {
     {"bisect_solve_interval", nonlineq_bisect_solve_interval, METH_VARARGS,
       bisect_solve_interval_docstring},
     {"newton_solve_interval", nonlineq_newton_solve_interval, METH_VARARGS,
       newton_solve_interval_docstring},
+    {"bisect_solve_interval_log", nonlineq_bisect_solve_interval_log, METH_VARARGS,
+      bisect_solve_interval_log_docstring},
+    {"newton_solve_interval_log", nonlineq_newton_solve_interval_log, METH_VARARGS,
+      newton_solve_interval_log_docstring},
     {NULL, NULL, 0, NULL}
 };
 
@@ -64,3 +74,20 @@ static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args) 
 
   return Py_BuildValue("(ddi)", res.approx_root, res.approx_root_value, res.iter_num);
 }
+
+static PyObject* nonlineq_bisect_solve_interval_log(PyObject *self, PyObject *args) {
+  double a, b, c, d, int_start, int_end, delta;
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta))
+    return NULL;
+
+  return find_root_bisect_log(a, b, c, d, int_start, int_end, delta);
+}
+
+static PyObject* nonlineq_newton_solve_interval_log(PyObject *self, PyObject *args) {
+  double a, b, c, d, int_start, int_end, delta;
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta))
+    return NULL;
+
+  return find_root_newton_log(a, b, c, d, int_start, int_end, delta);
+}
+
