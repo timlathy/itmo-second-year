@@ -18,11 +18,9 @@ result find_root_bisect(double a, double b, double c, double d,
       int_start = x_0; /* otherwise, put [x_0, int_end] as the new interval */
 
     /* === Step 2. Check if we have arrived at the answer */
-    double f_start = cubic(a, b, c, d, int_start);
-    if (fabs(f_start) <= delta) return (result) { int_start, f_start, iter_num };
-
-    double f_end = cubic(a, b, c, d, int_end);
-    if (fabs(f_end) <= delta) return (result) { int_end, f_end, iter_num };
+    double f_x_0 = cubic(a, b, c, d, x_0);
+    if (fabs(int_start - int_end) <= delta || fabs(f_x_0) <= delta)
+      return (result) { x_0, f_x_0, iter_num };
   }
 }
 
@@ -51,6 +49,6 @@ PyObject* find_root_bisect_log(double a, double b, double c, double d,
     PyList_Append(log, Py_BuildValue("(ddddddd)",
       int_start_old, int_end_old, x_0, f_start, f_end, f_x, fabs(int_start_old - int_end_old)));
 
-    if (fabs(f_end) <= delta || fabs(f_start) <= delta) return log;
+    if (fabs(int_start - int_end) <= delta || fabs(f_x) <= delta) return log;
   }
 }

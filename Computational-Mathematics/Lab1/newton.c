@@ -13,10 +13,12 @@ result find_root_newton(double a, double b, double c, double d,
   while (1) {
     iter_num++;
 
-    x = x - cubic(a, b, c, d, x) / cubic_deriv(a, b, c, x);
+    double step = cubic(a, b, c, d, x) / cubic_deriv(a, b, c, x);
+
+    x = x - step;
     double f_x = cubic(a, b, c, d, x);
 
-    if (fabs(f_x) <= delta)
+    if (fabs(step) <= delta || fabs(f_x) <= delta)
       return (result) { x, f_x, iter_num };
   }
 }

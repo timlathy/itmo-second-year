@@ -1,0 +1,62 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[a4paper, mag=1000, left=2.5cm, right=1cm, top=2cm, bottom=2cm, headsep=0.7cm, footskip=1cm]{geometry}
+% Fonts
+\usepackage{fontspec, unicode-math}
+\setmainfont[Ligatures=TeX]{CMU Serif}
+\setmonofont{CMU Typewriter Text}
+\usepackage[english, russian]{babel}
+% Indent first paragraph
+\usepackage{indentfirst}
+\setlength{\parskip}{5pt}
+% Code listings
+\usepackage[dvipsnames]{xcolor}
+\usepackage{listings}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+
+\textsc{ФГАОУ ВО «Санкт-Петербургский национальный исследовательский университет информационных технологий, механики и оптики»\\[4mm]
+Кафедра вычислительной техники}
+\vfill
+\textbf{ЛАБОРАТОРНАЯ РАБОТА №1\\[4mm]
+Вычислительная математика}\\[16mm]
+Лабушев Тимофей Михайлович
+\\[2mm]Группа P3202
+\vfill
+Санкт-Петербург\\[2mm]
+2018 г.
+\end{center}
+\end{titlepage}
+
+\section*{Цель работы}
+
+Программно реализовать метод половинного деления и метод Ньютона для численного
+решения нелинейных уравнений; применить программу для решения заданного кубического уравнения.
+
+\section*{Порядок выполнения работы}
+
+В ходе выполнения работы рисуется график функции, строятся таблицы работы
+методов для нахождения двух корней (крайнего справа и крайнего слева на графике).
+
+\section*{Рабочие формулы методов}
+
+\textbf{Метод половинного деления:} $$x_n = \frac{a_n + b_n}{2}$$
+
+где $a_n, b_n$ — границы интервала.\\[4mm]
+
+\textbf{Метод Ньютона} $$x_n = x_{n-1} - \frac{f(x_{n-1})}{f'(x_{n-1})}$$
+
+\section*{Программная реализация}
+
+\subsection*{Метод половинного деления}
+\lstinputlisting[firstline=5, lastline=26, basicstyle=\scriptsize]{bisect.c}
+
+\subsection*{Метод Ньютона}
+\lstinputlisting[firstline=3, lastline=23, basicstyle=\scriptsize]{newton.c}
+
+\subsection*{Вспомогательные функции}
+\lstinputlisting[firstline=4, lastline=21, basicstyle=\scriptsize]{primitives.h}
+
+\end{document}

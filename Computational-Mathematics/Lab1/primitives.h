@@ -17,9 +17,7 @@ static inline double cubic_deriv2(double a, double b, double x) {
 }
 
 typedef struct {
-  double approx_root;
-  double approx_root_value;
-  int iter_num;
+  double approx_root; double approx_root_value; int iter_num;
 } result;
 
 #endif
