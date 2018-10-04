@@ -1,0 +1,283 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[a4paper, includeheadfoot, mag=1000,
+            left=2cm, right=1.5cm, top=1.5cm, bottom=1.5cm,
+            headsep=0.8cm, footskip=0.8cm]{geometry}
+% Fonts
+\usepackage{fontspec, unicode-math}
+\setmainfont[Ligatures=TeX]{CMU Serif}
+\setmonofont{CMU Typewriter Text}
+\usepackage[english, russian]{babel}
+% Indent first paragraph
+\usepackage{indentfirst}
+\setlength{\parskip}{5pt}
+% Diagrams
+\usepackage{graphicx}
+\usepackage{floatrow}
+% Python
+\usepackage{pythontex}
+
+\begin{document}
+\begin{titlepage}
+
+\noindent\textsc{ФГАОУ ВО «Санкт-Петербургский национальный исследовательский
+университет информационных технологий, механики и оптики»\\[4mm]
+Кафедра физики}
+\vfill
+\noindent\textbf{РАБОЧИЙ ПРОТОКОЛ И ОТЧЕТ\\[2mm]
+ПО ЛАБОРАТОРНОЙ РАБОТЕ №1\\[4mm]
+Изучение картины эквипотенциальных поверхностей и силовых линий
+электростатического поля с помощью электролитической ванны }\\[16mm]
+Преподаватель Ефремова Екатерина Александровна\\[2mm]
+Студенты Лабушев Тимофей Михайлович, Нестеров Дали Константинович\\[2mm]
+Группа P3202
+\vfill
+\noindent Санкт-Петербург\\[2mm]
+2018 г.
+
+\end{titlepage}
+
+\section*{Введение}
+
+\subsection*{Цель работы}
+
+Построение сечений эквипотенциальных поверхностей и силовых линий
+электростатического поля на основе экспериментального моделирования
+распределения потенциала в слабопроводящей среде.
+
+\subsection*{Задачи, решаемые при выполнении работы}
+
+\begin{itemize}
+\item Получение картины эквипотенциальных поверхностей
+\item Оценка величины напряженности электрического поля в некоторых точках
+\end{itemize}
+
+\subsection*{Объект исследования}
+
+Электрическое поле
+
+\subsection*{Метод экспериментального исследования}
+
+Прямые и косвенные измерения, графическое отображение
+
+\subsection*{Требуемое оборудование и материалы}
+
+\begin{enumerate}
+\item Блок амперметра-вольтметра АВ1
+\item Генератор напряжений ГН1
+\item Электролитическая ванна ЭВ01
+\item Проводящие тела разной формы
+\item Проводники Ш4/Ш1,6: 4 шт
+\end{enumerate}
+
+\subsection*{Рабочие формулы и исходные формулы}
+
+Структуру электростатического поля можно представить графически с
+помощью силовых линий и с помощью эквипотенциальных поверхностей (на
+чертеже обычно изображают сечения таких поверхностей).
+
+Силовые линии строятся так, чтобы касательная в каждой точке такой
+линии совпадала с вектором $\vec{E}$ электрической напряженности в этой же точке.
+Густота силовых линий качественно характеризует величину напряженности
+электростатического поля: в области, где линии идут гуще — модуль вектора $\vec{E}$
+больше. Поскольку вектор электрической напряженности в данной точке
+пространства определяет величину и направление силы действующей на любой
+точечный заряд, помещенный в данную точку, этот вектор называют силовой
+характеристикой электростатического поля.
+Другая, энергетическая, характеристика электростатического поля —
+потенциал $\varphi$. Работа сил электростатического поля над зарядом при
+перемещении этого заряда по произвольной траектории определяется
+разностью потенциалов между началом и концом траектории. Поверхности
+равного потенциала $\varphi = const$ называются эквипотенциальными поверхностями.
+Силовая и энергетическая характеристики электростатического поля
+связаны друг с другом соотношением:
+\begin{equation}
+\vec{E} = -\nabla\varphi
+\end{equation}
+
+Градиент потенциала, стоящий в правой части этого соотношения в декартовой
+системе координат определяется формулой
+\begin{equation}
+\nabla\varphi = i \frac{\partial\varphi}{\partial x} + j \frac{\partial\varphi}
++ k \frac{\partial\varphi}{\partial z}
+\end{equation}
+где $x,y,z$ — координаты, $\vec{i}, \vec{j}, \vec{k}$ — орты координатных осей.
+
+Из свойств градиента следует, что:
+\begin{itemize}
+\item силовые линии пересекают эквипотенциальные поверхности под прямым углом
+\item вектор напряженности направлен в сторону убывания потенциала
+\item модуль вектора напряженности определяет пространственную быстроту
+убывания потенциала в направлении силовой линии
+\end{itemize}
+
+Последнее означает, что, если известны потенциалы $\varphi_1$ и $\varphi_2$
+двух точек, лежащих на одной силовой линии (см.рис.1), то средняя напряженность
+между этими точками вычисляется по формуле.
+\begin{equation} \label{eq:potdiff}
+E_{12} = \frac{\varphi_1 - \varphi_2}{l_{12}}
+\end{equation}
+
+где $l_{12}$ – длина участка силовой линии между точками,
+$l_{12} = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}$. Если относительное
+изменение локального значения напряженности между выбранными точками
+невелико, то формула (3) дает значение близкое к напряженности на середине
+участка 1-2.
+
+\begin{figure}[H]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{$AA'$ — эквипотенциальная поверхность с потенциалом $\varphi_1$,
+$BB'$ — с потенциалом $\varphi_2$, 1 и 2 – две точки одной силовой линии}}
+{\includegraphics[width=0.3\textwidth]{lab1.png}}
+\end{figure}
+
+\newpage
+\section*{Ход работы}
+
+\begin{pycode}
+from measurements import print_table, load_data_0, load_data_1, load_data_2
+\end{pycode}
+
+\subsection*{Измерения с двумя проводниками}
+
+\pyc{print_table(load_data_0())}
+
+\subsection*{Измерения с двумя проводниками и кольцом}
+
+\begin{table}[H]
+\resizebox{1.02\textwidth}{!}{
+\pyc{print_table(load_data_1())}}
+\end{table} 
+
+\subsection*{Измерения с двумя проводниками и вторым проводящим телом}
+
+\begin{table}[H]
+\resizebox{1.02\textwidth}{!}{
+\pyc{print_table(load_data_2())}}
+\end{table} 
+
+\subsection*{Графики, построенные по измерениям}
+
+\begin{pycode}
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, (ax0, ax1, ax2) = plt.subplots(3, figsize=(10, 20))
+
+def plot_data(ax, data, lines):
+  (xs, ys, vs) = data
+  ax.axis((2, 28, 2, 24))
+  ax.axis('equal')
+  ax.tricontour(xs, ys, vs, lines, linewidths=0.5, colors='k')
+  ax.grid(linestyle='--')
+  
+plot_data(ax0, load_data_0(), 6)
+plot_data(ax1, load_data_1(), 15)
+plot_data(ax2, load_data_2(), 17)
+
+ax1.add_artist(plt.Circle((15, 10), radius=5, color='black'))
+
+polygon_pts = np.array([(14, 7), (11, 10), (14, 13), (19, 13), (16, 10), (19, 7), (14, 7)])
+ax2.add_artist(plt.Polygon(polygon_pts, color='black'))
+
+plt.setp((ax1, ax2), xticks=list(range(2, 30, 2)), yticks=list(range(2, 20, 2)))
+plt.savefig('plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=0.65\textwidth]{plot.pdf}
+\end{figure}
+
+\subsection*{Расчеты}
+
+Величина напряженности электрического поля оценивается в трех произвольно
+взятых точках, для которых сняты измерения во всех опытах.
+
+Для каждой из точек берется смежная ей по оси $x$, и по формуле (\ref{eq:potdiff})
+находится проекция средней напряженности на эту ось. То же самое повторяется
+для оси $y$.
+
+Из полученных $x$ и $y$ компонент получаем полную среднюю напряженность,
+выполнив их векторное сложение.
+
+\begin{sympycode}
+E_variables = symbols('\\varphi_1 \\varphi_2 \\varphi_3 l_{12} l_{13}')
+phi1, phi2, phi3, l12, l13 = E_variables
+Ex = (phi1 - phi2) / l12
+Ey = (phi1 - phi3) / l13
+E = sqrt(Ex**2 + Ey**2)
+\end{sympycode}
+
+$$E_x=\sympy{Ex},\ E_y=\sympy{Ey},\ E=\sympy{E}$$
+
+Погрешность расчетов можно высчитать по следующей формуле:
+
+\begin{sympycode}
+lab_equip_delta = { phi1: 0.1, phi2: 0.1, phi3: 0.1, l12: 0.001, l13: 0.001 }
+deltaE = abs(sum(diff(E, v) * lab_equip_delta[v] for v in E_variables))
+
+def pdE(wrt): return '\\frac{\\partial E}{\\partial ' + f'{wrt}' + '}'
+latex_dE = "\\Delta E = " + " + ".join([pdE(wrt=v) + f'\\Delta {v}' for v in E_variables])
+latex_partials = '$$$$'.join([pdE(wrt=v) + ' = ' + latex(diff(E, v)) for v in E_variables])
+\end{sympycode}
+
+$$\sympy{latex_dE}$$
+
+$$\sympy{latex_partials}$$
+
+Приборная погрешность составляет:
+$$\Delta\varphi = 0.1, \Delta l = 0.001$$.
+
+\noindent\textbf{Расчеты для первого опыта:}\\
+
+\noindent
+\begin{sympycode}
+from measurements import comp_prereqs
+
+(pts, xymap0, xymap1, xymap2) = comp_prereqs()
+
+def render_xymap(xymap):
+  for (x1, y1, x2, y2) in pts:
+    var_subs = [(phi1, xymap[str(x1)][str(y1)]),
+                (phi2, xymap[str(x1)][str(y2)]),
+                (phi3, xymap[str(x2)][str(y1)]),
+                (l12, (y1 - y2) / 100),
+                (l13, (x2 - x1) / 100)]
+    e = E.subs(var_subs)
+    delta = deltaE.subs(var_subs)
+    print('$E_{x_1 = ' + f'{x1:.0f}' + ',\ x_2 = ' + f'{x2:.0f}' + ',\ y_1 = ' + f'{y1:.0f}' + ',\ y_2 = ' + f'{y2:.0f}' + '} = '
+          + latex(Float(e, 3)) + ',\ \\Delta E = ' + latex(Float(delta, 2)) + '$\\\\')
+
+render_xymap(xymap0)
+\end{sympycode}
+
+\noindent\textbf{Расчеты для второго опыта:}\\
+
+\noindent
+\begin{sympycode}
+render_xymap(xymap1)
+\end{sympycode}
+
+\noindent\textbf{Расчеты для третьего опыта:}\\
+
+\noindent
+\begin{sympycode}
+render_xymap(xymap2)
+\end{sympycode}
+
+\section*{Вывод}
+
+В ходе выполнения лабораторной работы нами были начерчены сечения
+эквипотенциальных поверхностей, с помощью которых мы построили силовые линии
+электростатического поля. Полученные картины позволили сделать нам вывод о том,
+что около фигур густота силовых линий, которая характеризует величину напряженности
+электростатического поля, увеличивается, из чего следует, что увеличивается и
+величина напряженности.
+
+На основе экспериментально полученных данных мы посчитали величину напряженности
+в нескольких точках; расчеты подтвердили наше заключение, полученное по графикам:
+величина напряженности увеличивается со сгущением силовых линий.
+
+На картине также видно, что силовые линии примыкают к фигурам строго перпендикулярно,
+что объясняется тем, что фигуры сами являются эквипотенциальными поверхностями.
+
+\end{document}
