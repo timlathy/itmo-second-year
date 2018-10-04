@@ -213,7 +213,7 @@ $$E_x=\sympy{Ex},\ E_y=\sympy{Ey},\ E=\sympy{E}$$
 
 \begin{sympycode}
 lab_equip_delta = { phi1: 0.1, phi2: 0.1, phi3: 0.1, l12: 0.001, l13: 0.001 }
-deltaE = abs(sum(diff(E, v) * lab_equip_delta[v] for v in E_variables))
+deltaE = sum(abs(diff(E, v) * lab_equip_delta[v]) for v in E_variables)
 
 def pdE(wrt): return '\\frac{\\partial E}{\\partial ' + f'{wrt}' + '}'
 latex_dE = "\\Delta E = " + " + ".join([pdE(wrt=v) + f'\\Delta {v}' for v in E_variables])
@@ -245,7 +245,7 @@ def render_xymap(xymap):
     e = E.subs(var_subs)
     delta = deltaE.subs(var_subs)
     print('$E_{x_1 = ' + f'{x1:.0f}' + ',\ x_2 = ' + f'{x2:.0f}' + ',\ y_1 = ' + f'{y1:.0f}' + ',\ y_2 = ' + f'{y2:.0f}' + '} = '
-          + latex(Float(e, 3)) + ',\ \\Delta E = ' + latex(Float(delta, 2)) + '$\\\\')
+          + latex(Float(e, 3)) + ',\ \\Delta E = ' + latex(Float(delta, 3)) + '$\\\\')
 
 render_xymap(xymap0)
 \end{sympycode}
