@@ -1,34 +1,11 @@
-\documentclass[12pt,a4paper]{report}
-\usepackage[a4paper, mag=1000, left=2.5cm, right=1cm, top=2cm, bottom=2cm, headsep=0.7cm, footskip=1cm]{geometry}
-% Fonts
-\usepackage{fontspec, unicode-math}
-\setmainfont[Ligatures=TeX]{CMU Serif}
-\setmonofont{CMU Typewriter Text}
-\usepackage[english, russian]{babel}
-% Indent first paragraph
-\usepackage{indentfirst}
-\setlength{\parskip}{5pt}
-% Code listings
-\usepackage[dvipsnames]{xcolor}
-\usepackage{listings}
+\documentclass[listings]{labreport}
+\departmentsubject{Кафедра вычислительной техники}{Вычислительная математика}
+\titleparts{Лабораторная работа №1}{Численные методы решения нелинейных уравнений}
+\students{Лабушев Тимофей Михайлович}
 
 \begin{document}
 
-\begin{titlepage}
-\begin{center}
-
-\textsc{ФГАОУ ВО «Санкт-Петербургский национальный исследовательский университет информационных технологий, механики и оптики»\\[4mm]
-Кафедра вычислительной техники}
-\vfill
-\textbf{ЛАБОРАТОРНАЯ РАБОТА №1\\[4mm]
-Вычислительная математика}\\[16mm]
-Лабушев Тимофей Михайлович
-\\[2mm]Группа P3202
-\vfill
-Санкт-Петербург\\[2mm]
-2018 г.
-\end{center}
-\end{titlepage}
+\maketitlepage
 
 \section*{Цель работы}
 

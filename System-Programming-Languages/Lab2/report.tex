@@ -1,40 +1,12 @@
-\documentclass[12pt,a4paper]{report}
-\usepackage[a4paper, mag=1000, left=2.5cm, right=1cm, top=2cm, bottom=2cm, headsep=0.7cm, footskip=1cm]{geometry}
-% Fonts
-\usepackage{fontspec, unicode-math}
-\setmainfont[Ligatures=TeX]{CMU Serif}
-\setmonofont{CMU Typewriter Text}
-\usepackage[english, russian]{babel}
-% Indent first paragraph
-\usepackage{indentfirst}
-\setlength{\parskip}{5pt}
-% Code listings
-\usepackage[dvipsnames]{xcolor}
-\usepackage{listings}
+\documentclass[en, listings]{labreport}
+\departmentsubject{Department of Computational Technologies}{System Programming Languages}
+\titleparts{Lab Work \#2}{Linked-list dictionary}
+\students{Timothy Labushev}
 
 \begin{document}
 
-\begin{titlepage}
-\begin{center}
-\textsc{
-  National Research University ITMO\\[4mm]
-  Department of Computational Technologies
-}
-\vfill
-\textbf{
-  Lab Report \#2\\[2mm]
-  System Programming Languages
-  \\[20mm]
-}
-Timothy Labushev\\[2mm]
-Group P3202
-\vfill
-Saint Petersburg\\[2mm]
-2018
-\end{center}
-\end{titlepage}
+\maketitlepage
 
-\newpage
 \section*{Summary}
 
 This report covers an assignment on implementing a \textit{dictionary} in
