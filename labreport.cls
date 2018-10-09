@@ -41,7 +41,7 @@
 \newcommand{\organization}[1]{\renewcommand{\titleorganization}{#1}}
 \newcommand{\departmentsubject}[2]{
   \renewcommand{\titledepartment}{#1}
-  \renewcommand{\titlesubject}{\uppercase{#1}}
+  \renewcommand{\titlesubject}{\uppercase{#2}}
 }
 \newcommand{\titleparts}[2]{
   \renewcommand{\titlemain}{#1}
