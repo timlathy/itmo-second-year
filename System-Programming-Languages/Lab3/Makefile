@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c89 -pedantic-errors -Wall -Werror
+CFLAGS=-std=c89 -g -pedantic-errors -Wall -Werror
 
 all: main
 

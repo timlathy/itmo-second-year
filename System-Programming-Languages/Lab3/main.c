@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include "prime.h"
 #include "dot.h"
 
@@ -9,13 +12,15 @@ void print_array(const char* prelude, const int a[], size_t len) {
   size_t i;
 
   printf(prelude);
-  for (i = 0; i < len - 1; i++) printf("%d ", a[i]);
+  for (i = 0; i < len; i++) printf("%d ", a[i]);
   printf("\n");
 }
 
 int main() {
   unsigned long primality_test_input;
   const size_t dot_vec_len = sizeof(a) / sizeof(int);
+  char input_buffer[64]; /* 64 chars ought to be enough for anybody */
+  char* input_end_char;
 
   print_array("a[]: ", a, dot_vec_len);
   print_array("b[]: ", b, dot_vec_len);
@@ -23,7 +28,13 @@ int main() {
 
   printf("\nEnter a number to check for primality: ");
 
-  if (!scanf("%lu", &primality_test_input)) {
+  if (!scanf("%63s", input_buffer)) {
+    fprintf(stderr, "Input is too long\n");
+    return 1;
+  }
+  errno = 0;
+  primality_test_input = strtoul((const char*) input_buffer, &input_end_char, 10);
+  if (errno == ERANGE || *input_end_char != '\0' || input_buffer[0] == '-') {
     fprintf(stderr, "Input is not a number\n");
     return 1;
   }
