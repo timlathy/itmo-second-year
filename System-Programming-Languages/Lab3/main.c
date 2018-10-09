@@ -14,22 +14,24 @@ void print_array(const char* prelude, const int a[], size_t len) {
 }
 
 int main() {
-  unsigned long d;
-  const size_t len = sizeof(a) / sizeof(int);
+  unsigned long primality_test_input;
+  const size_t dot_vec_len = sizeof(a) / sizeof(int);
 
-  print_array("a[]: ", a, len);
-  print_array("b[]: ", b, len);
-  printf("dot(a, b) = %ld\n", dot_product(a, b, len));
+  print_array("a[]: ", a, dot_vec_len);
+  print_array("b[]: ", b, dot_vec_len);
+  printf("dot(a, b) = %ld\n", dot_product(a, b, dot_vec_len));
 
   printf("\nEnter a number to check for primality: ");
 
-  if (!scanf("%lu", &d)) {
+  if (!scanf("%lu", &primality_test_input)) {
     fprintf(stderr, "Input is not a number\n");
     return 1;
   }
 
-  if (is_prime(d)) printf("%lu is a prime number\n", d);
-  else printf("%lu is not a prime number\n", d);
+  if (is_prime(primality_test_input))
+    printf("%lu is a prime number\n", primality_test_input);
+  else
+    printf("%lu is not a prime number\n", primality_test_input);
 
   return 0;
 }
