@@ -16,6 +16,7 @@ static char newton_solve_interval_log_docstring[] =
 
 static PyObject* nonlineq_bisect_solve_interval(PyObject *self, PyObject *args);
 static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args);
+static PyObject* nonlineq_newton_solve_interval_manual(PyObject *self, PyObject *args);
 static PyObject* nonlineq_bisect_solve_interval_log(PyObject *self, PyObject *args);
 static PyObject* nonlineq_newton_solve_interval_log(PyObject *self, PyObject *args);
 
@@ -23,6 +24,8 @@ static PyMethodDef module_methods[] = {
     {"bisect_solve_interval", nonlineq_bisect_solve_interval, METH_VARARGS,
       bisect_solve_interval_docstring},
     {"newton_solve_interval", nonlineq_newton_solve_interval, METH_VARARGS,
+      newton_solve_interval_docstring},
+    {"newton_solve_interval_manual", nonlineq_newton_solve_interval_manual, METH_VARARGS,
       newton_solve_interval_docstring},
     {"bisect_solve_interval_log", nonlineq_bisect_solve_interval_log, METH_VARARGS,
       bisect_solve_interval_log_docstring},
@@ -85,6 +88,8 @@ static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args) 
   if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &int_start, &int_end, &delta)) {
     return NULL;
   }
+  PySys_WriteStdout("  f(a): %f, f'(a): %f, f''(a): %f\n", cubic(a, b, c, d, int_start), cubic_deriv(a, b, c, int_start), cubic_deriv2(a, b, int_start));
+  PySys_WriteStdout("  f(b): %f, f'(b): %f, f''(b): %f\n", cubic(a, b, c, d, int_end), cubic_deriv(a, b, c, int_end), cubic_deriv2(a, b, int_end));
   if (cubic(a, b, c, d, int_start) * cubic_deriv2(a, b, int_start) <= 0
       && cubic(a, b, c, d, int_end) * cubic_deriv2(a, b, int_end) <= 0) {
     PyErr_SetString(PyExc_ValueError, "Cannot determine the initial guess");
@@ -92,6 +97,16 @@ static PyObject* nonlineq_newton_solve_interval(PyObject *self, PyObject *args) 
   }
 
   result res = find_root_newton(a, b, c, d, int_start, int_end, delta);
+
+  return Py_BuildValue("(ddi)", res.approx_root, res.approx_root_value, res.iter_num);
+}
+
+static PyObject* nonlineq_newton_solve_interval_manual(PyObject *self, PyObject *args) {
+  double a, b, c, d, approx, delta;
+  if (!PyArg_ParseTuple(args, "ddddddd", &a, &b, &c, &d, &approx, &delta)) {
+    return NULL;
+  }
+  result res = find_root_newton_manual(a, b, c, d, approx, delta);
 
   return Py_BuildValue("(ddi)", res.approx_root, res.approx_root_value, res.iter_num);
 }

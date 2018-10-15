@@ -1,6 +1,6 @@
 from IPython.display import display
 import ipywidgets as widgets
-from _nonlineq import bisect_solve_interval, newton_solve_interval
+from _nonlineq import bisect_solve_interval, newton_solve_interval, newton_solve_interval_manual
 
 def run():
   _ = widgets.interact(data_input, mode=widgets.RadioButtons(
@@ -59,17 +59,17 @@ def load_file(path):
 
 def find_root(int_start, int_end, delta):
   try:
+    print('Метод половинного деления:')
     (x, f_x, iter_num) = bisect_solve_interval(
       1, 2.28, -1.934, -3.907, int_start, int_end, delta)
-    print('Метод половинного деления:')
     print(f'  число итераций = {iter_num}, x = {x}, f(x) = {f_x}')
+    print('Метод Ньютона:')
     (x_n, f_x_n, iter_num_n) = newton_solve_interval(
       1, 2.28, -1.934, -3.907, int_start, int_end, delta)
-    print('Метод Ньютона:')
     print(f'  число итераций = {iter_num_n}, x = {x_n}, f(x) = {f_x_n}')
     save_result(f'{x} {f_x} {iter_num}\n{x_n} {f_x_n} {iter_num_n}\n')
   except ValueError as e:
     if str(e) == 'Expected an isolating interval':
-      print('Необходим интервал изоляции корня: функция должна принимать разные знаки на концах интервала')
+      print('  Необходим интервал изоляции корня: функция должна принимать разные знаки на концах интервала')
     if str(e) == 'Cannot determine the initial guess':
-      print('Невозможно определить начальное приближение: ни на одном из концов не совпадают знаки функции и второй производной')
+      print('  Невозможно определить начальное приближение: ни на одном из концов не совпадают знаки функции и второй производной')

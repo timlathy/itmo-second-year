@@ -1,14 +1,9 @@
 #include "primitives.h"
 
-result find_root_newton(double a, double b, double c, double d,
-                        double int_start, double int_end, double delta) {
+result find_root_newton_manual(double a, double b, double c, double d,
+                               double approx, double delta) {
   int iter_num = 0;
-  double x;
-
-  if (cubic(a, b, c, d, int_start) * cubic_deriv2(a, b, int_start) > 0)
-    x = int_start;
-  else
-    x = int_end;
+  double x = approx;
 
   while (1) {
     iter_num++;
@@ -21,6 +16,17 @@ result find_root_newton(double a, double b, double c, double d,
     if (fabs(step) <= delta || fabs(f_x) <= delta)
       return (result) { x, f_x, iter_num };
   }
+}
+
+result find_root_newton(double a, double b, double c, double d,
+                        double int_start, double int_end, double delta) {
+  double x;
+
+  if (cubic(a, b, c, d, int_start) * cubic_deriv2(a, b, int_start) > 0)
+    x = int_start;
+  else
+    x = int_end;
+  return find_root_newton_manual(a, b, c, d, x, delta);
 }
 
 PyObject* find_root_newton_log(double a, double b, double c, double d,
