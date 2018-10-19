@@ -1,19 +1,30 @@
 #include "llist.h"
 
 llist* list_create(int el) {
-	llist* lst = NULL;
-	list_add_front(&lst, el);
-	return lst;
+  llist* lst = (llist*) malloc(sizeof(llist));
+  lst->el = el;
+  lst->rest = NULL;
+  return lst;
 }
 
 void list_add_front(llist** lst, int el) {
-	llist* prev_head = *lst;
-	*lst = (llist*) malloc(sizeof(llist));
-	(*lst)->el = el;
-	(*lst)->rest = prev_head;
+  if (*lst == NULL) {
+    *lst = list_create(el);
+    return;
+  }
+
+  llist* prev_head = *lst;
+  *lst = (llist*) malloc(sizeof(llist));
+  (*lst)->el = el;
+  (*lst)->rest = prev_head;
 }
 
 void list_add_back(llist** lst, int el) {
+  if (*lst == NULL) {
+    *lst = list_create(el);
+    return;
+  }
+
   llist* last_node = list_last_node(*lst);
   last_node->rest = list_create(el);
 }

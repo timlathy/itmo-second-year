@@ -7,6 +7,13 @@ void list_foreach(llist* lst, void (*iter_fun) (int)) {
   }
 }
 
+void list_foreach_closure(llist* lst, void* locals, void (*iter_fun) (int, void*)) {
+  while (lst != NULL) {
+    iter_fun(lst->el, locals);
+    lst = lst->rest;
+  }
+}
+
 llist* list_map(llist* lst, int (*transform_fun) (int)) {
   llist* new_lst = NULL;
 
