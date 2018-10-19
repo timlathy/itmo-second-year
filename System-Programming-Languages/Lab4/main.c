@@ -1,11 +1,9 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <assert.h>
 
 #include "llist.h"
 #include "llist_iter.h"
-
-void write_element(int el, void* dstfile) { fprintf(dstfile, "%d\n", el); }
+#include "llist_io.h"
 
 void print_element_space(int el) { printf("%d ", el); }
 void print_element_newline(int el) { printf("%d\n", el); }
@@ -14,84 +12,25 @@ int plus(int a, int b) { return a + b; }
 int square(int a) { return a * a; }
 int cube(int a) { return a * a * a; }
 
-bool list_save(llist* lst, const char* filename) {
-  FILE* dst = fopen(filename, "w");
-  if (dst == NULL) return false;
-
-  list_foreach_closure(lst, dst, write_element);
-
-  return fclose(dst) == 0;
-}
-
-bool list_load(llist** lst, const char* filename) {
-  FILE* src = fopen(filename, "r");
-  if (src == NULL) return false;
-
-  int el;
-  while (fscanf(src, "%d", &el) != EOF) {
-    list_add_back(lst, el);
-  }
-
-  return fclose(src) == 0;
-}
-
-void list_read_stdin(llist** lst) {
-  int el;
-  while (scanf("%d", &el) != EOF)
-    list_add_front(lst, el);
-}
-
-bool list_serialize(llist* lst, const char* filename) {
-  FILE* dst = fopen(filename, "wb");
-  if (dst == NULL) return false;
-
-  int len = list_length(lst);
-  int* buf = (int*) malloc(len * sizeof(int));
-
-  for (int buf_iter = 0; lst != NULL; buf_iter++) {
-    buf[buf_iter] = lst->el;
-    lst = lst->rest;
-  }
-
-  return fwrite(buf, len, sizeof(int), dst) != 0 && fclose(dst) == 0;
-}
-
-bool list_deserialize(llist** lst, const char* filename) {
-  FILE* src = fopen(filename, "rb");
-  if (src == NULL) return false;
-
-  fseek(src, 0, SEEK_END);
-  long buf_size = ftell(src);
-  rewind(src);
-
-  if (buf_size % sizeof(int) != 0) return false;
-
-  int* buf = (int*) malloc(buf_size);
-  fread(buf, buf_size, sizeof(int), src);
-  
-  for (int i = 0; i < buf_size / sizeof(int); i++)
-    list_add_front(lst, buf[i]);
-
-  return true;
-}
-
 int main() {
   char opt = 0;
-  while (opt != 'L' && opt != 'I') {
+  while (opt != 't' && opt != 'b' && opt != 'i') {
     printf("Do you wish to load the list from a file or enter it interactively?\n");
-    printf("[L]oad, [I]nteractive: ");
+    printf("Load [t]ext, Load [b]inary, [i]nteractive: ");
     scanf("%c", &opt);
     printf("\n");
   }
 
   llist* lst = NULL;
-  if (opt == 'L') {
+  if (opt == 't' || opt == 'b') {
     char filename[64]; // 64 chars is ought to be enough for anybody
     printf("Enter filename to open: ");
     scanf("%63s", filename);
     printf("\n");
-    if (!list_load(&lst, filename)) {
-      fprintf(stderr, "Unable to open the file\n");
+
+    if (!( (opt == 't' && list_load(&lst, filename))
+        || (opt == 'b' && list_deserialize(&lst, filename)))) {
+      fprintf(stderr, "Unable to read the specified file\n");
       return 1;
     }
   }
@@ -103,6 +42,7 @@ int main() {
   list_foreach(lst, print_element_space); printf("\n");
 
   list_foreach(lst, print_element_newline);
+  printf("Number of elements: %d\n", list_length(lst));
   printf("Sum of elements: %d\n", list_foldl(lst, 0, plus));
 
   llist* squares_lst = list_map(lst, square);
@@ -114,15 +54,18 @@ int main() {
   list_foreach(cubes_lst, print_element_space); printf("\n");
 
   printf("Do you wish to save the list to a file?\n");
-  printf("[Yy]es, [Nn]o: ");
-  scanf("%c", &opt);
+  printf("To [t]ext, to [b]inary, [n]o: ");
+  scanf(" %c", &opt);
   
-  if (opt == 'Y' || opt == 'y') {
+  if (opt == 't' || opt == 'b') {
     char filename[64]; // 64 chars is ought to be enough for anybody
-    printf("Enter filename to save to: ");
+    printf("Enter the target filename: ");
     scanf("%63s", filename);
     printf("\n");
-    return list_save(lst, filename);
+    if (opt == 't') {
+      return list_save(lst, filename);
+    }
+    return list_serialize(lst, filename);
   }
 
   list_free(&lst);

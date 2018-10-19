@@ -53,10 +53,9 @@ int list_get(llist* lst, int index) {
 }
 
 int list_length(llist* lst) {
-  int length = 0;
-  llist* curr_node = lst;
-  while ((curr_node = curr_node->rest) != NULL) length++;
-  return length;
+  int len;
+  for (len = 0; lst != NULL; len++) lst = lst->rest;
+  return len;
 }
 
 void list_free(llist** lstptr) {
