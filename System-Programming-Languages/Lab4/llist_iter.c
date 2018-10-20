@@ -25,6 +25,13 @@ llist* list_map(llist* lst, int (*transform_fun) (int)) {
   return new_lst;
 }
 
+void list_map_mut(llist* lst, int (*transform_fun) (int)) {
+  while (lst != NULL) {
+    lst->el = transform_fun(lst->el);
+    lst = lst->rest;
+  }
+}
+
 int list_foldl(llist* lst, int acc, int (*acc_fun) (int, int)) {
   while (lst != NULL) {
     acc = acc_fun(lst->el, acc);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
 #include <linux/limits.h>
 
 #include "llist.h"
@@ -11,6 +12,8 @@ void print_element_space(int el) { printf("%d ", el); }
 void print_element_newline(int el) { printf("%d\n", el); }
 
 int plus(int a, int b) { return a + b; }
+int min(int a, int b) { return a < b ? a : b; }
+int max(int a, int b) { return a > b ? a : b; }
 int square(int a) { return a * a; }
 int cube(int a) { return a * a * a; }
 
@@ -56,6 +59,11 @@ int main() {
   list_foreach(lst, print_element_newline);
   printf("Number of elements: %d\n", list_length(lst));
   printf("Sum of elements: %d\n", list_foldl(lst, 0, plus));
+  printf("Smallest element: %d\n", list_foldl(lst, INT_MAX, min));
+  printf("Largest element: %d\n", list_foldl(lst, INT_MIN, max));
+  puts("Absolute values:");
+  list_map_mut(lst, abs);
+  list_foreach(lst, print_element_space); printf("\n");
 
   llist* squares_lst = list_map(lst, square);
   puts("Squares:");
