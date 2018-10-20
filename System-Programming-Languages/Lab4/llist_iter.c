@@ -40,3 +40,13 @@ int list_foldl(llist* lst, int acc, int (*acc_fun) (int, int)) {
 
   return acc;
 }
+
+llist* list_iterate(int init, int iter_count, int (*iter_fun) (int)) {
+  llist* lst = list_create(init);
+
+  int acc = init;
+  for (int i = 0; i < iter_count; acc = iter_fun(acc), i++)
+    list_add_back(&lst, acc);
+  
+  return lst;
+}

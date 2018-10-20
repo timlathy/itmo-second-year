@@ -13,4 +13,6 @@ void list_map_mut(llist* lst, int (*transform_fun) (int));
 
 int list_foldl(llist* lst, int acc, int (*acc_fun) (int, int));
 
+llist* list_iterate(int init, int iter_count, int (*iter_fun) (int));
+
 #endif

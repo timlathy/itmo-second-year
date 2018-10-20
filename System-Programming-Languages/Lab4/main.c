@@ -16,6 +16,7 @@ int min(int a, int b) { return a < b ? a : b; }
 int max(int a, int b) { return a > b ? a : b; }
 int square(int a) { return a * a; }
 int cube(int a) { return a * a * a; }
+int mul2(int a) { return a * 2; }
 
 char* read_filename(const char* prompt) {
   char* filename = (char*) malloc(PATH_MAX + 1);
@@ -52,7 +53,6 @@ int main() {
     list_read_stdin(&lst);
   }
 
-  
   puts("Row view:");
   list_foreach(lst, print_element_space); printf("\n");
   puts("Column view:");
@@ -72,6 +72,9 @@ int main() {
   llist* cubes_lst = list_map(lst, cube);
   puts("Cubes:");
   list_foreach(cubes_lst, print_element_space); printf("\n");
+
+  puts("Powers of two:");
+  list_foreach(list_iterate(1, 10, mul2), print_element_space); printf("\n");
 
   opt = 0;
   puts("Do you wish to save the list to a file?");
