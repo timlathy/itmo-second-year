@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+#include <linux/limits.h>
 
 #include "llist.h"
 #include "llist_iter.h"
@@ -12,64 +14,79 @@ int plus(int a, int b) { return a + b; }
 int square(int a) { return a * a; }
 int cube(int a) { return a * a * a; }
 
+char* read_filename(const char* prompt) {
+  char* filename = (char*) malloc(PATH_MAX + 1);
+  fputs(prompt, stdout);
+  scanf("\n");
+  fgets(filename, PATH_MAX + 1, stdin);
+  fputs("\n", stdout);
+  filename[strcspn(filename, "\n")] = 0; // remove the trailing newline preserved by fgets
+  return filename;
+}
+
 int main() {
   char opt = 0;
   while (opt != 't' && opt != 'b' && opt != 'i') {
-    printf("Do you wish to load the list from a file or enter it interactively?\n");
-    printf("Load [t]ext, Load [b]inary, [i]nteractive: ");
+    puts("Do you wish to load the list from a file or enter it interactively?");
+    fputs("Load [t]ext, load [b]inary, [i]nteractive: ", stdout);
     scanf("%c", &opt);
-    printf("\n");
   }
 
   llist* lst = NULL;
   if (opt == 't' || opt == 'b') {
-    char filename[64]; // 64 chars is ought to be enough for anybody
-    printf("Enter filename to open: ");
-    scanf("%63s", filename);
-    printf("\n");
+    char* filename = read_filename("Enter path to the source file: ");
 
     if (!( (opt == 't' && list_load(&lst, filename))
         || (opt == 'b' && list_deserialize(&lst, filename)))) {
       fprintf(stderr, "Unable to read the specified file\n");
       return 1;
     }
+
+    free(filename);
   }
   else {
-    printf("Enter list elements delimited by space; finish the input with ^D\n");
+    puts("Enter list elements delimited by space; finish the input with ^D");
     list_read_stdin(&lst);
   }
 
+  
+  puts("Row view:");
   list_foreach(lst, print_element_space); printf("\n");
-
+  puts("Column view:");
   list_foreach(lst, print_element_newline);
   printf("Number of elements: %d\n", list_length(lst));
   printf("Sum of elements: %d\n", list_foldl(lst, 0, plus));
 
   llist* squares_lst = list_map(lst, square);
-  printf("Squares: \n");
+  puts("Squares:");
   list_foreach(squares_lst, print_element_space); printf("\n");
 
   llist* cubes_lst = list_map(lst, cube);
-  printf("Cubes: \n");
+  puts("Cubes:");
   list_foreach(cubes_lst, print_element_space); printf("\n");
 
-  printf("Do you wish to save the list to a file?\n");
-  printf("To [t]ext, to [b]inary, [n]o: ");
+  opt = 0;
+  puts("Do you wish to save the list to a file?");
+  fputs("To [t]ext, to [b]inary, [n]o: ", stdout);
   scanf(" %c", &opt);
   
   if (opt == 't' || opt == 'b') {
-    char filename[64]; // 64 chars is ought to be enough for anybody
-    printf("Enter the target filename: ");
-    scanf("%63s", filename);
-    printf("\n");
-    if (opt == 't') {
-      return list_save(lst, filename);
-    }
-    return list_serialize(lst, filename);
+    char* filename = read_filename("Enter destination path: ");
+
+    if (opt == 't') list_save(lst, filename);
+    else list_serialize(lst, filename);
+    
+    free(filename);
   }
 
   list_free(&lst);
   assert(lst == NULL);
+
+  list_free(&squares_lst);
+  assert(squares_lst == NULL);
+
+  list_free(&cubes_lst);
+  assert(cubes_lst == NULL);
 
   return 0;
 }
