@@ -1,20 +1,20 @@
 #include "llist_iter.h"
 
-void list_foreach(llist* lst, void (*iter_fun) (int)) {
+void list_foreach(const llist* lst, void (*iter_fun) (int)) {
   while (lst != NULL) {
     iter_fun(lst->el);
     lst = lst->rest;
   }
 }
 
-void list_foreach_closure(llist* lst, void* locals, void (*iter_fun) (int, void*)) {
+void list_foreach_ctx(const llist* lst, void* context, void (*iter_fun) (int, void*)) {
   while (lst != NULL) {
-    iter_fun(lst->el, locals);
+    iter_fun(lst->el, context);
     lst = lst->rest;
   }
 }
 
-llist* list_map(llist* lst, int (*transform_fun) (int)) {
+llist* list_map(const llist* lst, int (*transform_fun) (int)) {
   llist* new_lst = NULL;
 
   while (lst != NULL) {
@@ -32,7 +32,7 @@ void list_map_mut(llist* lst, int (*transform_fun) (int)) {
   }
 }
 
-int list_foldl(llist* lst, int acc, int (*acc_fun) (int, int)) {
+int list_foldl(const llist* lst, int acc, int (*acc_fun) (int, int)) {
   while (lst != NULL) {
     acc = acc_fun(lst->el, acc);
     lst = lst->rest;

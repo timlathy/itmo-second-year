@@ -4,11 +4,11 @@ void write_element(int el, void* dstfile) {
   fprintf(dstfile, "%d\n", el);
 }
 
-bool list_save(llist* lst, const char* filename) {
+bool list_save(const llist* lst, const char* filename) {
   FILE* dst = fopen(filename, "w");
   if (dst == NULL) return false;
 
-  list_foreach_closure(lst, dst, write_element);
+  list_foreach_ctx(lst, dst, write_element);
 
   return fclose(dst) == 0;
 }
@@ -31,7 +31,7 @@ void list_read_stdin(llist** lst) {
     list_add_front(lst, el);
 }
 
-bool list_serialize(llist* lst, const char* filename) {
+bool list_serialize(const llist* lst, const char* filename) {
   FILE* dst = fopen(filename, "wb");
   if (dst == NULL) return false;
 
