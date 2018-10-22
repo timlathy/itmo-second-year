@@ -67,3 +67,12 @@ void list_free_preserve_ptr(llist* lst) {
   if (lst->rest != NULL) list_free_preserve_ptr(lst->rest);
   free(lst);
 }
+
+bool list_compare(llist* a, llist* b) {
+  while (a != NULL && b != NULL) {
+    if (a->el != b->el) return false;
+    a = a->rest;
+    b = b->rest;
+  }
+  return a == NULL && b == NULL;
+}

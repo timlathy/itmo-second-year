@@ -77,7 +77,7 @@ int main() {
   list_foreach(list_iterate(1, 10, mul2), print_element_space); printf("\n");
 
   opt = 0;
-  puts("Do you wish to save the list to a file?");
+  puts("\nDo you wish to save the list to a file?");
   fputs("To [t]ext, to [b]inary, [n]o: ", stdout);
   scanf(" %c", &opt);
   
@@ -86,8 +86,28 @@ int main() {
 
     if (opt == 't') list_save(lst, filename);
     else list_serialize(lst, filename);
-    
+
+    puts("File saved, reading it back to verify that it was written correctly...");
+
+    llist* lst_serialized = NULL;
+
+    if (!( (opt == 't' && list_load(&lst_serialized, filename))
+        || (opt == 'b' && list_deserialize(&lst_serialized, filename)))) {
+      fprintf(stderr, "Unable to read the file\n");
+      return 1;
+    }
+
+    if (!list_compare(lst, lst_serialized)) {
+      fprintf(stderr, "Serialization error\n");
+      return 1;
+    }
+
+    puts("OK");
+
     free(filename);
+
+    list_free(&lst_serialized);
+    assert(lst_serialized == NULL);
   }
 
   list_free(&lst);

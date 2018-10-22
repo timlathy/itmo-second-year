@@ -60,7 +60,7 @@ bool list_deserialize(llist** lst, const char* filename) {
   fread(buf, buf_size, sizeof(int), src);
   
   for (int i = 0; i < buf_size / sizeof(int); i++)
-    list_add_front(lst, buf[i]);
+    list_add_back(lst, buf[i]);
 
   return true;
 }

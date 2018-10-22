@@ -2,6 +2,7 @@
 #define LLIST_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct llist llist;
 
@@ -27,5 +28,7 @@ int list_length(llist* lst);
 void list_free_preserve_ptr(llist* lst);
 
 void list_free(llist** lstptr);
+
+bool list_compare(llist* a, llist* b);
 
 #endif

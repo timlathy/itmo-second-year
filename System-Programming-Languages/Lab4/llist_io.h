@@ -2,7 +2,6 @@
 #define LLIST_IO_H
 
 #include <stdio.h>
-#include <stdbool.h>
 #include "llist.h"
 #include "llist_iter.h"
 
