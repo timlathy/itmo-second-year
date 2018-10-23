@@ -27,8 +27,13 @@ bool list_load(llist** lst, const char* filename) {
 
 void list_read_stdin(llist** lst) {
   int el;
-  while (scanf("%d", &el) != EOF)
-    list_add_front(lst, el);
+  int scanf_res;
+  while ((scanf_res = scanf("%d", &el)) != EOF) {
+    if (scanf_res != 1) // unable to read the character
+      printf("Unexpected input: %c\n", getchar());
+    else
+      list_add_front(lst, el);
+  }
 }
 
 bool list_serialize(const llist* lst, const char* filename) {
