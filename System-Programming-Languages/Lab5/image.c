@@ -9,7 +9,7 @@ image_t image_rotate_copy_180(const image_t image) {
       data_rot[(h * image.width) + w] =
         image.data[((image.height - 1 - h) * image.width) + w];
 
-  return (image_t) { image.width, image.height, data_rot };
+  return (image_t) { .width = image.width, .height = image.height, .data = data_rot };
 }
 
 image_t image_rotate_copy_90cw(const image_t image) {
@@ -20,5 +20,5 @@ image_t image_rotate_copy_90cw(const image_t image) {
       data_rot[(w * image.height) + h] =
         image.data[(h * image.width) + w];
 
-  return (image_t) { image.height, image.width, data_rot };
+  return (image_t) { .width = image.height, .height = image.width, .data = data_rot };
 }

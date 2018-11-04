@@ -21,8 +21,9 @@ typedef struct __attribute__((packed)) {
   uint32_t file_size;
   uint32_t reserved0;
   uint32_t data_offset;
+} bmp_file_header_t;
 
-  /* DIB */
+typedef struct __attribute__((packed)) {
   uint32_t header_size;
   uint32_t width;
   uint32_t height;
@@ -34,10 +35,15 @@ typedef struct __attribute__((packed)) {
   uint32_t w_pixels_per_meter;
   uint32_t num_colors;
   uint32_t num_important_colors;
+} bmp_bitmap_header_t;
+
+typedef struct __attribute__((packed)) {
+  bmp_file_header_t file;
+  bmp_bitmap_header_t bitmap;
 } bmp_header_t;
 
-bmp_read_status_t image_read_bmp(FILE* source_bmp, image_t* image, bmp_header_t* header);
+bmp_read_status_t image_read_bmp(FILE* source_bmp, image_t* image);
 
-bmp_write_status_t image_write_bmp(FILE* dest_bmp, const image_t image, const bmp_header_t header);
+bmp_write_status_t image_write_bmp(FILE* dest_bmp, const image_t image);
 
 #endif
