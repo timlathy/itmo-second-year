@@ -12,8 +12,6 @@ typedef struct {
   pixel_t* data;
 } image_t;
 
-image_t image_rotate_copy_180(const image_t image);
-
 image_t image_rotate_copy_90cw(const image_t image);
 
 #endif
