@@ -36,7 +36,7 @@ bmp_read_status_t image_read_bmp(FILE* source_bmp, image_t* image) {
     return READ_INVALID_SIGNATURE;
 
   if (header.bitmap.bits_per_pixel != 24)
-    return READ_INVALID_BITS;
+    return READ_UNSUPPORTED_BITS_PER_PIXEL;
 
   uint8_t* raw_data = (uint8_t*) malloc(header.bitmap.data_size);
 

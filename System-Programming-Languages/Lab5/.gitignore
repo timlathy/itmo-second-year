@@ -1,2 +1,3 @@
-lain90.bmp
-main
+lab5
+*.bmp
+!lain.bmp

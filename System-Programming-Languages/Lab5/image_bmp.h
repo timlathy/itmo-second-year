@@ -7,7 +7,7 @@
 typedef enum {
   READ_OK = 0,
   READ_INVALID_SIGNATURE,
-  READ_INVALID_BITS,
+  READ_UNSUPPORTED_BITS_PER_PIXEL,
   READ_ERROR
 } bmp_read_status_t;
 

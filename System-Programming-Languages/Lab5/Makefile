@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=c99 -g -pedantic-errors -Wall -Werror
 
-all: main
+all: lab5
 
-main: *.c
-	$(CC) $(CFLAGS) -o main *.c
+lab5: *.c
+	$(CC) $(CFLAGS) -o lab5 *.c
