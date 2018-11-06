@@ -1,3 +1,7 @@
 lab5
 *.bmp
 !lain.bmp
+
+*.aux
+*.log
+*.pdf
