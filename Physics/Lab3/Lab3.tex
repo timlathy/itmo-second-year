@@ -353,15 +353,33 @@ power_table = [[i, gross_power(i), net_power(i), power_loss(i), efficiency(i)] f
 \subsection*{Зависимости $P(I)$, $P_{net}(I)$, $P_{loss}(I)$}
 
 \begin{pycode}
-i_mean, gross_power, net_power, power_loss, efficiency = np.array(power_table).transpose()
+from numpy.polynomial.polynomial import polyfit
 
-plt.figure(figsize=(12,8))
+i_mean, gross_power, net_power, power_loss, efficiency = np.array(power_table).transpose()
+ploss_c, ploss_b, ploss_a = polyfit(currents_mean, power_loss, 2)
+pnet_c, pnet_b, pnet_a = polyfit(currents_mean, net_power, 2)
+p_b, p_a = polyfit(currents_mean, gross_power, 1)
+i_approx_range = np.arange(0, 0.03, step=0.0001)
+loss_power_approx = [ploss_a*i**2 + ploss_b*i + ploss_c for i in i_approx_range]
+net_power_approx = [pnet_a*i**2 + pnet_b*i + pnet_c for i in i_approx_range]
+gross_power_approx = [p_a*i + p_b for i in i_approx_range]
+
+def p_net_at_p_0():
+  inet_c, inet_b, inet_a = polyfit(net_power, currents_mean, 2)
+  return np.round(inet_c, 4)
+
+plt.figure(figsize=(10,8))
 plt.grid()
 plt.xlabel('$I$, А', fontsize=14)
 plt.ylabel('$P$, Вт', fontsize=14)
 plt.plot(i_mean, gross_power, label='$P$')
 plt.plot(i_mean, power_loss, label='$P_{loss}$')
 plt.plot(i_mean, net_power, label='$P_{net}$')
+plt.plot(i_approx_range, gross_power_approx, linestyle='--', color='C0', label='$P_{approx}$')
+plt.plot(i_approx_range, loss_power_approx, linestyle='--', color='C1', label='$P_{loss_{approx}}$')
+plt.plot(i_approx_range, net_power_approx, linestyle='--', color='C2', label='$P_{net_{approx}}$')
+plt.xlim(left=0, right=0.03)
+plt.ylim(bottom=0, top=0.3)
 plt.legend()
 plt.savefig('power_plot.pdf', bbox_inches='tight')
 \end{pycode}
@@ -389,8 +407,7 @@ $I_m = \py{np.round(max_p_i, 4)}$ А, $P_{1max} = \py{np.round(max_p, 4)}$ Вт
 $I_{m_t} = \py{np.round(emf / (2*internal_resistance), 4)}$ А,
 $P_{1max_t} = \py{np.round(emf**2 / (4*internal_resistance), 4)}$ Вт
 
-На пересечении прямой $P_1(I)$ с осью $I$ ($P_1 = 0$) мы получаем $I_{sc} =
-\py{interp1d(net_power, currents_mean, kind = 'quadratic', fill_value = 'extrapolate')(0)}$ А.
+На пересечении прямой $P_{net}(I)$ с осью $I$ ($P_{net} = 0$) мы получаем $I_{sc} = \py{p_net_at_p_0()} $ А.
 
 \subsection*{Зависимость $\eta(I)$}
 
