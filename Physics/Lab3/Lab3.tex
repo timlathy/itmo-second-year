@@ -285,6 +285,12 @@ data = np.insert(data, 0, rs, axis=1).tolist()
 
 \begin{pycode}
 import matplotlib.pyplot as plt
+from numpy.polynomial.polynomial import polyfit
+
+currents_mean, voltages_mean = i_u_mean
+u_b, u_a = polyfit(currents_mean, voltages_mean, 1)
+i_approx_range = np.arange(0, 0.022, step=0.0001)
+u_approx = [u_a*i + u_b for i in i_approx_range]
 
 currents1, voltages1 = i_u_100ohms_to_1500
 currents2, voltages2 = i_u_1500ohms_to_100
@@ -293,8 +299,9 @@ plt.figure(figsize=(12,8))
 plt.grid()
 plt.xlabel('$I$, А', fontsize=14)
 plt.ylabel('$U$, В', fontsize=14)
-plt.plot(currents1, voltages1, label='От 100Ом к 1500Ом')
-plt.plot(currents2, voltages2, label='От 1500Ом к 100Ом')
+plt.plot(currents1, voltages1, label='От 100Ом к 1500Ом', marker='o')
+plt.plot(currents2, voltages2, label='От 1500Ом к 100Ом', marker='o')
+plt.plot(i_approx_range, u_approx, label='Аппроксимация', linestyle='--')
 plt.legend()
 plt.savefig('i_u_plot.pdf', bbox_inches='tight')
 \end{pycode}
@@ -312,7 +319,6 @@ plt.savefig('i_u_plot.pdf', bbox_inches='tight')
 \begin{pycode}
 from scipy.interpolate import interp1d
 
-currents_mean, voltages_mean = i_u_mean
 at_i_0 = interp1d(currents_mean, voltages_mean, fill_value = 'extrapolate')(0)
 at_u_0 = interp1d(voltages_mean, currents_mean, fill_value = 'extrapolate')(0)
 
@@ -328,7 +334,7 @@ $\varepsilon = \py{emf}$ В, $I_{sc} = \py{isc}$ А.
 Воспользовавшись формулой (15), рассчитаем внутренее сопротивление источника:
 
 \noindent
-$r = \frac{\varepsilon}{I_{sc}} = \py{internal_resistance}$ Ом
+$r = \frac{\varepsilon}{I_{sc}} = \py{internal_resistance}$ Ом.
 
 \subsection*{Определение мощности и КПД}  
 
@@ -353,8 +359,6 @@ power_table = [[i, gross_power(i), net_power(i), power_loss(i), efficiency(i)] f
 \subsection*{Зависимости $P(I)$, $P_{net}(I)$, $P_{loss}(I)$}
 
 \begin{pycode}
-from numpy.polynomial.polynomial import polyfit
-
 i_mean, gross_power, net_power, power_loss, efficiency = np.array(power_table).transpose()
 ploss_c, ploss_b, ploss_a = polyfit(currents_mean, power_loss, 2)
 pnet_c, pnet_b, pnet_a = polyfit(currents_mean, net_power, 2)
@@ -432,7 +436,26 @@ key=lambda z: abs(0.5 - z[1]))
 В ближайшей к $\eta = 0.5$ точке $I_m = \py{np.round(closest_eta_i, 4)}$ А,
 что соответствует значению, полученному на предыдущем этапе работы.
 
-
 \section*{Вывод}
+
+В ходе выполнения лабораторной работы нами была экспериментально отслежена
+зависимость напряжения от силы тока путем изменения значения сопротивления.
+График зависимости $U(I)$ был экстраполирован до точек пересечения с осями
+координат, что позволило нам на основании снятых измерений определить
+ЭДС источника $\varepsilon$ и ток короткого замыкания $I_{sc}$, а также
+внутренее сопротивление источника $r$.
+
+Рассматривая зависимость мощности от силы тока, мы пришли к выводу, что,
+хотя график полной мощности $P = P_{net} + P_{loss}$ линеен, графики полезной
+мощности $P_{net}$ и мощности потерь на внутреннем сопротивлении $P_{loss}$
+являются параболами. Теоретически, значению $I_m$, на котором достигается
+максимальная полезная мощность $P_{net_{max}}$ и при котором сопротивление
+$R$ внешней цепи равно внутреннему сопротивлению источника $r$, соответствует
+точка пересечения $P_{net}$ и $P_{loss}$. На построенном нами графике
+точка несколько смещена, что объясняется погрешностью измерений.
+
+Зависимость КПД $\eta$ от силы тока линейна. При максимальном значении
+полезной мощности $P_{net}$ КПД равен 50\%, а при стремлении силы тока к нулю
+$\eta$ приближается к 1, что было подтверждено нами экспериментально.
 
 \end{document}
