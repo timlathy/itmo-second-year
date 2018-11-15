@@ -1,0 +1,389 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[a4paper, includeheadfoot, mag=1000,
+            left=2cm, right=1.5cm, top=1.5cm, bottom=1.5cm,
+            headsep=0.8cm, footskip=0.8cm]{geometry}
+% Fonts
+\usepackage{fontspec, unicode-math}
+\setmainfont[Ligatures=TeX]{CMU Serif}
+\setmonofont{CMU Typewriter Text}
+\usepackage[english, russian]{babel}
+% Indent first paragraph
+\usepackage{indentfirst}
+\setlength{\parskip}{5pt}
+% Diagrams
+\usepackage{graphicx}
+\usepackage{floatrow}
+% Python
+\usepackage{pythontex}
+
+\begin{document}
+\begin{titlepage}
+
+\noindent\textsc{ФГАОУ ВО «Санкт-Петербургский национальный исследовательский
+университет информационных технологий, механики и оптики»\\[4mm]
+Кафедра физики}
+\vfill
+\noindent\textbf{РАБОЧИЙ ПРОТОКОЛ И ОТЧЕТ\\[2mm]
+ПО ЛАБОРАТОРНОЙ РАБОТЕ №3\\[4mm]
+Исследование характеристик источника тока}\\[16mm]
+Преподаватель Ефремова Екатерина Александровна\\[2mm]
+Студенты Лабушев Тимофей Михайлович, Нестеров Дали Константинович\\[2mm]
+Группа P3202
+\vfill
+\noindent Санкт-Петербург\\[2mm]
+2018 г.
+
+\end{titlepage}
+
+\section*{Введение}
+
+\subsection*{Цель работы}
+
+Исследование зависимости полной мощности, полезной мощности, мощности
+потерь, падения напряжения во внешней цепи и КПД источника от силы тока в
+цепи
+
+\subsection*{Задачи, решаемые при выполнении работы}
+
+\begin{itemize}
+\item Определение зависимости напряжения от силы тока
+\item Определение ЭДС, внутреннего сопротивления источника и силы тока короткого замыкания
+\item Определение мощностей и КПД, поиск сопротивления, при котором наблюдается наибольшая полезная мощност
+\end{itemize}
+
+\subsection*{Объект исследования}
+
+Источник тока
+
+\subsection*{Метод экспериментального исследования}
+
+Прямые и косвенные измерения
+
+\subsection*{Требуемое оборудование и материалы}
+
+\begin{enumerate}
+\item Генератор напряжений ГН1
+\item Амперметр-вольтметр АВ1
+\item Стенд с объектами исследования С3-ЭМ01
+\item Проводники Ш4/Ш1,6-60 см (4 шт.), Ш4/Ш4-60 см (1 шт)
+\end{enumerate}
+
+\subsection*{Рабочие формулы и исходные формулы}
+
+Если к источнику тока (см. рис. 1), обладающему внутренним
+сопротивлением $r$, подключить внешнее сопротивление $R$, то напряжение на
+зажимах источника $U$ согласно закону Ома для неоднородного участка цепи
+можно представить в виде:
+\begin{equation}
+U = \varepsilon - Ir
+\end{equation}
+
+где $\varepsilon$ — электродвижущая сила источника (ЭДС); $I$ – сила тока,
+текущего через источник.
+
+\begin{figure}[H]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{Рабочая схема}}
+{\includegraphics[width=0.25\textwidth]{lab3.png}}
+\end{figure}
+
+График зависимости напряжения $U$ от силы тока $I$ представляет собой прямую
+(кривая \textit{а} на рис. 2). Пересечение с осью напряжений ($I = 0$)
+происходит в точке $U = \varepsilon$, а точка пересечения графика с осью токов
+($U = 0$) дает значение силы тока короткого замыкания источника $I_{sc}$.
+Отметим, что последнее утверждение является идеализацией. В реальных источниках
+ЭДС при токах близких к $I_{sc}$ линейный характер зависимости
+напряжения $U$ от силы тока $I$ нарушается (кривая \textit{б} на рис. 2).
+Это вызвано у одних источников уменьшением ЭДС при больших токах, у других
+увеличением внутреннего сопротивления, у третьих одновременным влиянием двух этих причин.
+
+\begin{figure}[H]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{График зависимости напряжения на источнике от силы тока в цепи}}
+{\includegraphics[width=0.25\textwidth]{lab3_2.png}}
+\end{figure}
+
+\noindent Умножив обе части уравнения (1) на силу тока, протекающего по цепи, получим:
+\begin{equation}
+I\varepsilon = I^2R + I^2r
+\end{equation}
+Что можно представить в виде:
+\begin{equation}
+P = P_1 + P_2
+\end{equation}
+
+Здесь $P = I\varepsilon$ – полная мощность, развиваемая источником; $P_1 = I_2R = IU$ –
+полезная мощность, т.е. мощность, развиваемая источником во внешней цепи
+(на сопротивлении $R$); $P_2 = I_2r$ – потери мощности внутри источника (на
+сопротивлении $r$).
+
+Исследуем зависимость этих мощностей от силы тока. Графически (см.
+рис. 3) зависимость полной мощности от силы тока P = I ε изображается
+прямой линией, проходящей через начало координат. Полезная мощность из (2)
+может быть представлена в виде:
+\begin{equation}
+P_1 = I\varepsilon − I^2r
+\end{equation}
+
+\begin{figure}[H]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{Зависимости полной мощности ($P$), полезной мощности ($P_1$) и мощности потерь ($P_2$)
+от силы тока в замкнутой цепи}}
+{\includegraphics[width=0.35\textwidth]{lab3_3.png}}
+\end{figure}
+
+Эта зависимость изображается параболой. Найдем значение тока $I_m$, при
+котором полезная мощность максимальна. Для этого, взяв первую производную
+от полезной мощности по силе тока, приравняем её к нулю:
+\begin{equation}
+\frac{dP_1}{dI} = \varepsilon - 2Ir = 0
+\end{equation}
+
+Откуда получим:
+\begin{equation}
+I_m = \frac{\varepsilon}{2r}
+\end{equation}
+
+Вторая производная $\frac{d^2P_1}{dI^2} = -2r$ отрицательна, так как при значении силы
+тока $I_m$ полезная мощность имеет максимум $P_{1max}$. Подставляя выражение (6) в
+уравнение (4) находим максимальное значение полезной мощности:
+\begin{equation}
+P_{1max} = \frac{\varepsilon^2}{4r}
+\end{equation}
+
+Заметим, что из уравнения (1) с учетом $U = IR$ следует, что
+\begin{equation}
+I = \frac{\varepsilon}{R + r}
+\end{equation}
+
+Сравнивая это выражение с выражением (6), видим, что при $I = I_m$ выполняется
+равенство $R = r$. Следовательно, полезная мощность $P_1$ максимальна тогда,
+когда сопротивление нагрузки равно внутреннему сопротивлению источника
+питания $R = r$.
+
+Потери мощности в источнике зависят от силы тока по формуле
+\begin{equation}
+P_2 = I^2r
+\end{equation}
+
+Графически эта зависимость (см. рис. 3) – парабола с вершиной в начале
+координат и ветвями направленными вверх. При физически осмысленных
+значениях $r > 0$, мы видим правую ветвь этой параболы.
+
+Коэффициентом полезного действия (КПД) $\eta$ источника тока называется
+величина, равная отношению полезной мощности к полной мощности,
+затрачиваемой источником:
+\begin{equation}
+\eta = \frac{P_1}{P} = \frac{IU}{I\varepsilon} = \frac{U}{\varepsilon}
+\end{equation}
+
+Представив выражение для $U$ из (1) в (10), находим зависимость КПД от силы тока:
+\begin{equation}
+\eta = \frac{\varepsilon - Ir}{\varepsilon} = 1 - I\frac{r}{\varepsilon}
+\end{equation}
+
+Из уравнения (11) видно, что зависимость КПД от силы тока в цепи
+изображается прямой линией (см. рис. 4), убывающей от значения $\eta = 1$ , при
+токе $I = 0$, до значения $\eta = 0$, при силе тока
+\begin{equation}
+I_k = \frac{\varepsilon}{r}
+\end{equation}
+
+\begin{figure}[H]
+\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
+{\caption{Зависимость КПД источника от силы тока в замкнутой цепи}}
+{\includegraphics[width=0.3\textwidth]{lab3_4.png}}
+\end{figure}
+
+Это значение тока – уже упомянутый выше ток короткого замыкания.
+Действительно, при $R = 0$ («короткое замыкание» источника, при этом $U = 0$) из
+(1) видно, что сила тока достигает наибольшего значения, даваемого формулой
+(12). Полезная мощность $P_1$ при этом убывает до нуля (см. рис. 3), так как при
+сопротивлении $R = 0$ получаем $P_1 = I_{sc}U = I_{sc}^2R = 0$.
+
+Полная мощность источника $P = I_{sc}\varepsilon$ и потери мощности
+$P_2 = I_{sc}^2r$ при токе короткого замыкания $I = I_{sc}$ достигают
+наибольшего значения и равны друг другу:
+
+\begin{equation}
+P_{max} = P_{2max} = \frac{\varepsilon^2}{r}
+\end{equation}
+
+Найдем значение КПД и соотношения между мощностями $P$, $P_1$, $P_2$ при
+максимуме полезной мощности $P_1 = P_{1max}$. Полезная мощность максимальна
+при условии $R = r$, КПД (10) при этом равен
+
+\begin{equation}
+\eta = \frac{U}{\varepsilon} = \frac{IR}{I(R+r)} = 0.5 = 50\%
+\end{equation}
+
+Отсюда, при токе $I = I_m$, полезная максимальная мощность равна
+$P_{1max} = 0.5 P$ и с учетом (3) полезная мощность равна мощности потерь:
+$P_{1max} = P_2$.
+
+Из графиков зависимостей мощностей и КПД от силы тока (рис. 3, 4) видим,
+что условия получения наибольшей полезной мощности $P_{1max}$ и наибольшего
+КПД несовместимы. Когда $P_1$ достигает наибольшего значения, сила тока равна
+$I_m$ и $\eta = 0.5$ или $50\%$. Когда же КПД близок к единице, полезная
+мощность $P_1$ мала по сравнению с максимальной мощностью $P_{1max}$,
+которую мог бы развить данный источник.
+
+Прямолинейный характер зависимости напряжения $U$ от силы тока $I$ (см
+формулу (1) и рис. 2), позволяет следующим, так называемым, методом
+«короткого замыкания и холостого хода», определить параметры источника.
+Изменяя в некоторых пределах сопротивление $R$, измеряют соответствующие
+значения силы тока и напряжения. По измеренным значениям строят
+прямолинейную зависимость $U$ от $I$. Продолжив ее до пересечения с осью
+напряжений, находят напряжение «холостого хода» $U_х = \varepsilon$,
+а продолжив до пересечения с осью токов, находят ток короткого замыкания
+$I_{sc}$. Внутреннее сопротивление источника ЭДС определяют после
+этого по формуле
+
+\begin{equation}
+r = \frac{\varepsilon}{I_{sc}}
+\end{equation}
+
+\section*{Результаты прямых измерений}
+
+\begin{pycode}
+import numpy as np
+from tabulate import tabulate
+import re
+
+i_u_100ohms_to_1500 = np.array([
+  [ma / 1000 for ma in [22.3, 19.1, 16.2, 14.4, 13.0, 11.7, 10.8, 10.0, 9.4, 8.7, 8.1, 7.7, 7.3, 6.9, 6.7]],
+  [0.1, 2.12, 4.06, 5.3, 6.19, 7.06, 7.66, 8.24, 8.6, 9.11, 9.49, 9.77, 9.99, 10.3, 10.39]
+])
+i_u_1500ohms_to_100 = np.array([
+  [ma / 1000 for ma in [22.3, 18.5, 16.3, 14.5, 13.3, 11.9, 10.7, 10.0, 9.3, 8.7, 8.1, 7.8, 7.3, 6.9, 6.7]],
+  [0.01, 2.54, 3.98, 5.17, 5.98, 6.97, 7.76, 8.2, 8.65, 9.11, 9.45, 9.7, 10.02, 10.31, 10.39]
+])
+i_u_mean = (i_u_100ohms_to_1500 + i_u_1500ohms_to_100) / 2
+
+def latex_table(data, headers):
+  s = tabulate(data, headers=headers, tablefmt='latex')
+  # https://github.com/gregbanks/python-tabulate/issues/5
+  s = re.sub(r'(\^\{\})', "^", s); s = re.sub(r'\\([\$\_\{\}\^])', r'\1', s); s = re.sub(r'(\\textbackslash{})', r'\\', s)
+  return s
+
+data = np.array([i_u_100ohms_to_1500, i_u_100ohms_to_1500, i_u_mean])
+data = data.reshape(-1, data.shape[-1]).transpose()
+data = np.insert(data, 0, np.arange(100, 1600, 100), axis=1).tolist()
+\end{pycode}
+
+\begin{table}[H]
+\py{latex_table(data, ['$R$, Ом', '$I_1$, А', '$U_1$, В', '$I_2$, А', '$U_2$, В', '$I_{mean}$, А', '$U_{mean}$, В'])}
+\end{table} 
+
+Показания $I_1$ и $U_1$ были сняты при изменении сопротивления $R$ от 100 Ом
+до 1500 Ом, $I_2$, $U_2$ — от 1500 Ом до 100 Ом.
+
+\section*{Ход работы}
+
+\subsection*{График зависимости $U(I)$}
+
+\begin{pycode}
+import matplotlib.pyplot as plt
+
+currents1, voltages1 = i_u_100ohms_to_1500
+currents2, voltages2 = i_u_1500ohms_to_100
+
+plt.figure(figsize=(12,8))
+plt.grid()
+plt.xlabel('$I$, А', fontsize=14)
+plt.ylabel('$U$, В', fontsize=14)
+plt.plot(currents1, voltages1, label='От 100Ом к 1500Ом')
+plt.plot(currents2, voltages2, label='От 1500Ом к 100Ом')
+plt.legend()
+plt.savefig('i_u_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{i_u_plot.pdf}
+\end{figure}
+
+\subsection*{Определение внутреннего сопротивления}
+
+Экстраполировав зависимость $U(I)$ до пересечения с осями координат,
+найдем значения ЭДС $\varepsilon$ (при $I = 0$) и силы тока
+короткого замыкания $I_{sc}$ (при $U = 0$) источника:
+
+\begin{pycode}
+from scipy.interpolate import interp1d
+
+currents_mean, voltages_mean = i_u_mean
+at_i_0 = interp1d(currents_mean, voltages_mean, fill_value = 'extrapolate')(0)
+at_u_0 = interp1d(voltages_mean, currents_mean, fill_value = 'extrapolate')(0)
+
+emf = np.round(at_i_0, 3)
+isc = np.round(at_u_0, 3)
+
+internal_resistance = np.round(emf / isc, 2)
+\end{pycode}
+
+\noindent
+$\varepsilon = \py{emf}$ В, $I_{sc} = \py{isc}$ А.
+
+Воспользовавшись формулой (15), рассчитаем внутренее сопротивление источника:
+
+\noindent
+$r = \frac{\varepsilon}{I_{sc}} = \py{internal_resistance}$ Ом
+
+\subsection*{Определение мощности и КПД}  
+
+Вычислим полную мощность $P$, развиваемую источником, полезную мощность $P_{net}$,
+развиваемую источником во внешней цепи, потери мощности $P_{loss}$ внутри
+источника и коэффициент полезного действия $\eta$ источника
+по формулам (2), (4), (9) и (11) соответственно:
+
+\begin{pycode}
+gross_power = lambda i: np.round(i * emf, 4)
+power_loss = lambda i: np.round(i**2 * internal_resistance, 4)
+net_power = lambda i: np.round(gross_power(i) - power_loss(i), 4)
+efficiency = lambda i: np.round(1.0 - i*(internal_resistance / emf), 3)
+
+power_table = [[i, gross_power(i), net_power(i), power_loss(i), efficiency(i)] for i in i_u_mean[0]]
+\end{pycode}
+
+\begin{table}[H]
+\py{latex_table(power_table, ['$I_{mean}$, А', '$P$, Вт', '$P_{net}$, Вт', '$P_{loss}$, Вт', "$\eta$"])}
+\end{table} 
+
+\subsection*{График зависимости $P(I)$, $P_{net}(I)$, $P_{loss}(I)$}
+
+\begin{pycode}
+i_mean, gross_power, net_power, power_loss, efficiency = np.array(power_table).transpose()
+
+plt.figure(figsize=(12,8))
+plt.grid()
+plt.xlabel('$I$, А', fontsize=14)
+plt.ylabel('$P$, Вт', fontsize=14)
+plt.plot(i_mean, gross_power, label='$P$')
+plt.plot(i_mean, power_loss, label='$P_{loss}$')
+plt.plot(i_mean, net_power, label='$P_{net}$')
+plt.legend()
+plt.savefig('power_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{power_plot.pdf}
+\end{figure}
+
+\subsection*{График зависимости $\eta(I)$}
+
+\begin{pycode}
+plt.figure(figsize=(12,8))
+plt.grid()
+plt.xlabel('$I$, А', fontsize=14)
+plt.ylabel('$\eta$', fontsize=14)
+plt.plot(i_mean, efficiency)
+plt.savefig('efficiency_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{efficiency_plot.pdf}
+\end{figure}
+
+\section*{Вывод}
+
+\end{document}
