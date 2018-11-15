@@ -250,6 +250,7 @@ import numpy as np
 from tabulate import tabulate
 import re
 
+rs = np.arange(100, 1600, 100)
 i_u_100ohms_to_1500 = np.array([
   [ma / 1000 for ma in [22.3, 19.1, 16.2, 14.4, 13.0, 11.7, 10.8, 10.0, 9.4, 8.7, 8.1, 7.7, 7.3, 6.9, 6.7]],
   [0.1, 2.12, 4.06, 5.3, 6.19, 7.06, 7.66, 8.24, 8.6, 9.11, 9.49, 9.77, 9.99, 10.3, 10.39]
@@ -268,7 +269,7 @@ def latex_table(data, headers):
 
 data = np.array([i_u_100ohms_to_1500, i_u_100ohms_to_1500, i_u_mean])
 data = data.reshape(-1, data.shape[-1]).transpose()
-data = np.insert(data, 0, np.arange(100, 1600, 100), axis=1).tolist()
+data = np.insert(data, 0, rs, axis=1).tolist()
 \end{pycode}
 
 \begin{table}[H]
@@ -280,7 +281,7 @@ data = np.insert(data, 0, np.arange(100, 1600, 100), axis=1).tolist()
 
 \section*{Ход работы}
 
-\subsection*{График зависимости $U(I)$}
+\subsection*{Зависимость $U(I)$}
 
 \begin{pycode}
 import matplotlib.pyplot as plt
@@ -337,10 +338,10 @@ $r = \frac{\varepsilon}{I_{sc}} = \py{internal_resistance}$ Ом
 по формулам (2), (4), (9) и (11) соответственно:
 
 \begin{pycode}
-gross_power = lambda i: np.round(i * emf, 4)
-power_loss = lambda i: np.round(i**2 * internal_resistance, 4)
-net_power = lambda i: np.round(gross_power(i) - power_loss(i), 4)
-efficiency = lambda i: np.round(1.0 - i*(internal_resistance / emf), 3)
+gross_power = lambda i: np.round(net_power(i) + power_loss(i), 4)
+power_loss = lambda i: max(0, np.round(i**2 * internal_resistance, 4))
+net_power = lambda i: max(0, np.round(i * emf - power_loss(i), 4))
+efficiency = lambda i: max(0, np.round(1.0 - i*(internal_resistance / emf), 3))
 
 power_table = [[i, gross_power(i), net_power(i), power_loss(i), efficiency(i)] for i in i_u_mean[0]]
 \end{pycode}
@@ -349,7 +350,7 @@ power_table = [[i, gross_power(i), net_power(i), power_loss(i), efficiency(i)] f
 \py{latex_table(power_table, ['$I_{mean}$, А', '$P$, Вт', '$P_{net}$, Вт', '$P_{loss}$, Вт', "$\eta$"])}
 \end{table} 
 
-\subsection*{График зависимости $P(I)$, $P_{net}(I)$, $P_{loss}(I)$}
+\subsection*{Зависимости $P(I)$, $P_{net}(I)$, $P_{loss}(I)$}
 
 \begin{pycode}
 i_mean, gross_power, net_power, power_loss, efficiency = np.array(power_table).transpose()
@@ -368,8 +369,30 @@ plt.savefig('power_plot.pdf', bbox_inches='tight')
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{power_plot.pdf}
 \end{figure}
+\newpage
 
-\subsection*{График зависимости $\eta(I)$}
+Найдем точку $I_m$, в которой $P_1$ принимает максимальное значение:
+
+\begin{pycode}
+max_p_i, max_p, max_p_r = max(zip(currents_mean, net_power, rs),
+key=lambda z: z[1])
+\end{pycode}
+
+\noindent
+$I_m = \py{np.round(max_p_i, 4)}$ А, $P_{1max} = \py{np.round(max_p, 4)}$ Вт
+
+Точке $I_m = \py{np.round(max_p_i, 4)}$ А соотвествует $R = \py{max_p_r}$ Ом.
+
+Теоретические значения, рассчитанные по формулам (6) и (7) соответственно:
+
+\noindent
+$I_{m_t} = \py{np.round(emf / (2*internal_resistance), 4)}$ А,
+$P_{1max_t} = \py{np.round(emf**2 / (4*internal_resistance), 4)}$ Вт
+
+На пересечении прямой $P_1(I)$ с осью $I$ ($P_1 = 0$) мы получаем $I_{sc} =
+\py{interp1d(net_power, currents_mean, kind = 'quadratic', fill_value = 'extrapolate')(0)}$ А.
+
+\subsection*{Зависимость $\eta(I)$}
 
 \begin{pycode}
 plt.figure(figsize=(12,8))
@@ -383,6 +406,15 @@ plt.savefig('efficiency_plot.pdf', bbox_inches='tight')
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{efficiency_plot.pdf}
 \end{figure}
+
+\begin{pycode}
+closest_eta_i, closest_eta = min(zip(currents_mean, efficiency),
+key=lambda z: abs(0.5 - z[1]))
+\end{pycode}
+
+В ближайшей к $\eta = 0.5$ точке $I_m = \py{np.round(closest_eta_i, 4)}$ А,
+что соответствует значению, полученному на предыдущем этапе работы.
+
 
 \section*{Вывод}
 
