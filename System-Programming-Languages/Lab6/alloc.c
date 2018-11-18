@@ -43,16 +43,26 @@ void reserve_new_chunk(chunk_head_t* last_chnk) {
   last_chnk->next = new_chnk_head;
 }
 
+void merge_succeeding_free_chunks(chunk_head_t* chnk) {
+  while (chnk->next != NULL && chnk->next->is_free) {
+    chnk->capacity += chnk->next->capacity + sizeof(chunk_head_t);
+    chnk->next = chnk->next->next;
+  }
+}
+
 void* heap_alloc(size_t requested_size) {
   if (requested_size % CHUNK_ALIGN != 0)
     requested_size += CHUNK_ALIGN - (requested_size % CHUNK_ALIGN);
 
   chunk_head_t* chnk = (chunk_head_t*) heap_start;
-  while (!(chnk->is_free && chnk->capacity >= requested_size)) {
-    if (chnk->next == NULL)
-      reserve_new_chunk(chnk);
-    else
-      chnk = chnk->next;
+  while (true) {
+    if (chnk->is_free) {
+      if (chnk->capacity >= requested_size) break;
+      merge_succeeding_free_chunks(chnk);
+      if (chnk->capacity >= requested_size) break;
+    }
+    if (chnk->next == NULL) reserve_new_chunk(chnk);
+    else chnk = chnk->next;
   }
   chnk->is_free = false;
 
@@ -74,6 +84,7 @@ void* heap_alloc(size_t requested_size) {
 }
 
 void heap_free(void* ptr) {
-  chunk_head_t *ptr_chunk = (chunk_head_t*) ((char*) ptr - sizeof(chunk_head_t));
-  ptr_chunk->is_free = true;
+  chunk_head_t* ptr_chnk = (chunk_head_t*) ((char*) ptr - sizeof(chunk_head_t));
+  ptr_chnk->is_free = true;
+  merge_succeeding_free_chunks(ptr_chnk);
 }
