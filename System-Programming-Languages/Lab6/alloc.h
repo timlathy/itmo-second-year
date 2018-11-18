@@ -73,7 +73,7 @@ struct chunk_head_t {
 /* Before any allocations can happen, we need to have at least one free chunk:
  * `heap_init` requests `CHUNK_INIT_SIZE` bytes from the OS and places a
  * `chunk_head_t` at the beginning of the area, with `is_free` set to `true`. */
-void heap_init();
+void* heap_init();
 
 /* The data returned by `alloc` must be aligned on an eight-byte boundary
  * (the address should be divisible by 8) for performance reasons. */
@@ -83,6 +83,6 @@ void heap_init();
 
 void* heap_alloc(size_t requested_size);
 
-void heap_free(void** heap_ptr_ptr);
+void heap_free(void* ptr);
 
 #endif

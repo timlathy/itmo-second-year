@@ -12,12 +12,15 @@
 
 char* heap_start;
 
-void heap_init() {
+void* heap_init() {
   heap_start = mmap(HEAP_START, CHUNK_INIT_SIZE, PROT_READ | PROT_WRITE,
     MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
+
   ((chunk_head_t*) heap_start)->next = NULL;
   ((chunk_head_t*) heap_start)->capacity = CHUNK_INIT_SIZE - sizeof(chunk_head_t);
   ((chunk_head_t*) heap_start)->is_free = true;
+
+  return (void*) heap_start;
 }
 
 void reserve_new_chunk(chunk_head_t* last_chnk) {
@@ -68,4 +71,9 @@ void* heap_alloc(size_t requested_size) {
   succ_chnk->is_free = true;
   chnk->next = (chunk_head_t*) chnk_end;
   return (void*) (chnk + 1);
+}
+
+void heap_free(void* ptr) {
+  chunk_head_t *ptr_chunk = (chunk_head_t*) ((char*) ptr - sizeof(chunk_head_t));
+  ptr_chunk->is_free = true;
 }
