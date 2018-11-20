@@ -23,24 +23,30 @@ void* heap_init() {
   return (void*) heap_start;
 }
 
-void reserve_new_chunk(chunk_head_t* last_chnk) {
+bool reserve_new_chunk(chunk_head_t* last_chnk, size_t requested_size) {
+  size_t chunk_size = requested_size + requested_size % sysconf(_SC_PAGESIZE);
+
   void* heap_end = (char*) last_chnk + sizeof(chunk_head_t) + last_chnk->capacity;
 
-  void* new_area = mmap(heap_end, CHUNK_INIT_SIZE, PROT_READ | PROT_WRITE,
+  void* new_area = mmap(heap_end, chunk_size, PROT_READ | PROT_WRITE,
     MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
   if (new_area != MAP_FAILED && last_chnk->is_free) {
-    last_chnk->capacity += CHUNK_INIT_SIZE;
-    return;
+    last_chnk->capacity += chunk_size;
+    return true;
   }
   else if (new_area == MAP_FAILED) {
-    new_area = mmap(NULL, CHUNK_INIT_SIZE, PROT_READ | PROT_WRITE,
+    new_area = mmap(NULL, chunk_size, PROT_READ | PROT_WRITE,
       MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    if (new_area == MAP_FAILED)
+      return false;
   }
   chunk_head_t* new_chnk_head = (chunk_head_t*) new_area;
   new_chnk_head->next = NULL;
-  new_chnk_head->capacity = CHUNK_INIT_SIZE - sizeof(chunk_head_t);
+  new_chnk_head->capacity = chunk_size - sizeof(chunk_head_t);
   new_chnk_head->is_free = true;
   last_chnk->next = new_chnk_head;
+
+  return true;
 }
 
 void merge_succeeding_free_chunks(chunk_head_t* chnk) {
@@ -60,7 +66,9 @@ void* heap_alloc(size_t requested_size) {
       merge_succeeding_free_chunks(chnk);
       if (chnk->capacity >= requested_size) break;
     }
-    if (chnk->next == NULL) reserve_new_chunk(chnk);
+    if (chnk->next == NULL) {
+      if (!reserve_new_chunk(chnk, requested_size)) return NULL;
+    }
     else chnk = chnk->next;
   }
   chnk->is_free = false;

@@ -36,7 +36,7 @@
  *
  * Our heap begins at an arbitrary location chosen after the _program break_
  * (the end of static code and data): */
-#define HEAP_START ((void*) 0x0404000)
+#define HEAP_START ((void*) 0x04040000)
 
 /* The allocator sees heap as a collection of variable-sized chunks, which
  * are either _allocated_ or _free_:
