@@ -61,7 +61,7 @@ typedef struct chunk_head_t chunk_head_t;
 struct chunk_head_t {
   chunk_head_t* next;
   size_t capacity;
-  bool is_free; // TODO: use the least significant byte of `next` as a flag
+  bool is_free;
 };
 
 /* When there are no free chunks available that can fit the requested size,

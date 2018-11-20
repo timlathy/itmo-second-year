@@ -44,7 +44,7 @@ void reserve_new_chunk(chunk_head_t* last_chnk) {
 }
 
 void merge_succeeding_free_chunks(chunk_head_t* chnk) {
-  while (chnk->next != NULL && chnk->next->is_free) {
+  while ((char*) chnk->next == (char*) (chnk + 1) + chnk->capacity && chnk->next->is_free) {
     chnk->capacity += chnk->next->capacity + sizeof(chunk_head_t);
     chnk->next = chnk->next->next;
   }
@@ -57,7 +57,6 @@ void* heap_alloc(size_t requested_size) {
   chunk_head_t* chnk = (chunk_head_t*) heap_start;
   while (true) {
     if (chnk->is_free) {
-      if (chnk->capacity >= requested_size) break;
       merge_succeeding_free_chunks(chnk);
       if (chnk->capacity >= requested_size) break;
     }
