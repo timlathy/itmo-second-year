@@ -1,1 +1,4 @@
 lab6
+*.aux
+*.log
+*.pdf
