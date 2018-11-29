@@ -267,7 +267,7 @@ def latex_table(data, headers):
   s = re.sub(r'(\^\{\})', "^", s); s = re.sub(r'\\([\$\_\{\}\^])', r'\1', s); s = re.sub(r'(\\textbackslash{})', r'\\', s)
   return s
 
-data = np.array([i_u_100ohms_to_1500, i_u_100ohms_to_1500, i_u_mean])
+data = np.array([i_u_100ohms_to_1500, i_u_1500ohms_to_100, i_u_mean])
 data = data.reshape(-1, data.shape[-1]).transpose()
 data = np.insert(data, 0, rs, axis=1).tolist()
 \end{pycode}
@@ -317,13 +317,11 @@ plt.savefig('i_u_plot.pdf', bbox_inches='tight')
 короткого замыкания $I_{sc}$ (при $U = 0$) источника:
 
 \begin{pycode}
-from scipy.interpolate import interp1d
+u_b, u_a = polyfit(currents_mean, voltages_mean, 1)
+i_b, i_a = polyfit(voltages_mean, currents_mean, 1)
 
-at_i_0 = interp1d(currents_mean, voltages_mean, fill_value = 'extrapolate')(0)
-at_u_0 = interp1d(voltages_mean, currents_mean, fill_value = 'extrapolate')(0)
-
-emf = np.round(at_i_0, 3)
-isc = np.round(at_u_0, 3)
+emf = np.round(u_b, 3)
+isc = np.round(i_b, 3)
 
 internal_resistance = np.round(emf / isc, 2)
 \end{pycode}
