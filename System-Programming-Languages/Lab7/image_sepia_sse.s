@@ -84,23 +84,23 @@ image_sepia_sse_loop_4_pixels:
   movzx eax, byte [pixel_ptr + 3*1 + 2] ; eax = (uint32_t) pixel[1].r 
   pinsrd xmm_ch1, eax, 3                ; xmm_ch1[3] = pixel[1].r
   ; xmm_ch1[0] = xmm_ch1[0], xmm_ch1[1] = xmm_ch1[0], xmm_ch1[2] = xmm_ch1[0], xmm_ch1[3] = xmm_ch1[3]
-  shufps xmm_ch1, xmm_ch1, 0b00000011
+  shufps xmm_ch1, xmm_ch1, 0b11000000
   ; xmm_ch1 is now [pixel[0].r, pixel[0].r, pixel[0].r, pixel[1].r]
 
   movzx eax, byte [pixel_ptr + 3*0 + 1] ; same for the green channel (pixel.g)
   movd xmm_ch2, eax
   movzx eax, byte [pixel_ptr + 3*1 + 1]
   pinsrd xmm_ch2, eax, 3
-  shufps xmm_ch2, xmm_ch2, 0b00000011
+  shufps xmm_ch2, xmm_ch2, 0b11000000
   ; xmm_ch2 is now [pixel[0].g, pixel[0].g, pixel[0].g, pixel[1].g]
 
   movzx eax, byte [pixel_ptr + 3*0 + 0] ; same for the blue channel (pixel.b)
   movd xmm_ch3, eax
   movzx eax, byte [pixel_ptr + 3*0 + 3]
   pinsrd xmm_ch3, eax, 3
-  shufps xmm_ch3, xmm_ch3, 0b00000011
+  shufps xmm_ch3, xmm_ch3, 0b11000000
   ; xmm_ch3 is now [pixel[0].b, pixel[0].b, pixel[0].b, pixel[1].b]
-  
+
   xorps xmm_rgbr, xmm_rgbr
   vfmadd231ps xmm_rgbr, xmm_ch1, xmm_c1_rgbr ; xmm_rgbr[i] += xmm_ch1[i] * xmm_c1_rgbr[i]
   vfmadd231ps xmm_rgbr, xmm_ch2, xmm_c2_rgbr ; xmm_rgbr[i] += xmm_ch1[i] * xmm_c1_rgbr[i]
@@ -111,23 +111,23 @@ image_sepia_sse_loop_4_pixels:
   movzx eax, byte [pixel_ptr + 3*1 + 2]
   movd xmm_ch1, eax
   movzx eax, byte [pixel_ptr + 3*2 + 2]
-  pinsrd xmm_ch1, eax, 2
+  pinsrd xmm_ch1, eax, 3
   ; xmm_ch1[0] = xmm_ch1[0], xmm_ch1[1] = xmm_ch1[0], xmm_ch1[2] = xmm_ch1[2], xmm_ch1[3] = xmm_ch1[2]
-  shufps xmm_ch1, xmm_ch1, 0b00001010
+  shufps xmm_ch1, xmm_ch1, 0b11110000
   ; xmm_ch1 is now [pixel[1].r, pixel[1].r, pixel[2].r, pixel[2].r]
 
   movzx eax, byte [pixel_ptr + 3*1 + 1]
   movd xmm_ch2, eax
   movzx eax, byte [pixel_ptr + 3*2 + 1]
-  pinsrd xmm_ch2, eax, 2
-  shufps xmm_ch2, xmm_ch2, 0b00001010
+  pinsrd xmm_ch2, eax, 3
+  shufps xmm_ch2, xmm_ch2, 0b11110000
   ; xmm_ch2 is now [pixel[1].g, pixel[1].g, pixel[2].g, pixel[2].g]
 
   movzx eax, byte [pixel_ptr + 3*1 + 0]
   movd xmm_ch3, eax
   movzx eax, byte [pixel_ptr + 3*2 + 0]
-  pinsrd xmm_ch3, eax, 2
-  shufps xmm_ch3, xmm_ch3, 0b00001010
+  pinsrd xmm_ch3, eax, 3
+  shufps xmm_ch3, xmm_ch3, 0b11110000
   ; xmm_ch3 is now [pixel[1].b, pixel[1].b, pixel[2].b, pixel[2].b]
   
   xorps xmm_gbrg, xmm_gbrg
@@ -135,28 +135,28 @@ image_sepia_sse_loop_4_pixels:
   vfmadd231ps xmm_gbrg, xmm_ch2, xmm_c2_gbrg
   vfmadd231ps xmm_gbrg, xmm_ch3, xmm_c3_gbrg
 
-  ; === xmm_grgb
+  ; === xmm_brgb
 
   movzx eax, byte [pixel_ptr + 3*2 + 2]
   movd xmm_ch1, eax
   movzx eax, byte [pixel_ptr + 3*3 + 2]
   pinsrd xmm_ch1, eax, 1
   ; xmm_ch1[0] = xmm_ch1[0], xmm_ch1[1] = xmm_ch1[1], xmm_ch1[2] = xmm_ch1[1], xmm_ch1[3] = xmm_ch1[1]
-  shufps xmm_ch1, xmm_ch1, 0b00010101
+  shufps xmm_ch1, xmm_ch1, 0b01010100
   ; xmm_ch1 is now [pixel[2].r, pixel[3].r, pixel[3].r, pixel[3].r]
 
   movzx eax, byte [pixel_ptr + 3*2 + 1]
   movd xmm_ch2, eax
   movzx eax, byte [pixel_ptr + 3*3 + 1]
-  pinsrd xmm_ch2, eax, 2
-  shufps xmm_ch2, xmm_ch2, 0b00001010
+  pinsrd xmm_ch2, eax, 1
+  shufps xmm_ch2, xmm_ch2, 0b01010100
   ; xmm_ch2 is now [pixel[2].g, pixel[3].g, pixel[3].g, pixel[3].g]
 
   movzx eax, byte [pixel_ptr + 3*2 + 0]
   movd xmm_ch3, eax
   movzx eax, byte [pixel_ptr + 3*3 + 0]
-  pinsrd xmm_ch3, eax, 2
-  shufps xmm_ch3, xmm_ch3, 0b00001010
+  pinsrd xmm_ch3, eax, 1
+  shufps xmm_ch3, xmm_ch3, 0b01010100
   ; xmm_ch3 is now [pixel[2].b, pixel[3].b, pixel[3].b, pixel[3].b]
   
   xorps xmm_brgb, xmm_brgb
