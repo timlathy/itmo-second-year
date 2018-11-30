@@ -1,0 +1,7 @@
+lab7
+*.bmp
+!arisu.bmp
+
+*.aux
+*.log
+*.pdf

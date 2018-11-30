@@ -1,0 +1,1 @@
+../Lab5/image_bmp.c
