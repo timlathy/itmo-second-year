@@ -8,7 +8,7 @@
 #define PANIC(...) do { fprintf(stderr, __VA_ARGS__); return 1; } while (0)
 
 int main(int argc, char** argv) {
-  if (argc != 3) PANIC("Usage: lab5 source.bmp destination.bmp\n");
+  if (argc != 3) PANIC("Usage: lab7 source.bmp destination.bmp\n");
 
   const char* input_path = argv[1];
   const char* output_path = argv[2];
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
       break;
   }
 
-  sepia_c_inplace(&img);
+  sepia_sse_inplace(&img);
 
   FILE* output_file = fopen(output_path, "wb");
   if (output_file == NULL) PANIC("Unable to open %s for writing\n", output_path);
