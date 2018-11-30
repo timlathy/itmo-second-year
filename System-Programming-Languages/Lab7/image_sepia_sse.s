@@ -7,25 +7,25 @@ align 16
 maximum: dd 255, 255, 255, 255
 
 align 16
-c1_rgbr: dd 0.393, 0.769, 0.189, 0.393
+c1_rgbr: dd 0.393, 0.349, 0.272, 0.393
 align 16
-c2_rgbr: dd 0.349, 0.686, 0.168, 0.349
+c2_rgbr: dd 0.769, 0.686, 0.543, 0.769
 align 16
-c3_rgbr: dd 0.272, 0.543, 0.131, 0.272
+c3_rgbr: dd 0.189, 0.168, 0.131, 0.189
 
 align 16
-c1_gbrg: dd 0.769, 0.189, 0.393, 0.769
+c1_gbrg: dd 0.349, 0.272, 0.393, 0.349
 align 16
-c2_gbrg: dd 0.686, 0.168, 0.349, 0.686
+c2_gbrg: dd 0.686, 0.543, 0.769, 0.686
 align 16
-c3_gbrg: dd 0.543, 0.131, 0.272, 0.543
+c3_gbrg: dd 0.168, 0.131, 0.189, 0.168
 
 align 16
-c1_brgb: dd 0.189, 0.393, 0.769, 0.189
+c1_brgb: dd 0.272, 0.393, 0.349, 0.272
 align 16
-c2_brgb: dd 0.168, 0.349, 0.686, 0.168
+c2_brgb: dd 0.543, 0.769, 0.686, 0.543
 align 16
-c3_brgb: dd 0.131, 0.272, 0.543, 0.131
+c3_brgb: dd 0.131, 0.189, 0.168, 0.131
 
 ; rdi = pointer to the pixel array
 ; rsi = number of pixels (must be divisible by 4)
@@ -86,6 +86,7 @@ image_sepia_sse_loop_4_pixels:
   ; xmm_ch1[0] = xmm_ch1[0], xmm_ch1[1] = xmm_ch1[0], xmm_ch1[2] = xmm_ch1[0], xmm_ch1[3] = xmm_ch1[3]
   shufps xmm_ch1, xmm_ch1, 0b11000000
   ; xmm_ch1 is now [pixel[0].r, pixel[0].r, pixel[0].r, pixel[1].r]
+  cvtdq2ps xmm_ch1, xmm_ch1             ; convert to floats
 
   movzx eax, byte [pixel_ptr + 3*0 + 1] ; same for the green channel (pixel.g)
   movd xmm_ch2, eax
@@ -93,6 +94,7 @@ image_sepia_sse_loop_4_pixels:
   pinsrd xmm_ch2, eax, 3
   shufps xmm_ch2, xmm_ch2, 0b11000000
   ; xmm_ch2 is now [pixel[0].g, pixel[0].g, pixel[0].g, pixel[1].g]
+  cvtdq2ps xmm_ch2, xmm_ch2
 
   movzx eax, byte [pixel_ptr + 3*0 + 0] ; same for the blue channel (pixel.b)
   movd xmm_ch3, eax
@@ -100,6 +102,7 @@ image_sepia_sse_loop_4_pixels:
   pinsrd xmm_ch3, eax, 3
   shufps xmm_ch3, xmm_ch3, 0b11000000
   ; xmm_ch3 is now [pixel[0].b, pixel[0].b, pixel[0].b, pixel[1].b]
+  cvtdq2ps xmm_ch3, xmm_ch3
 
   xorps xmm_rgbr, xmm_rgbr
   vfmadd231ps xmm_rgbr, xmm_ch1, xmm_c1_rgbr ; xmm_rgbr[i] += xmm_ch1[i] * xmm_c1_rgbr[i]
@@ -115,6 +118,7 @@ image_sepia_sse_loop_4_pixels:
   ; xmm_ch1[0] = xmm_ch1[0], xmm_ch1[1] = xmm_ch1[0], xmm_ch1[2] = xmm_ch1[2], xmm_ch1[3] = xmm_ch1[2]
   shufps xmm_ch1, xmm_ch1, 0b11110000
   ; xmm_ch1 is now [pixel[1].r, pixel[1].r, pixel[2].r, pixel[2].r]
+  cvtdq2ps xmm_ch1, xmm_ch1
 
   movzx eax, byte [pixel_ptr + 3*1 + 1]
   movd xmm_ch2, eax
@@ -122,6 +126,7 @@ image_sepia_sse_loop_4_pixels:
   pinsrd xmm_ch2, eax, 3
   shufps xmm_ch2, xmm_ch2, 0b11110000
   ; xmm_ch2 is now [pixel[1].g, pixel[1].g, pixel[2].g, pixel[2].g]
+  cvtdq2ps xmm_ch2, xmm_ch2
 
   movzx eax, byte [pixel_ptr + 3*1 + 0]
   movd xmm_ch3, eax
@@ -129,6 +134,7 @@ image_sepia_sse_loop_4_pixels:
   pinsrd xmm_ch3, eax, 3
   shufps xmm_ch3, xmm_ch3, 0b11110000
   ; xmm_ch3 is now [pixel[1].b, pixel[1].b, pixel[2].b, pixel[2].b]
+  cvtdq2ps xmm_ch3, xmm_ch3
   
   xorps xmm_gbrg, xmm_gbrg
   vfmadd231ps xmm_gbrg, xmm_ch1, xmm_c1_gbrg
@@ -144,20 +150,25 @@ image_sepia_sse_loop_4_pixels:
   ; xmm_ch1[0] = xmm_ch1[0], xmm_ch1[1] = xmm_ch1[1], xmm_ch1[2] = xmm_ch1[1], xmm_ch1[3] = xmm_ch1[1]
   shufps xmm_ch1, xmm_ch1, 0b01010100
   ; xmm_ch1 is now [pixel[2].r, pixel[3].r, pixel[3].r, pixel[3].r]
+  cvtdq2ps xmm_ch1, xmm_ch1
 
+  xorps xmm_ch2, xmm_ch2
   movzx eax, byte [pixel_ptr + 3*2 + 1]
   movd xmm_ch2, eax
   movzx eax, byte [pixel_ptr + 3*3 + 1]
   pinsrd xmm_ch2, eax, 1
   shufps xmm_ch2, xmm_ch2, 0b01010100
   ; xmm_ch2 is now [pixel[2].g, pixel[3].g, pixel[3].g, pixel[3].g]
+  cvtdq2ps xmm_ch2, xmm_ch2
 
+  xorps xmm_ch3, xmm_ch3
   movzx eax, byte [pixel_ptr + 3*2 + 0]
   movd xmm_ch3, eax
   movzx eax, byte [pixel_ptr + 3*3 + 0]
   pinsrd xmm_ch3, eax, 1
   shufps xmm_ch3, xmm_ch3, 0b01010100
   ; xmm_ch3 is now [pixel[2].b, pixel[3].b, pixel[3].b, pixel[3].b]
+  cvtdq2ps xmm_ch3, xmm_ch3
   
   xorps xmm_brgb, xmm_brgb
   vfmadd231ps xmm_brgb, xmm_ch1, xmm_c1_brgb
@@ -166,8 +177,12 @@ image_sepia_sse_loop_4_pixels:
 
   ; === export results
 
-  cvtps2dq xmm0, xmm0 ; float -> int
-  pminsd xmm0, [maximum] ; cut to 255
+  cvtps2dq xmm_rgbr, xmm_rgbr ; float -> int
+  pminsd xmm_rgbr, [maximum]  ; min(xmm_rgbr[i], 255) (saturate)
+  cvtps2dq xmm_gbrg, xmm_gbrg
+  pminsd xmm_gbrg, [maximum]
+  cvtps2dq xmm_brgb, xmm_brgb
+  pminsd xmm_brgb, [maximum]
 
   pextrb [pixel_ptr + 3*0 + 2], xmm_rgbr, 0
   pextrb [pixel_ptr + 3*0 + 1], xmm_rgbr, 4
