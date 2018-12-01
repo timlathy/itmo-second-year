@@ -1,9 +1,6 @@
 global image_sepia_sse
 
-section .text
-
-align 16
-channel_max_val: dd 255, 255, 255, 255
+section .data
 
 align 16
 c1_rgbr: dd 0.393, 0.349, 0.272, 0.393
@@ -25,6 +22,11 @@ align 16
 c2_brgb: dd 0.543, 0.769, 0.686, 0.543
 align 16
 c3_brgb: dd 0.131, 0.189, 0.168, 0.131
+
+align 16
+shuffle_rgb_to_bgr: db 2, 1, 0, 5, 4, 3, 8, 7, 6, 11, 10, 9, -1, -1, -1, -1
+
+section .text
 
 ; rdi = pointer to the pixel array
 ; rsi = number of pixels (must be divisible by 4)
@@ -54,7 +56,7 @@ c3_brgb: dd 0.131, 0.189, 0.168, 0.131
 %define xmm_gbrg xmm13
 %define xmm_brgb xmm14
 
-%define xmm_clamp_to xmm15
+%define xmm_shuffle_rgb_to_bgr xmm15
 
 %define pixel_ptr r8
 
@@ -71,7 +73,7 @@ image_sepia_sse:
   movaps xmm_c2_brgb, [c2_brgb]
   movaps xmm_c3_brgb, [c3_brgb]
 
-  movdqa xmm_clamp_to, [channel_max_val]
+  movdqa xmm_shuffle_rgb_to_bgr, [shuffle_rgb_to_bgr]
 
   mov pixel_ptr, rdi
   lea rsi, [rsi + 2*rsi] ; rsi (number of bytes to process) = number of pixels * 3 (sizeof(pixel) = 3)
@@ -162,27 +164,30 @@ image_sepia_sse_loop_4_pixels:
 
   ; === export results
 
-  cvtps2dq xmm_rgbr, xmm_rgbr   ; float -> int
-  pminsd xmm_rgbr, xmm_clamp_to ; min(xmm_rgbr[i], 255) (saturate)
+  cvtps2dq xmm_rgbr, xmm_rgbr ; float -> int
   cvtps2dq xmm_gbrg, xmm_gbrg
-  pminsd xmm_gbrg, xmm_clamp_to
   cvtps2dq xmm_brgb, xmm_brgb
-  pminsd xmm_brgb, xmm_clamp_to
 
-  pextrb [pixel_ptr + 3*0 + 2], xmm_rgbr, 0
-  pextrb [pixel_ptr + 3*0 + 1], xmm_rgbr, 4
-  pextrb [pixel_ptr + 3*0 + 0], xmm_rgbr, 8
-  pextrb [pixel_ptr + 3*1 + 2], xmm_rgbr, 12
- 
-  pextrb [pixel_ptr + 3*1 + 1], xmm_gbrg, 0
-  pextrb [pixel_ptr + 3*1 + 0], xmm_gbrg, 4
-  pextrb [pixel_ptr + 3*2 + 2], xmm_gbrg, 8
-  pextrb [pixel_ptr + 3*2 + 1], xmm_gbrg, 12
- 
-  pextrb [pixel_ptr + 3*2 + 0], xmm_brgb, 0
-  pextrb [pixel_ptr + 3*3 + 2], xmm_brgb, 4
-  pextrb [pixel_ptr + 3*3 + 1], xmm_brgb, 8
-  pextrb [pixel_ptr + 3*3 + 0], xmm_brgb, 12
+  ; convert xmm_rgbr (int32[4]) and xmm_gbrg (int32[4]) to xmm_rgbr (int16[8])
+  ; xmm_rgbr now contains r0 g0 b0 r1 g1 b1 r1 g2
+  packssdw xmm_rgbr, xmm_gbrg
+  ; convert xmm_brgb to int16[8]
+  ; xmm_gbrg now contains b2 r3 g3 b3 [ b2 r3 g3 b3 ] (we'll ignore the last four values)
+  packssdw xmm_brgb, xmm_brgb
+  ; convert uint16s to uint8 using unsigned saturation (i.e. clamp the values between 0 and 255)
+  ; xmm_rgbr now contains r0 g0 b0 r1 g1 b1 r2 g2 b2 r3 g3 b3 [ b2 r3 g3 b3 ]
+  packuswb xmm_rgbr, xmm_brgb
+  ; reorder xmm_rgbr (pixels are stored as bgr in memory)
+  ; xmm_rgbr now contains b0 g0 r0 b1 g1 r1 b2 g2 r2 b3 g3 r3 [ 00 00 00 00 ]
+  pshufb xmm_rgbr, xmm_shuffle_rgb_to_bgr
+
+  ; write the processed pixels (12 bytes, qword + dword) back to pixel_ptr
+  pextrq rdx, xmm_rgbr, 0
+  mov [pixel_ptr], rdx
+  pextrd edx, xmm_rgbr, 2
+  mov [pixel_ptr + 8], edx
+
+  ; === loop
 
   lea pixel_ptr, [pixel_ptr + 12]
   cmp pixel_ptr, rsi
