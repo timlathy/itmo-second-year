@@ -2,9 +2,8 @@ global image_sepia_sse
 
 section .text
 
-%define pixels_in_image r9
 align 16
-maximum: dd 255, 255, 255, 255
+channel_max_val: dd 255, 255, 255, 255
 
 align 16
 c1_rgbr: dd 0.393, 0.349, 0.272, 0.393
@@ -30,32 +29,32 @@ c3_brgb: dd 0.131, 0.189, 0.168, 0.131
 ; rdi = pointer to the pixel array
 ; rsi = number of pixels (must be divisible by 4)
 
-%define xmm_tmp xmm0
-
 ; Four channels are processed in parallel,
 ; first R_{n+0} G_{n+0} B_{n+0} R_{n+1}
 ; then  G_{n+1} B_{n+1} R_{n+2] G_{n+2}
 ; then  B_{n+2} R_{n+3} G_{n+3} B_{n+3}
 
-%define xmm_ch1 xmm1
-%define xmm_ch2 xmm2
-%define xmm_ch3 xmm3
+%define xmm_ch1 xmm0
+%define xmm_ch2 xmm1
+%define xmm_ch3 xmm2
 
-%define xmm_c1_rgbr xmm4
-%define xmm_c2_rgbr xmm5
-%define xmm_c3_rgbr xmm6
+%define xmm_c1_rgbr xmm3
+%define xmm_c2_rgbr xmm4
+%define xmm_c3_rgbr xmm5
 
-%define xmm_c1_gbrg xmm7
-%define xmm_c2_gbrg xmm8
-%define xmm_c3_gbrg xmm9
+%define xmm_c1_gbrg xmm6
+%define xmm_c2_gbrg xmm7
+%define xmm_c3_gbrg xmm8
 
-%define xmm_c1_brgb xmm10
-%define xmm_c2_brgb xmm11
-%define xmm_c3_brgb xmm12
+%define xmm_c1_brgb xmm9
+%define xmm_c2_brgb xmm10
+%define xmm_c3_brgb xmm11
 
-%define xmm_rgbr xmm13
-%define xmm_gbrg xmm14
-%define xmm_brgb xmm15
+%define xmm_rgbr xmm12
+%define xmm_gbrg xmm13
+%define xmm_brgb xmm14
+
+%define xmm_clamp_to xmm15
 
 %define pixel_ptr r8
 
@@ -71,6 +70,8 @@ image_sepia_sse:
   movaps xmm_c1_brgb, [c1_brgb]
   movaps xmm_c2_brgb, [c2_brgb]
   movaps xmm_c3_brgb, [c3_brgb]
+
+  movdqa xmm_clamp_to, [channel_max_val]
 
   mov pixel_ptr, rdi
   lea rsi, [rsi + 2*rsi] ; rsi (number of bytes to process) = number of pixels * 3 (sizeof(pixel) = 3)
@@ -177,12 +178,12 @@ image_sepia_sse_loop_4_pixels:
 
   ; === export results
 
-  cvtps2dq xmm_rgbr, xmm_rgbr ; float -> int
-  pminsd xmm_rgbr, [maximum]  ; min(xmm_rgbr[i], 255) (saturate)
+  cvtps2dq xmm_rgbr, xmm_rgbr   ; float -> int
+  pminsd xmm_rgbr, xmm_clamp_to ; min(xmm_rgbr[i], 255) (saturate)
   cvtps2dq xmm_gbrg, xmm_gbrg
-  pminsd xmm_gbrg, [maximum]
+  pminsd xmm_gbrg, xmm_clamp_to
   cvtps2dq xmm_brgb, xmm_brgb
-  pminsd xmm_brgb, [maximum]
+  pminsd xmm_brgb, xmm_clamp_to
 
   pextrb [pixel_ptr + 3*0 + 2], xmm_rgbr, 0
   pextrb [pixel_ptr + 3*0 + 1], xmm_rgbr, 4
