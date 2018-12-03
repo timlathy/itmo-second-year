@@ -140,21 +140,21 @@ image_sepia_sse_loop_4_pixels:
   shr rdx, 8                ; (uint8[8]) b2 g2 r2 b3 g3 r3 00 00
   movd xmm_ch3, edx         ; channel 3 (blue)
   pmovzxbd xmm_ch3, xmm_ch3 ; (uint32[4]) b2 g2 r2 b3
-  shufps xmm_ch3, xmm_ch3, 0b01010100
-  ; xmm_ch3[0] = xmm_ch3[0], xmm_ch3[1] = xmm_ch3[1], xmm_ch3[2] = xmm_ch3[1], xmm_ch3[3] = xmm_ch3[1]
+  shufps xmm_ch3, xmm_ch3, 0b11111100
+  ; xmm_ch3[0] = xmm_ch3[0], xmm_ch3[1] = xmm_ch3[3], xmm_ch3[2] = xmm_ch3[3], xmm_ch3[3] = xmm_ch3[3]
   ; xmm_ch3 is now [pixel[2].b, pixel[3].b, pixel[3].b, pixel[3].b]
   cvtdq2ps xmm_ch3, xmm_ch3
 
   shr rdx, 8                ; (uint8[8]) g2 r2 b3 g3 r3 00 00 00
   movd xmm_ch2, edx         ; channel 2 (green)
   pmovzxbd xmm_ch2, xmm_ch2 ; (uint32[4]) g2 r2 b3 g3
-  shufps xmm_ch2, xmm_ch2, 0b01010100
+  shufps xmm_ch2, xmm_ch2, 0b11111100
   cvtdq2ps xmm_ch2, xmm_ch2
 
   shr rdx, 8                ; (uint8[8]) r2 b3 g3 r3 00 00 00 00
   movd xmm_ch1, edx         ; channel 1 (red)
   pmovzxbd xmm_ch1, xmm_ch1 ; (uint32[4]) r2 b3 g3 r3
-  shufps xmm_ch1, xmm_ch1, 0b01010100
+  shufps xmm_ch1, xmm_ch1, 0b11111100
   cvtdq2ps xmm_ch1, xmm_ch1
 
   xorps xmm_brgb, xmm_brgb
