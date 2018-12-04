@@ -21,11 +21,23 @@ void do_benchmark(image_t* img) {
 
   getrusage(RUSAGE_SELF, &r); start = r.ru_utime;
 
-  for (uint64_t i = 0; i < BENCHMARK_NUM_RUNS; i++) sepia_sse_inplace(img);
+  for (uint64_t i = 0; i < BENCHMARK_NUM_RUNS; i++) sepia_avx_inplace(img);
 
   getrusage(RUSAGE_SELF, &r); end = r.ru_utime;
 
   long res = ((end.tv_sec - start.tv_sec) * 1000000L) + end.tv_usec - start.tv_usec;
+
+  printf("AVX implementation: %ld μs (average for %lu runs)\n", res / BENCHMARK_NUM_RUNS, BENCHMARK_NUM_RUNS);
+
+  // ---
+
+  getrusage(RUSAGE_SELF, &r); start = r.ru_utime;
+
+  for (uint64_t i = 0; i < BENCHMARK_NUM_RUNS; i++) sepia_sse_inplace(img);
+
+  getrusage(RUSAGE_SELF, &r); end = r.ru_utime;
+
+  res = ((end.tv_sec - start.tv_sec) * 1000000L) + end.tv_usec - start.tv_usec;
 
   printf("SSE implementation: %ld μs (average for %lu runs)\n", res / BENCHMARK_NUM_RUNS, BENCHMARK_NUM_RUNS);
 
@@ -42,11 +54,12 @@ void do_benchmark(image_t* img) {
   printf("Naive implementation: %ld μs (average for %lu runs)\n", res / BENCHMARK_NUM_RUNS, BENCHMARK_NUM_RUNS);
 }
 
-const char* USAGE = "Usage: lab7 (naive|sse|benchmark) src.bmp dst.bmp\n";
+const char* USAGE = "Usage: lab7 (naive|sse|avx|benchmark) src.bmp dst.bmp\n";
 
 int main(int argc, char** argv) {
   if (argc != 4 || (strncmp(argv[1], "naive", 5) != 0
         && strncmp(argv[1], "sse", 3) != 0
+        && strncmp(argv[1], "avx", 3) != 0
         && strncmp(argv[1], "benchmark", 9) != 0)) PANIC(USAGE);
 
   const char* input_path = argv[2];
@@ -76,6 +89,7 @@ int main(int argc, char** argv) {
 
   if (strncmp(argv[1], "naive", 5) == 0) sepia_naive_inplace(&img);
   else if (strncmp(argv[1], "sse", 3) == 0) sepia_sse_inplace(&img);
+  else if (strncmp(argv[1], "avx", 3) == 0) sepia_avx_inplace(&img);
   else {
     do_benchmark(&img);
     return 0;

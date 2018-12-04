@@ -18,19 +18,26 @@ static void sepia_one(pixel_t* pixel) {
 }
 
 extern void image_sepia_sse(pixel_t* pixel, uint64_t size);
+extern void image_sepia_avx(pixel_t* pixel, uint64_t size);
  
 void sepia_sse_inplace(image_t* img) {
   uint64_t num_pixels = img->height * img->width;
 
-  if (num_pixels < 4) {
-    for (int p = 0; p < num_pixels; ++p) sepia_one(img->data + p);
-    return;
-  }
+  if (num_pixels < 4) { for (int p = 0; p < num_pixels; ++p) sepia_one(img->data + p); return; }
 
   image_sepia_sse(img->data, num_pixels - num_pixels % 4);
 
-  for (int p = num_pixels - num_pixels % 4; p < num_pixels; ++p)
-    sepia_one(img->data + p);
+  for (int p = num_pixels - num_pixels % 4; p < num_pixels; ++p) sepia_one(img->data + p);
+}
+
+void sepia_avx_inplace(image_t* img) {
+  uint64_t num_pixels = img->height * img->width;
+
+  if (num_pixels < 8) { for (int p = 0; p < num_pixels; ++p) sepia_one(img->data + p); return; }
+
+  image_sepia_avx(img->data, num_pixels - num_pixels % 8);
+
+  for (int p = num_pixels - num_pixels % 8; p < num_pixels; ++p) sepia_one(img->data + p);
 }
 
 void sepia_naive_inplace(image_t* img) {
