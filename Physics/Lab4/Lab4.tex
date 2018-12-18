@@ -197,21 +197,60 @@ data = [
   [13.5, 0.25, 0.05, 23, 35]
 ]
 
+
 def alpha(k_x): return f'${k_x * N_1 / (R_1 * L):.3f}$'
 def beta(k_y): return f'${k_y * R_2 * C * 10**-6 / (N_2 * S) * 10**6:.0f} \\cdot 10^{-6}$'
-def H(k_x, x): return f'${x * k_x * N_1 / (R_1 * L):.3f}$'
-def B(k_y, y): return f'${y * k_y * R_2 * C * 10**-6 / (N_2 * S) * 10**5:.0f} \\cdot 10^{-5}$'
-def mu(k_x, x, k_y, y):
+def H_float(k_x, x): return x * k_x * N_1 / (R_1 * L);
+def H(k_x, x): return f'${H_float(k_x, x):.3f}$'
+def B_float(k_y, y): return y * k_y * R_2 * C * 10**-6 / (N_2 * S);
+def B(k_y, y): return f'${B_float(k_y, y) * 10**5:.0f} \\cdot 10^{-5}$'
+def mu_float(k_x, x, k_y, y):
   h = x * k_x * N_1 / (R_1 * L)
   b = y * k_y * R_2 * C * 10**-6 / (N_2 * S)
   mu_0 = 4 * np.pi * 10**-7
-  return f'${(1 / mu_0) * (b / h):.3f}$'
+  return (1 / mu_0) * (b / h)
+def mu(k_x, x, k_y, y): return f'${mu_float(k_x, x, k_y, y):.3f}$'
 
-data = [[u, k_x, k_y, x, y, alpha(k_x), beta(k_y), H(k_x, x), B(k_y, y), mu(k_x, x, k_y, y)] for [u, k_x, k_y, x, y] in data]
+table1 = [[u, k_x, k_y, x, y, alpha(k_x), beta(k_y), H(k_x, x), B(k_y, y), mu(k_x, x, k_y, y)] for [u, k_x, k_y, x, y] in data]
 \end{pycode}
 
 \begin{table}[H]
-\py{latex_table(data, ['$U$', '$K_X$', '$K_Y$', '$X$', '$Y$', '$\\alpha$', '$\\beta$', '$H$', '$B$', '$\\mu$'])}
+\py{latex_table(table1, ['$U$', '$K_X$', '$K_Y$', '$X$', '$Y$', '$\\alpha$', '$\\beta$', '$H_m$', '$B_m$', '$\\mu$'])}
 \end{table} 
+
+\subsection*{График начального намагничивания $B_m = f(H_m)$}
+
+\begin{pycode}
+import matplotlib.pyplot as plt
+
+hb_table = [[H_float(k_x, x), B_float(k_y, y)] for [u, k_x, k_y, x, y] in data]
+hs, bs = np.transpose(hb_table).tolist()
+plt.figure(figsize=(7, 4))
+plt.plot(hs, bs, '-o')
+plt.axis((0, 19, 0, 0.0007))
+plt.grid()
+plt.savefig('hb_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=0.65\textwidth]{hb_plot.pdf}
+\end{figure}
+
+\subsection*{График магнитной проницаемости $\mu = f(H_m)$}
+
+\begin{pycode}
+hmu_table = [[H_float(k_x, x), mu_float(k_x, x, k_y, y)]
+  for [u, k_x, k_y, x, y] in data]
+hs, mus = np.transpose(hmu_table).tolist()
+plt.figure(figsize=(7, 4))
+plt.plot(hs, mus, '-o')
+plt.axis((0, 19, 0, 60))
+plt.grid()
+plt.savefig('hmu_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=0.65\textwidth]{hmu_plot.pdf}
+\end{figure}
 
 \end{document}
