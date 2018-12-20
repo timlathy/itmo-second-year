@@ -146,7 +146,6 @@ P = \chi S_{hl},\ \chi = K_X K_Y \frac{\nu N_1 RC}{N_2 R_1}
 \end{equation}
 где $\nu$ — частота колебаний напряжения, подаваемого на первичную обмотку.
 
-\newpage
 \section*{Ход работы}
 
 \subsection*{Исходные параметры}
@@ -202,13 +201,17 @@ data = [
 def alpha(k_x): return f'${k_x * N_1 / (R_1 * L):.3f}$'
 def beta(k_y): return f'${k_y * R_2 * C / (N_2 * S):.3f}$'
 def H_float(k_x, x): return x * k_x * N_1 / (R_1 * L);
-def H(k_x, x): return f'${H_float(k_x, x):.3f}$'
+def H_delta(k_x, x): return H_float(k_x, x) * (0.001 / L + 6.8 / R_1)
+def H(k_x, x): return f'${H_float(k_x, x):.1f} \\pm {H_delta(k_x, x):.1f}$'
 def B_float(k_y, y): return y * k_y * R_2 * C / (N_2 * S);
-def B(k_y, y): return f'${B_float(k_y, y):.4f}$'
+def B_delta(k_y, y): return B_float(k_y, y) * (47000 / R_2 + (0.047 * 10**-6) / C + (0.05 * 10**-4) / S)
+def B(k_y, y): return f'${B_float(k_y, y):.3f} \\pm {B_delta(k_y, y):.3f}$'
 def mu_float(k_x, x, k_y, y):
   mu_0 = 4 * np.pi * 10**-7
   return (1 / mu_0) * (B_float(k_y, y) / H_float(k_x, x))
-def mu(k_x, x, k_y, y): return f'${mu_float(k_x, x, k_y, y):.3f}$'
+def mu(k_x, x, k_y, y):
+  mu_delta = mu_float(k_x, x, k_y, y) * (H_delta(k_x, x) / H_float(k_x, x) + B_delta(k_y, y) / B_float(k_y, y))
+  return f'${mu_float(k_x, x, k_y, y):.3f} \\pm {mu_delta:.3f}$'
 
 table1 = [[u, k_x, k_y, x, y, alpha(k_x), beta(k_y), H(k_x, x), B(k_y, y), mu(k_x, x, k_y, y)] for [u, k_x, k_y, x, y] in data]
 \end{pycode}
@@ -230,9 +233,10 @@ def chi_float(): return K_X * K_Y * (freq * N_1 * R_2 * C) / (N_2 * R_1);
 def chi(): return f'{chi_float():.3f}'
 def P_float(): return chi_float() * 3.52;
 def P(): return f'{P_float():.4f}'
+def P_delta(): return np.round(P_float() * (5 / freq + 6.8 / R_1 + 47000 / R_2 + (0.047 * 10**-6) / C), 4);
 \end{pycode}
 
-$$\chi = K_X K_Y \frac{\nu N_1 R C}{N_2 R_1} = \py{chi()}, P = \chi S_{hl} = \py{P()} \textup{ Вт}$$
+$$\chi = K_X K_Y \frac{\nu N_1 R C}{N_2 R_1} = \py{chi()}, P = \chi S_{hl} = \py{P()} \pm \py{P_delta()} \textup{ Вт}$$
 
 \subsection*{Погрешности косвенных измерений}
 
@@ -240,8 +244,17 @@ $$\chi = K_X K_Y \frac{\nu N_1 R C}{N_2 R_1} = \py{chi()}, P = \chi S_{hl} = \py
 \Delta R_1 = 6.8 \textup{ Ом}, \Delta R_2 = 47000 \textup { Ом}, \Delta C = 0.047 \cdot 10^{-6} \textup{ Ф}$,
 вычислим погрешность рассчитанного значения $P$:
 
-$$\Delta P = P(\frac{\Delta\nu}{\nu} + \frac{\Delta R_1}{R_1} + \frac{\Delta R_2}{R_2} + \frac{\Delta C}{C}) =
-\py{np.round(P_float() * (5 / freq + 6.8 / R_1 + 47000 / R_2 + (0.047 * 10**-6) / C), 4)} \textup{ Вт}$$
+$$\Delta P = P(\frac{\Delta\nu}{\nu} + \frac{\Delta R_1}{R_1} + \frac{\Delta R_2}{R_2} + \frac{\Delta C}{C}) = \py{P_delta()} \textup{ Вт}$$
+
+Погрешности значений напряженности $H$ и индукции $B$ находятся по следующим формулам
+(с учетом $\Delta l = 0.001 \textup{ м}$):
+
+$$\Delta H_m = H_m(\frac{\Delta l}{l} + \frac{\Delta R_1}{R_1}),
+\ \Delta B_m = B_m(\frac{\Delta R_2}{R_2} + \frac{\Delta C}{C} + \frac{\Delta S}{S})$$
+
+Погрешность магнитной проницаемости $\mu$ складывается из двух предыдущих:
+
+$$\Delta\mu = \mu(\frac{\Delta H_m}{H_m} + \frac{\Delta B_m}{B_m})$$
 
 \subsection*{График начального намагничивания $B_m = f(H_m)$}
 
