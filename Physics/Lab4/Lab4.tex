@@ -152,25 +152,28 @@ P = \chi S_{hl},\ \chi = K_X K_Y \frac{\nu N_1 RC}{N_2 R_1}
 \subsection*{Исходные параметры}
 
 \begin{pycode}
+import numpy as np
+
 N_1 = 1665
 N_2 = 970
-L = 7.8
-S = 0.64
+L = 7.8 * 10**-2
+S = 0.64 * 10**-4
 R_1 = 68
-R_2 = 470000
-C = 0.47
+R_2 = 470 * 10**3
+C = 0.47 * 10**-6
 freq = 40
 K_X = 0.25
 K_Y = 0.1
 \end{pycode}
 
+\noindent
 $$N_1 = \py{N_1} \textup{ витков}, N_2 = \py{N_2} \textup{ витков},
-L = \py{L} \pm 0.1 \textup{ см}, S = \py{S} \pm 0.05 \textup{ см}^2$$
+L = \py{L * 10**2} \pm 0.1 \textup{ см}, S = \py{np.round(S * 10**4, 2)} \pm 0.05 \textup{ см}^2$$
 $$R_1 = \py{R_1} \textup{ Ом} \pm 10\%, R_2 = \py{R_2} \textup{ Ом} \pm 10\%,
-C = \py{C} \textup{ мкФ} \pm 10\%$$
-$$\nu = \py{freq} \textup{ Гц}, K_X = \py{K_X} \textup{ В}, K_Y = \py{K_Y} \textup{ В}$$
+C = \py{C * 10**6} \textup{ мкФ} \pm 10\%$$
+$$\nu = \py{freq} \pm 5 \textup{ Гц}, K_X = \py{K_X} \textup{ В}, K_Y = \py{K_Y} \textup{ В}$$
 
-\subsection*{Петля гистерезиса}
+\subsection*{Параметры гистерезисной петли}
 
 Для снятых показаний $U$, $K_X$, $К_Y$, $X$, $Y$ рассчитаем мгновенные значения
 напряженности $H$ и индукции $B$ магнитного поля по формулам (2) и (3) соответственно,
@@ -178,7 +181,6 @@ $$\nu = \py{freq} \textup{ Гц}, K_X = \py{K_X} \textup{ В}, K_Y = \py{K_Y} \t
 
 \begin{pycode}
 import re
-import numpy as np
 from tabulate import tabulate
 
 def latex_table(data, headers):
@@ -188,27 +190,24 @@ def latex_table(data, headers):
   return s
 
 data = [
-  [4.5, 0.05, 0.05, 28, 9],
-  [6, 0.1, 0.05, 18, 14],
-  [7.5, 0.1, 0.05, 23, 29],
-  [9, 0.1, 0.05, 30, 23],
-  [10.5, 0.25, 0.05, 16, 28],
-  [12, 0.25, 0.05, 19, 31],
-  [13.5, 0.25, 0.05, 23, 35]
-]
-
+  [4.5, 0.05, 0.05, 28 / 10, 9 / 10],
+  [6, 0.1, 0.05, 18 / 10, 14 / 10],
+  [7.5, 0.1, 0.05, 23 / 10, 19 / 10],
+  [9, 0.1, 0.05, 30 / 10, 23 / 10],
+  [10.5, 0.25, 0.05, 16 / 10, 28 / 10],
+  [12, 0.25, 0.05, 19 / 10, 31 / 10],
+  [13.5, 0.25, 0.05, 23 / 10, 35 / 10]
+][::-1]
 
 def alpha(k_x): return f'${k_x * N_1 / (R_1 * L):.3f}$'
-def beta(k_y): return f'${k_y * R_2 * C * 10**-6 / (N_2 * S) * 10**6:.0f} \\cdot 10^{-6}$'
+def beta(k_y): return f'${k_y * R_2 * C / (N_2 * S):.3f}$'
 def H_float(k_x, x): return x * k_x * N_1 / (R_1 * L);
 def H(k_x, x): return f'${H_float(k_x, x):.3f}$'
-def B_float(k_y, y): return y * k_y * R_2 * C * 10**-6 / (N_2 * S);
-def B(k_y, y): return f'${B_float(k_y, y) * 10**5:.0f} \\cdot 10^{-5}$'
+def B_float(k_y, y): return y * k_y * R_2 * C / (N_2 * S);
+def B(k_y, y): return f'${B_float(k_y, y):.4f}$'
 def mu_float(k_x, x, k_y, y):
-  h = x * k_x * N_1 / (R_1 * L)
-  b = y * k_y * R_2 * C * 10**-6 / (N_2 * S)
   mu_0 = 4 * np.pi * 10**-7
-  return (1 / mu_0) * (b / h)
+  return (1 / mu_0) * (B_float(k_y, y) / H_float(k_x, x))
 def mu(k_x, x, k_y, y): return f'${mu_float(k_x, x, k_y, y):.3f}$'
 
 table1 = [[u, k_x, k_y, x, y, alpha(k_x), beta(k_y), H(k_x, x), B(k_y, y), mu(k_x, x, k_y, y)] for [u, k_x, k_y, x, y] in data]
@@ -216,7 +215,33 @@ table1 = [[u, k_x, k_y, x, y, alpha(k_x), beta(k_y), H(k_x, x), B(k_y, y), mu(k_
 
 \begin{table}[H]
 \py{latex_table(table1, ['$U$', '$K_X$', '$K_Y$', '$X$', '$Y$', '$\\alpha$', '$\\beta$', '$H_m$', '$B_m$', '$\\mu$'])}
-\end{table} 
+\end{table}
+
+\subsection*{Средняя мощность, расходуемая на перемагничивание}
+
+Определим среднюю мощность $P$, затрачиваемую при циклическом перемагничивании
+ферромагнитного образца по формуле (4), предварительно измерив площадь петли в
+делениях шкалы осциллографа.
+
+Перенесенное на лист измерений изображение имеет площадь $3.52 \textup{дел}^2$.
+
+\begin{pycode}
+def chi_float(): return K_X * K_Y * (freq * N_1 * R_2 * C) / (N_2 * R_1);
+def chi(): return f'{chi_float():.3f}'
+def P_float(): return chi_float() * 3.52;
+def P(): return f'{P_float():.4f}'
+\end{pycode}
+
+$$\chi = K_X K_Y \frac{\nu N_1 R C}{N_2 R_1} = \py{chi()}, P = \chi S_{hl} = \py{P()} \textup{ Вт}$$
+
+\subsection*{Погрешности косвенных измерений}
+
+Основываясь на приборных погрешностях $\Delta\nu = 5 \textup{ Гц},
+\Delta R_1 = 6.8 \textup{ Ом}, \Delta R_2 = 47000 \textup { Ом}, \Delta C = 0.047 \cdot 10^{-6} \textup{ Ф}$,
+вычислим погрешность рассчитанного значения $P$:
+
+$$\Delta P = P(\frac{\Delta\nu}{\nu} + \frac{\Delta R_1}{R_1} + \frac{\Delta R_2}{R_2} + \frac{\Delta C}{C}) =
+\py{np.round(P_float() * (5 / freq + 6.8 / R_1 + 47000 / R_2 + (0.047 * 10**-6) / C), 4)} \textup{ Вт}$$
 
 \subsection*{График начального намагничивания $B_m = f(H_m)$}
 
@@ -227,7 +252,7 @@ hb_table = [[H_float(k_x, x), B_float(k_y, y)] for [u, k_x, k_y, x, y] in data]
 hs, bs = np.transpose(hb_table).tolist()
 plt.figure(figsize=(7, 4))
 plt.plot(hs, bs, '-o')
-plt.axis((0, 19, 0, 0.0007))
+plt.axis((0, 190, 0, 0.7))
 plt.grid()
 plt.savefig('hb_plot.pdf', bbox_inches='tight')
 \end{pycode}
@@ -244,7 +269,7 @@ hmu_table = [[H_float(k_x, x), mu_float(k_x, x, k_y, y)]
 hs, mus = np.transpose(hmu_table).tolist()
 plt.figure(figsize=(7, 4))
 plt.plot(hs, mus, '-o')
-plt.axis((0, 19, 0, 60))
+plt.axis((0, 190, 0, 6000))
 plt.grid()
 plt.savefig('hmu_plot.pdf', bbox_inches='tight')
 \end{pycode}
