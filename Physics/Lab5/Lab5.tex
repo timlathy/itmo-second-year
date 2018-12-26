@@ -57,7 +57,7 @@
 \begin{pycode}
 import numpy as np
 
-L = 7.8 * 10**-2
+L = 10 * 10**-3
 C_1 = 0.022 * 10**-6
 C_2 = 0.033 * 10**-6
 C_3 = 0.047 * 10**-6
@@ -68,7 +68,7 @@ def r2(f): return np.round(f, 2)
 \end{pycode}
 
 \noindent
-$$L = \py{L * 10**2} \pm 0.1 \textup{ см}$$
+$$L = \py{L * 10**3} \textup{ мГн} \pm 10\%$$
 $$\ C_1 = \py{r3(C_1 * 10**6)} \textup{ мкФ} \pm 10\%
 ,\ C_2 = \py{r3(C_2 * 10**6)} \textup{ мкФ} \pm 10\%
 ,\ C_3 = \py{r3(C_3 * 10**6)} \textup{ мкФ} \pm 10\%
@@ -107,8 +107,10 @@ discharge_resistance_table = [
   [400, 1, 12, 2, 1]
 ]
 
-def log_decr(n, u0, un): return (1 / n) * np.log(u0 / un)
-def q_factor(n, u0, un): return np.pi / log_decr(n, u0, un)
+def log_decr(n, u0, un):
+  return (1 / n) * np.log(u0 / un)
+def q_factor(n, u0, un):
+  return (2 * np.pi) / (1 - np.exp(-2 * log_decr(n, u0, un)))
 def inductance(c, r_m, n, u0, un):
   return (np.pi**2 * c * (r_m + R_0)**2) / log_decr(n, u0, un)**2
 
@@ -122,7 +124,7 @@ def approx_resistance_at_log_decr(l):
 R_0 = -approx_resistance_at_log_decr(0)
 
 table1 = [
-  [r, t, u0, un, n, log_decr(n, u0, un), q_factor(n, u0, un), r3(inductance(C_1, r, n, u0, un)) if r <= 100 else '-']
+  [r, t, u0, un, n, log_decr(n, u0, un), q_factor(n, u0, un), r3(inductance(C_1, r, n, u0, un) * 10**3) if r <= 100 else '-']
   for [r, t, u0, un, n] in discharge_resistance_table
 ]
 \end{pycode}
@@ -139,5 +141,24 @@ $$R_0 = \py{r2(R_0)} \textup{ Ом}$$
 контура $L$ для малых значений сопротивления магазина $R_M \leq 100 \textup{ Ом}$ как:
 
 $$L = \frac{\pi^2 C R^2}{l^2}$$
+
+Усредним полученные результаты:
+
+\begin{pycode}
+L_mean = np.mean(np.array(table1)[:11, 7].astype(float))
+\end{pycode}
+
+$$L_{ср} = \py{r3(L_mean)} \textup{ мГн}$$
+
+\subsection*{Период колебаний контура}
+
+Найдем период колебаний в контуре при минимальном сопротивлении магазина
+$R_M = 0 \textup{ Ом},\ R = R_0 = \py{r2(R_0)} \textup{ Ом}$ как: 
+
+\begin{pycode}
+T_0 = (np.pi * 2) / np.sqrt((1 / (L * C_1)) - (R_0**2 / (4 * L**2)))
+\end{pycode}
+
+$$T = \frac{2\pi}{\sqrt{\frac{1}{LC} - \frac{R^2}{4L^2}}} = \py{r2(T_0 * 10**3)}$$
 
 \end{document}
