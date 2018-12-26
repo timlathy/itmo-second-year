@@ -1,0 +1,118 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[a4paper, includeheadfoot, mag=1000,
+            left=2cm, right=1.5cm, top=1.5cm, bottom=1.5cm,
+            headsep=0.8cm, footskip=0.8cm]{geometry}
+% Fonts
+\usepackage{fontspec, unicode-math}
+\setmainfont[Ligatures=TeX]{CMU Serif}
+\setmonofont{CMU Typewriter Text}
+\usepackage[english, russian]{babel}
+% Indent first paragraph
+\usepackage{indentfirst}
+\setlength{\parskip}{5pt}
+% Diagrams
+\usepackage{graphicx}
+\usepackage{floatrow}
+% Python
+\usepackage{pythontex}
+
+\begin{document}
+\begin{titlepage}
+
+\noindent\textsc{ФГАОУ ВО «Санкт-Петербургский национальный исследовательский
+университет информационных технологий, механики и оптики»\\[4mm]
+Кафедра физики}
+\vfill
+\noindent\textbf{РАБОЧИЙ ПРОТОКОЛ И ОТЧЕТ\\[2mm]
+ПО ЛАБОРАТОРНОЙ РАБОТЕ №5\\[4mm]
+Изучение свободных затухающих электромагнитных колебаний}\\[16mm]
+Преподаватель Ефремова Екатерина Александровна\\[2mm]
+Студенты Лабушев Тимофей Михайлович, Нестеров Дали Константинович\\[2mm]
+Группа P3202
+\vfill
+\noindent Санкт-Петербург\\[2mm]
+2018 г.
+
+\end{titlepage}
+
+\section*{Введение}
+
+\subsection*{Цель работы}
+
+\subsection*{Требуемое оборудование и материалы}
+
+\begin{enumerate}
+\item Генератор напряжений ГН1
+\item Осциллограф ОЦЛ2
+\item Стенд с объектом исследования С3-ЭМ01
+\item Проводники Ш4/Ш2 (5 шт), Ш2/Ш2 (3 шт), 2Ш4/BNC (2 шт)
+\end{enumerate}
+
+\subsection*{Рабочие формулы и исходные формулы}
+
+\section*{Ход работы}
+
+\subsection*{Исходные параметры}
+
+\begin{pycode}
+import numpy as np
+
+L = 7.8 * 10**-2
+C_1 = 0.022 * 10**-6
+C_2 = 0.033 * 10**-6
+C_3 = 0.047 * 10**-6
+C_4 = 0.47 * 10**-6
+
+def r3(f): return np.round(f, 4)
+\end{pycode}
+
+\noindent
+$$L = \py{L * 10**2} \pm 0.1 \textup{ см}$$
+$$\ C_1 = \py{r3(C_1 * 10**6)} \textup{ мкФ} \pm 10\%
+,\ C_2 = \py{r3(C_2 * 10**6)} \textup{ мкФ} \pm 10\%
+,\ C_3 = \py{r3(C_3 * 10**6)} \textup{ мкФ} \pm 10\%
+,\ C_4 = \py{r3(C_4 * 10**6)} \textup{ мкФ} \pm 10\%$$
+
+\subsection*{Измерения процесса разряда конденсатора}
+
+\begin{pycode}
+import re
+from tabulate import tabulate
+
+def latex_table(data, headers):
+  s = tabulate(data, headers=headers, tablefmt='latex')
+  # https://github.com/gregbanks/python-tabulate/issues/5
+  s = re.sub(r'(\^\{\})', "^", s); s = re.sub(r'\\([\$\_\{\}\^])', r'\1', s); s = re.sub(r'(\\textbackslash{})', r'\\', s)
+  return s
+\end{pycode}
+
+\begin{pycode}
+discharge_resistance_table = [
+  [0, 1, 48, 17, 5],
+  [10, 1, 45, 13, 5],
+  [20, 1, 45, 10, 5],
+  [30, 1, 44, 8, 5],
+  [40, 1, 43, 6, 5],
+  [50, 1, 40, 5, 5],
+  [60, 1, 39, 9, 3],
+  [70, 1, 37, 8, 3],
+  [80, 1, 36, 7, 3],
+  [90, 1, 34, 6, 3],
+  [100, 1, 33, 8, 2],
+  [200, 1, 24, 8, 1],
+  [300, 1, 17, 3, 1],
+  [400, 1, 12, 2, 1]
+]
+
+def log_decr(n, u0, un): return (1 / n) * np.log(u0 / un)
+def q_factor(n, u0, un): return np.pi / log_decr(n, u0, un)
+
+table1 = [
+  [r, t, u0, un, n, log_decr(n, u0, un), q_factor(n, u0, un)]
+  for [r, t, u0, un, n] in discharge_resistance_table
+]
+\end{pycode}
+
+\py{latex_table(table1, ['$R_{M}$, Ом', '$T$, мс', '$2U_i$, дел', '$2U_{i+n}$, дел', '$n$', '$\\lambda$', '$Q$'])}
+
+\end{document}
