@@ -74,7 +74,7 @@ $$\ C_1 = \py{r3(C_1 * 10**6)} \textup{ мкФ} \pm 10\%
 ,\ C_3 = \py{r3(C_3 * 10**6)} \textup{ мкФ} \pm 10\%
 ,\ C_4 = \py{r3(C_4 * 10**6)} \textup{ мкФ} \pm 10\%$$
 
-\subsection*{Измерения процесса разряда конденсатора}
+\subsection*{Процесс разряда конденсатора}
 
 \begin{pycode}
 import re
@@ -159,7 +159,7 @@ plt.savefig('rl_plot.pdf', bbox_inches='tight')
 \includegraphics[width=0.8\textwidth]{rl_plot.pdf}
 \end{figure}
 
-\subsection*{Определение индуктивности контура $L$}
+\subsection*{Индуктивность контура $L$}
 
 Определим собственное сопротивление контура $R_0$ как модуль абсциссы точки с $\lambda = 0$
 аппроксимирующей прямой $\lambda(R_M)$:
@@ -207,5 +207,44 @@ T_0 = (np.pi * 2) / np.sqrt((1 / (L * C_1)) - (R_0**2 / (4 * L**2)))
 \end{pycode}
 
 $$T = \frac{2\pi}{\sqrt{\frac{1}{LC} - \frac{R^2}{4L^2}}} = \py{r2(T_0 * 10**3)}$$
+
+\subsection*{Периодичность}
+
+При значении сопротивления магазина $R_M = 500 \textup{ Ом}$ периодичность процесса
+разряда конденсатора исчезает. Оценим критическое сопротивление как $R = R_0 + R_M =
+\py{r2(R_0 + 500)} \textup{ Ом}$.
+
+Расчетное критическое сопротивление равно
+$R_\textup{к} = 2 \sqrt{\frac{L}{C}} = \py{r2(2 * np.sqrt(L / C_1))} \textup{ Ом}$
+
+\subsection*{Сдвиг фаз}
+
+Временной сдвиг между точками графиков тока и напряжения, соответствующих одинаковой
+фазе колебаний, $\Delta t = 0.3 \textup{ мс}$. Период $T = 1 \textup{ мс}$.
+
+Вычислим сдвиг фаз между током в контуре и напряжением на конденсаторе как:
+
+\begin{pycode}
+delta_e = np.pi - 2*np.pi*(0.3 / 1)
+\end{pycode}
+
+$$\delta_{\textup{э}} = \pi - 2\pi \frac{\Delta t}{T} = \py{r3(delta_e)}$$
+
+Выразим сдвиг фаз из циклической частоты колебаний конутра:
+
+$$\delta_{\textup{т}} = \arcsin{\frac{\omega}{\omega_0}}
+,\ \omega_0 = \frac{1}{\sqrt{LC}},\ \omega = \sqrt{\omega_0^2 - \beta^2}
+,\ \beta = \frac{R}{2L},\ R = R_0 + R_M = \py{r2(R_0 + 100)} \textup{ Ом}$$
+
+\begin{pycode}
+def delta_t():
+  w_0 = 1 / np.sqrt(L * C_1)
+  beta = (R_0 + 100) / (2 * L)
+  w = np.sqrt(w_0**2 - beta**2)
+  return np.arcsin(w / w_0)
+\end{pycode}
+
+\noindent
+$$\delta_{\textup{т}} = \py{r3(delta_t())}$$
 
 \end{document}
