@@ -63,7 +63,8 @@ C_2 = 0.033 * 10**-6
 C_3 = 0.047 * 10**-6
 C_4 = 0.47 * 10**-6
 
-def r3(f): return np.round(f, 4)
+def r3(f): return np.round(f, 3)
+def r2(f): return np.round(f, 2)
 \end{pycode}
 
 \noindent
@@ -87,6 +88,8 @@ def latex_table(data, headers):
 \end{pycode}
 
 \begin{pycode}
+from numpy.polynomial.polynomial import polyfit
+
 discharge_resistance_table = [
   [0, 1, 48, 17, 5],
   [10, 1, 45, 13, 5],
@@ -106,13 +109,35 @@ discharge_resistance_table = [
 
 def log_decr(n, u0, un): return (1 / n) * np.log(u0 / un)
 def q_factor(n, u0, un): return np.pi / log_decr(n, u0, un)
+def inductance(c, r_m, n, u0, un):
+  return (np.pi**2 * c * (r_m + R_0)**2) / log_decr(n, u0, un)**2
+
+def approx_resistance_at_log_decr(l):
+  r_leq_100 = discharge_resistance_table[:11]
+  rs_ls = [[r, log_decr(n, u0, un)] for [r, _, u0, un, n] in r_leq_100]
+  rs, ls = np.array(rs_ls).T.tolist()
+  r_b, r_a = polyfit(ls, rs, 1)
+  return r_a*l + r_b
+
+R_0 = -approx_resistance_at_log_decr(0)
 
 table1 = [
-  [r, t, u0, un, n, log_decr(n, u0, un), q_factor(n, u0, un)]
+  [r, t, u0, un, n, log_decr(n, u0, un), q_factor(n, u0, un), r3(inductance(C_1, r, n, u0, un)) if r <= 100 else '-']
   for [r, t, u0, un, n] in discharge_resistance_table
 ]
 \end{pycode}
 
-\py{latex_table(table1, ['$R_{M}$, Ом', '$T$, мс', '$2U_i$, дел', '$2U_{i+n}$, дел', '$n$', '$\\lambda$', '$Q$'])}
+\py{latex_table(table1, ['$R_{M}$, Ом', '$T$, мс', '$2U_i$, дел', '$2U_{i+n}$, дел', '$n$', '$\\lambda$', '$Q$', '$L$, мГн'])}
+\vspace{4mm}
+
+Определим собственное сопротивление контура $R_0$ как модуль абсциссы точки с $\lambda = 0$
+аппроксимирующей прямой $\lambda(R_M)$:
+
+$$R_0 = \py{r2(R_0)} \textup{ Ом}$$
+
+Считая полное сопротивление контура $R = R_0 + R_M$, вычислим значение индуктивности
+контура $L$ для малых значений сопротивления магазина $R_M \leq 100 \textup{ Ом}$ как:
+
+$$L = \frac{\pi^2 C R^2}{l^2}$$
 
 \end{document}
