@@ -135,7 +135,7 @@ table1 = [
 
 \py{latex_table(table1, ['$R_{M}$, Ом', '$T$, мс', '$2U_i$, дел', '$2U_{i+n}$, дел', '$n$', '$\\lambda$', '$Q$', '$L$, мГн'])}
 
-\subsection*{График зависимости $\lambda(R_M)$}
+\subsection*{Зависимость логарифмического декремента $\lambda$ от сопротивления магазина $R_M$}
 
 \begin{pycode}
 import matplotlib.pyplot as plt
@@ -156,7 +156,7 @@ plt.savefig('rl_plot.pdf', bbox_inches='tight')
 \end{pycode}
 
 \begin{figure}[H]
-\includegraphics[width=0.65\textwidth]{rl_plot.pdf}
+\includegraphics[width=0.8\textwidth]{rl_plot.pdf}
 \end{figure}
 
 \subsection*{Определение индуктивности контура $L$}
@@ -178,6 +178,24 @@ L_mean = np.mean(np.array(table1)[:11, 7].astype(float))
 \end{pycode}
 
 $$L_{ср} = \py{r3(L_mean)} \textup{ мГн}$$
+
+\subsection*{Зависимость добротности контура $Q$ от его сопротивления $R$}
+
+\begin{pycode}
+
+rs, qs = np.array([[r + R_0, q_factor(n, u0, un)] for [r, _, u0, un, n] in discharge_resistance_table]).T.tolist()
+plt.figure(figsize=(7, 4))
+plt.plot(rs, qs, '-o')
+plt.axis((0, 450, 0, 20))
+plt.grid()
+plt.xlabel('Сопротивление контура $R$, Ом', fontsize=12)
+plt.ylabel('Добротность контура $Q$', fontsize=12)
+plt.savefig('rq_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=0.8\textwidth]{rq_plot.pdf}
+\end{figure}
 
 \subsection*{Период колебаний контура}
 
