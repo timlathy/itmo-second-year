@@ -115,11 +115,15 @@ def inductance(c, r_m, n, u0, un):
   return (np.pi**2 * c * (r_m + R_0)**2) / log_decr(n, u0, un)**2
 
 def approx_resistance_at_log_decr(l):
-  r_leq_100 = discharge_resistance_table[:11]
-  rs_ls = [[r, log_decr(n, u0, un)] for [r, _, u0, un, n] in r_leq_100]
+  rs_ls = [[r, log_decr(n, u0, un)] for [r, _, u0, un, n] in discharge_resistance_table if r <= 100]
   rs, ls = np.array(rs_ls).T.tolist()
   r_b, r_a = polyfit(ls, rs, 1)
   return r_a*l + r_b
+
+def approx_coeffs_r_l_dependence():
+  rs_ls = [[r, log_decr(n, u0, un)] for [r, _, u0, un, n] in discharge_resistance_table if r <= 100]
+  rs, ls = np.array(rs_ls).T.tolist()
+  return polyfit(rs, ls, 1)
 
 R_0 = -approx_resistance_at_log_decr(0)
 
@@ -130,7 +134,32 @@ table1 = [
 \end{pycode}
 
 \py{latex_table(table1, ['$R_{M}$, Ом', '$T$, мс', '$2U_i$, дел', '$2U_{i+n}$, дел', '$n$', '$\\lambda$', '$Q$', '$L$, мГн'])}
-\vspace{4mm}
+
+\subsection*{График зависимости $\lambda(R_M)$}
+
+\begin{pycode}
+import matplotlib.pyplot as plt
+
+l_approx_range = np.arange(0, 400, step=1)
+l_b, l_a = approx_coeffs_r_l_dependence()
+l_approx = [l_a*r + l_b for r in l_approx_range]
+
+rs, ls = np.array([[r, log_decr(n, u0, un)] for [r, _, u0, un, n] in discharge_resistance_table]).T.tolist()
+plt.figure(figsize=(7, 4))
+plt.plot(rs, ls, 'o')
+plt.plot(l_approx_range, l_approx, '--')
+plt.axis((0, 420, 0, 2.1))
+plt.grid()
+plt.xlabel('Сопротивление магазина $R_m$, Ом', fontsize=12)
+plt.ylabel('Логарифмический декремент $\lambda$', fontsize=12)
+plt.savefig('rl_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=0.65\textwidth]{rl_plot.pdf}
+\end{figure}
+
+\subsection*{Определение индуктивности контура $L$}
 
 Определим собственное сопротивление контура $R_0$ как модуль абсциссы точки с $\lambda = 0$
 аппроксимирующей прямой $\lambda(R_M)$:
