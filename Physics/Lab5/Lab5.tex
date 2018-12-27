@@ -291,10 +291,11 @@ $$\delta T = 100\% \cdot |\frac{T_\textup{э} - T_\textup{т}}{T_\textup{т}}|$$
 \begin{pycode}
 cs, t1s, t2s = np.array([[c, t1, t2] for [c, t1, t2, _] in table2]).T.tolist()
 plt.figure(figsize=(7, 4))
-plt.plot(cs, t1s, '-o')
-plt.plot(cs, t2s, '-o')
+plt.plot(cs, t1s, '-o', label='$T_{э}$')
+plt.plot(cs, t2s, '-o', label='$T_{т}$')
 #plt.axis((0, 0.5, 0, 0.5))
 plt.grid()
+plt.legend()
 plt.xlabel('Емкость конденсатора $C$, мкФ', fontsize=12)
 plt.ylabel('Период колебаний $T$, мс', fontsize=12)
 plt.savefig('ct_plot.pdf', bbox_inches='tight')
