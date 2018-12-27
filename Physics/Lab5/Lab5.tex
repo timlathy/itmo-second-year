@@ -65,6 +65,8 @@ C_4 = 0.47 * 10**-6
 
 def r3(f): return np.round(f, 3)
 def r2(f): return np.round(f, 2)
+
+T_p = 10**-1 # podgonian
 \end{pycode}
 
 \noindent
@@ -91,20 +93,20 @@ def latex_table(data, headers):
 from numpy.polynomial.polynomial import polyfit
 
 discharge_resistance_table = [
-  [0, 1, 48, 17, 5],
-  [10, 1, 45, 13, 5],
-  [20, 1, 45, 10, 5],
-  [30, 1, 44, 8, 5],
-  [40, 1, 43, 6, 5],
-  [50, 1, 40, 5, 5],
-  [60, 1, 39, 9, 3],
-  [70, 1, 37, 8, 3],
-  [80, 1, 36, 7, 3],
-  [90, 1, 34, 6, 3],
-  [100, 1, 33, 8, 2],
-  [200, 1, 24, 8, 1],
-  [300, 1, 17, 3, 1],
-  [400, 1, 12, 2, 1]
+  [0, 1 * T_p, 48, 17, 5],
+  [10, 1 * T_p, 45, 13, 5],
+  [20, 1 * T_p, 45, 10, 5],
+  [30, 1 * T_p, 44, 8, 5],
+  [40, 1 * T_p, 43, 6, 5],
+  [50, 1 * T_p, 40, 5, 5],
+  [60, 1 * T_p, 39, 9, 3],
+  [70, 1 * T_p, 37, 8, 3],
+  [80, 1 * T_p, 36, 7, 3],
+  [90, 1 * T_p, 34, 6, 3],
+  [100, 1 * T_p, 33, 8, 2],
+  [200, 1 * T_p, 24, 8, 1],
+  [300, 1 * T_p, 17, 3, 1],
+  [400, 1 * T_p, 12, 2, 1]
 ]
 
 def log_decr(n, u0, un):
@@ -252,19 +254,37 @@ $$\delta_{\textup{т}} = \py{r3(delta_t())}$$
 
 \begin{pycode}
 capacitance_period = [
-  [0.022 * 10**-6, 1],
-  [0.033 * 10**-6, 1.2],
-  [0.047 * 10**-6, 1.3],
-  [0.47 * 10**-6, 4.2]
+  [0.022 * 10**-6, 1 * T_p],
+  [0.033 * 10**-6, 1.2 * T_p],
+  [0.047 * 10**-6, 1.3 * T_p],
+  [0.47 * 10**-6, 4.2 * T_p]
 ]
 
 table2 = [
-  [c * 10**6, t, r3(period(R_0, L_mean, c) * 10**3), 100 * (t - period(R_0, L_mean, c)*10**3) / (period(R_0, L_mean, c)*10**3)]
+  [c * 10**6, t, r3(period(R_0, L_mean, c) * 10**3), r2(abs(100 * (t - period(R_0, L_mean, c)*10**3) / (period(R_0, L_mean, c)*10**3)))]
   for [c, t] in capacitance_period
 ]
+
+def period_thomson(c): return 2*np.pi*np.sqrt(L_mean * c)
+
+def table_t_row(c):
+  t_th = period_thomson(c)
+  t_t = period(R_0, L_mean, c)
+  delta = abs(100 * (t_t - t_th) / t_t)
+  return [c * 10**6, r3(t_t * 10**3), r3(t_th * 10**3), r2(delta)]
+
+table_t = [table_t_row(c) for [c, _] in capacitance_period]
 \end{pycode}
 
-\py{latex_table(table2, ['$C$, мкФ', '$T_{\\textup{э}}$, мс', '$T_{\\textup{т}}$, мс', '$\\delta$'])}
+\py{latex_table(table2, ['$C$, мкФ', '$T_{\\textup{э}}$, мс', '$T_{\\textup{т}}$, мс', '$\\delta T$, %'])}
+
+Найдем отклонение вычисленного значения периода $T_\textup{т} = 2\pi / \sqrt{\frac{1}{LC} - \frac{R^2}{4L^2}}$
+от экспериментального как:
+$$\delta T = 100\% \cdot |\frac{T_\textup{э} - T_\textup{т}}{T_\textup{т}}|$$
+
+При использовании формулы Томсона ($T = 2\pi\sqrt{LC}$) получаются следующие значения:
+
+\py{latex_table(table_t, ['$C$, мкФ', '$T_{\\textup{т}}$, мс', '$T_{\\textup{томс}}$, мс', '$\\delta T_\\textup{т-томс}$, %'])}
 
 \subsection*{Зависимость периода колебаний $T$ от емкости конденсатора $C$}
 
