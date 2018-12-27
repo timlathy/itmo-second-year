@@ -174,15 +174,14 @@ $$L = \frac{\pi^2 C R^2}{l^2}$$
 Усредним полученные результаты:
 
 \begin{pycode}
-L_mean = np.mean(np.array(table1)[:11, 7].astype(float))
+L_mean = np.mean(np.array(table1)[:11, 7].astype(float)) * 10**-3
 \end{pycode}
 
-$$L_{ср} = \py{r3(L_mean)} \textup{ мГн}$$
+$$L_{ср} = \py{r3(L_mean * 10**3)} \textup{ мГн}$$
 
 \subsection*{Зависимость добротности контура $Q$ от его сопротивления $R$}
 
 \begin{pycode}
-
 rs, qs = np.array([[r + R_0, q_factor(n, u0, un)] for [r, _, u0, un, n] in discharge_resistance_table]).T.tolist()
 plt.figure(figsize=(7, 4))
 plt.plot(rs, qs, '-o')
@@ -203,7 +202,9 @@ plt.savefig('rq_plot.pdf', bbox_inches='tight')
 $R_M = 0 \textup{ Ом},\ R = R_0 = \py{r2(R_0)} \textup{ Ом}$ как: 
 
 \begin{pycode}
-T_0 = (np.pi * 2) / np.sqrt((1 / (L * C_1)) - (R_0**2 / (4 * L**2)))
+def period(r, l, c): return (np.pi * 2) / np.sqrt((1 / (l * c)) - (r**2 / (4 * l**2)))
+
+T_0 = period(R_0, L, C_1)
 \end{pycode}
 
 $$T = \frac{2\pi}{\sqrt{\frac{1}{LC} - \frac{R^2}{4L^2}}} = \py{r2(T_0 * 10**3)}$$
@@ -246,5 +247,41 @@ def delta_t():
 
 \noindent
 $$\delta_{\textup{т}} = \py{r3(delta_t())}$$
+
+\subsection*{Период колебаний и емкость конденсатора}
+
+\begin{pycode}
+capacitance_period = [
+  [0.022 * 10**-6, 1],
+  [0.033 * 10**-6, 1.2],
+  [0.047 * 10**-6, 1.3],
+  [0.47 * 10**-6, 4.2]
+]
+
+table2 = [
+  [c * 10**6, t, r3(period(R_0, L_mean, c) * 10**3), 100 * (t - period(R_0, L_mean, c)*10**3) / (period(R_0, L_mean, c)*10**3)]
+  for [c, t] in capacitance_period
+]
+\end{pycode}
+
+\py{latex_table(table2, ['$C$, мкФ', '$T_{\\textup{э}}$, мс', '$T_{\\textup{т}}$, мс', '$\\delta$'])}
+
+\subsection*{Зависимость периода колебаний $T$ от емкости конденсатора $C$}
+
+\begin{pycode}
+cs, t1s, t2s = np.array([[c, t1, t2] for [c, t1, t2, _] in table2]).T.tolist()
+plt.figure(figsize=(7, 4))
+plt.plot(cs, t1s, '-o')
+plt.plot(cs, t2s, '-o')
+#plt.axis((0, 0.5, 0, 0.5))
+plt.grid()
+plt.xlabel('Емкость конденсатора $C$, мкФ', fontsize=12)
+plt.ylabel('Период колебаний $T$, мс', fontsize=12)
+plt.savefig('ct_plot.pdf', bbox_inches='tight')
+\end{pycode}
+
+\begin{figure}[H]
+\includegraphics[width=0.8\textwidth]{ct_plot.pdf}
+\end{figure}
 
 \end{document}
