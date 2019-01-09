@@ -35,21 +35,6 @@
 
 \end{titlepage}
 
-\section*{Введение}
-
-\subsection*{Цель работы}
-
-\subsection*{Требуемое оборудование и материалы}
-
-\begin{enumerate}
-\item Генератор напряжений ГН1
-\item Осциллограф ОЦЛ2
-\item Стенд с объектом исследования С3-ЭМ01
-\item Проводники Ш4/Ш2 (5 шт), Ш2/Ш2 (3 шт), 2Ш4/BNC (2 шт)
-\end{enumerate}
-
-\subsection*{Рабочие формулы и исходные формулы}
-
 \section*{Ход работы}
 
 \subsection*{Исходные параметры}
@@ -129,13 +114,47 @@ def approx_coeffs_r_l_dependence():
 
 R_0 = -approx_resistance_at_log_decr(0)
 
+def d_log_decr(n, u0, un): return log_decr(n, u0, un) * (1 / u0 + 1 / un)
+
+def d_q_factor(n, u0, un):
+  return ((4 * np.exp(2 * log_decr(n, u0, un)) * np.pi) / (-1 + np.exp(2 * log_decr(n, u0, un)))**2) * d_log_decr(n, u0, un)
+
+def d_inductance(r_m, n, u0, un):
+  deriv_l = (2*np.pi**2 * C_1 * (r_m + R_0)**2) / log_decr(n, u0, un)**3
+  deriv_c = (np.pi**2 * (r_m + R_0)**2) / log_decr(n, u0, un)**2
+  return d_log_decr(n, u0, un) * deriv_l + (0.0022 * 10**-6) * deriv_c
+
 table1 = [
-  [r, t, u0, un, n, log_decr(n, u0, un), q_factor(n, u0, un), r3(inductance(C_1, r, n, u0, un) * 10**3) if r <= 100 else '-']
+  [
+    r, t, u0, un, n,
+    f'${r2(log_decr(n, u0, un))} \\pm {r2(d_log_decr(n, u0, un))}$',
+    f'${r2(q_factor(n, u0, un))} \\pm {r2(d_q_factor(n, u0, un))}$',
+    f'${r2(inductance(C_1, r, n, u0, un) * 10**3)} \\pm {r2(d_inductance(r, n, u0, un) * 10**3)}$' if r <= 100 else ''
+  ]
   for [r, t, u0, un, n] in discharge_resistance_table
 ]
 \end{pycode}
 
 \py{latex_table(table1, ['$R_{M}$, Ом', '$T$, мс', '$2U_i$, дел', '$2U_{i+n}$, дел', '$n$', '$\\lambda$', '$Q$', '$L$, мГн'])}
+
+Погрешность вычисления логарифмического декремента затухания $\lambda = \frac{1}{n} \ln\frac{U_i}{U_{i+n}}$
+с учетом приборных погрешностей находится как:
+
+$$\Delta\lambda = \lambda(\frac{\Delta U}{U_i} + \frac{\Delta U}{U_{i+n}}),\ \Delta U = 1\textup{ дел}$$
+
+Для добротности контура $Q = \frac{2\pi}{1 - e^{-2\lambda}}$ найдем погрешность как:
+
+$$\Delta Q = \frac{\partial Q}{\partial\lambda}\Delta\lambda = \frac{(4e^{2\lambda}\pi)}{(-1 + e^{2\lambda})^2}\Delta\lambda$$
+
+Для индуктивности $L = \frac{\pi^2CR^2}{\lambda^2}$ найдем погрешность как:
+
+$$\Delta L =
+  \frac{\partial L}{\partial\lambda}\Delta\lambda +
+  \frac{\partial L}{\partial C}\Delta C =
+  \frac{2\pi^2 C R^2}{\lambda^3}\Delta\lambda +
+  \frac{\pi^2 R^2}{\lambda^2}\Delta C
+  ,\ \Delta C = 0.0022 \textup{ мкФ}
+$$
 
 \subsection*{Зависимость логарифмического декремента $\lambda$ от сопротивления магазина $R_M$}
 
@@ -176,10 +195,16 @@ $$L = \frac{\pi^2 C R^2}{l^2}$$
 Усредним полученные результаты:
 
 \begin{pycode}
-L_mean = np.mean(np.array(table1)[:11, 7].astype(float)) * 10**-3
+l_table = [
+  [inductance(C_1, r, n, u0, un), d_inductance(r, n, u0, un)]
+  for [r, _, u0, un, n] in discharge_resistance_table
+  if r <= 100
+]
+L_mean = np.mean(np.array(l_table)[:, 0])
+d_L_mean = np.mean(np.array(l_table)[:, 1])
 \end{pycode}
 
-$$L_{ср} = \py{r3(L_mean * 10**3)} \textup{ мГн}$$
+$$L_\textup{ср} = \py{r3(L_mean * 10**3)} \pm \py{r3(d_L_mean * 10**3)} \textup{ мГн}$$
 
 \subsection*{Зависимость добротности контура $Q$ от его сопротивления $R$}
 
