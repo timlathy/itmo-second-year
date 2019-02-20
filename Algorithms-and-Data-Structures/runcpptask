@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+# Compiles and runs a C++ task solution, providing it valid input
+# Usage: runcpptask <task>
+# where: <task> is the input file,
+#        <task.cpp> is the source code file
+
+set -e
+
+g++ -o /tmp/task -std=c++11 -Wall -pedantic "$1.cpp"
+/tmp/task < "$1"
