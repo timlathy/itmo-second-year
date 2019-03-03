@@ -2,6 +2,7 @@
 \departmentsubject{Кафедра вычислительной техники}{Системное программное обеспечение}
 \titleparts{Лабораторная работа №1}{Введение в UNIX}
 \students{Лабушев Тимофей Михайлович}
+\usepackage{multicol}
 
 \begin{document}
 
@@ -117,5 +118,71 @@
 непривилегированным пользователям (если они принадлежат к новой группе).
 
 \noindent\rule{\textwidth}{1pt}
+
+\texttt{less}: пейджер, аналог \texttt{more} с расширенным функционалом. Позволяет перемещаться вперед и назад не только по файлу, но и
+стандартному потоку ввода. Ключи, изменяющие поведение (к примеру, \texttt{-N} для отображения номеров строк), могут быть введены во время
+работы программы как команды.
+
+Взаимодействие с \texttt{less} похоже на работу в \texttt{vi}: команды \texttt{j} и \texttt{k} используются для построчной навигации;
+\texttt{g} для перехода в начало текста, \texttt{G} для перехода в конец; \texttt{/pattern} для текстового поиска вперед, \texttt{n} и \texttt{N}
+для прямого и обратного перемещения по результатам; \texttt{q} для выхода.
+
+\noindent\rule{\textwidth}{1pt}
+
+\texttt{split}: разделяет один файл на несколько частей, сохраняя их с названиями \texttt{[prefix]aa}, \texttt{[prefix]ab} и т.д.
+Первый аргумент указывает путь к файлу, второй — \texttt{[prefix]}, по умолчанию равный \texttt{x}.
+
+Режимы работы определяются следующими ключами:
+
+\begin{enumerate}
+\item \texttt{-b size}: максимальный размер каждой части фиксирован, указывается в байтах или единице, определяемой суффиксом (\texttt{KB}, \texttt{MB});
+\item \texttt{-l count}: максимальное количество строк в каждой части фиксировано;
+\item \texttt{-n count}: количество частей фиксировано.
+\end{enumerate}
+
+Без аргументов утилита считывает стандартный поток ввода и разбивает его на части по 1000 строк.
+
+\noindent\rule{\textwidth}{1pt}
+
+\texttt{join}: соединяет строки из двух файлов, совпадающие по полю. Поле — часть строки, отделенная символом;
+по умолчанию разделителем считаются пробел и табуляция, задается ключом \texttt{-t}. Номера полей определяются
+ключами \texttt{-1} и \texttt{-2} для первого и второго файла соответственно. Файлы должны быть отсортированы по
+полю, которое используется для соединения.
+
+В качестве примера соединим два CSV файла:
+
+\begin{multicols}{2}
+\noindent\textit{characters.csv}
+\begin{verbatim}
+Name,Gender
+Bob,M
+Alice,F
+Charlie,M
+Eve,F
+Walter,M
+\end{verbatim}
+
+\noindent\textit{roles.csv}
+\begin{verbatim}
+Role,Name
+Sender,Alice
+Receiver,Bob
+Warden,Walter
+Third Participant,Charlie
+Eavesdropper,Eve
+\end{verbatim}
+\end{multicols}
+
+Вывод команды \texttt{join -t , -1 1 -2 2 {\textbackslash}} \\
+\texttt{<(tail -n +2 characters.csv | sort) {\textbackslash}} \\
+\texttt{<(tail -n +2 roles.csv | sort -t , -k 2)}:
+
+\begin{verbatim}
+Alice,F,Sender
+Bob,M,Receiver
+Charlie,M,Third Participant
+Eve,F,Eavesdropper
+Walter,M,Warden
+\end{verbatim}
 
 \end{document}
