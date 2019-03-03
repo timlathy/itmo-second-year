@@ -220,4 +220,75 @@ Walter,M,Warden
 
 \noindent\rule{\textwidth}{1pt}
 
+\texttt{cmp} (сокр. \textit{compare}): сравнивает содержание двух файлов. Если файлы одинаковы,
+программа завершается без текстового вывода с кодом 0. В противном случае печатается байт и строка,
+с которых содержание различается. Необязательными аргументами являются отступы от начала первого и второго файлов,
+содержание до которых не учитывается при сравнении.
+
+\texttt{diff} (сокр. \textit{difference}): построчно сравнивает содержание файлов, выводя все отличия в специальном формате.
+
+В качестве примера сравним следующие файлы:
+
+\begin{multicols}{2}
+\noindent\textit{target1}
+\begin{verbatim}
+original file
+we may need to modify this latr
+who knows
+
+removed paragraph
+
+\end{verbatim}
+
+\noindent\textit{target2}
+\begin{verbatim}
+prepended
+paragraph
+
+original file
+we may need to modify this later
+who knows
+\end{verbatim}
+\end{multicols}
+
+Вывод \texttt{diff target1 target2}:
+
+\begin{verbatim}
+0a1,3
+> prepended
+> paragraph
+> 
+2c5
+< we may need to modify this latr
+---
+> we may need to modify this later
+4,5d6
+< 
+< removed paragraph
+\end{verbatim}
+
+\texttt{a} обозначает добавленные строки, \texttt{d} — удаленные, \texttt{c} —
+измененные. Перед действием помечена строка в первом (исходном файле),
+после действия — во втором. \texttt{<} указывает на строку из первого файла,
+\texttt{>} — из второго.
+
+\noindent\rule{\textwidth}{1pt}
+
+\texttt{patch}: применяет файл, полученный в результате работы команды \texttt{diff},
+к одному или нескольким исходным файлам для получения измененных вариантов.
+
+\noindent\rule{\textwidth}{1pt}
+
+\texttt{sort}: построчно сортирует указанные текстовые файлы или стандартный поток ввода.
+По умолчанию для сортировки используется вся строка. Ключ \texttt{-k} позволяет
+выбрать из нее отдельное поле, разделенное пробелом или табуляцией. Для смены разделителя
+используется ключ \texttt{-t}. Для сортировки по числовому значению необходим ключ \texttt{-n}.
+Сортировка производится в порядке возрастания; изменение на противополжный производится ключом \texttt{-r}.
+
+\texttt{uniq}: сокращает подряд идущие повторяющиеся строки до одной.
+
+\noindent\rule{\textwidth}{1pt}
+
+\texttt{echo}:
+
 \end{document}
