@@ -375,9 +375,11 @@ $ sort file | uniq -c | sort -rn | head -n 1
 
 \noindent\rule{\textwidth}{1pt}
 
-\texttt{getent}: ...
+\texttt{getent}: возвращает информацию из определенной базы данных (системного текстового файла — \texttt{passwd}, \texttt{groups} и др.).
+Возможен выбор по ключу, например, имени пользователя из \texttt{passwd}.
 
-\texttt{xargs}: ...
+\texttt{xargs}: преобразует стандартный поток ввода в аргументы для указанной команды и исполняет ее.
+Не является фильтром.
 
 \section*{Атрибуты файлов, права доступа}
 
@@ -442,12 +444,6 @@ $ cat <(tail -n 2 file) <(head -n 5 file) | paste -sd ' ' | tr -s ' ' >&2
 no one would guess the answer to this code
 \end{verbatim}
 
-Затем обработать так, чтобы на стандартный поток ошибок была выведена строка "programming is not for impatient man".
-
-\begin{verbatim}
-$ dunno
-\end{verbatim}
-
 \section*{Дополнительное заданиe №2}
 
 Необходимо обработать \textit{file} так, чтобы на стандартный поток ошибок была выведена строка "answer to THAT code -- no one would guess".
@@ -456,13 +452,5 @@ $ dunno
 $ tail -n +3 file | paste -sd ' ' | sed 's/this code/THAT code --/' >&2
 answer to THAT code -- no one would guess
 \end{verbatim}
-
-\section*{Вывод}
-
-WIP
-
-На месте пути к файлу принимающим его командам может быть передан \texttt{-}, который будет заменен
-содержанием стандартного потока ввода.
-
 
 \end{document}
