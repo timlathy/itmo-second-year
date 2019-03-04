@@ -388,6 +388,41 @@ lrwxrwxrwx. 1 user group  4 Mar  4 00:00 text_symlink -> text
 
 Пятый столбец равен размеру файла в байтах, для директорий — размеру метаданных, то есть имен файлов, содержащихся в них.
 
+\section*{Дополнительное заданиe №1}
+
+Файл, сформированный командой:
+\begin{verbatim}
+$ echo '
+the
+answer
+to this
+code
+no one
+would guess' > file
+\end{verbatim}
+
+Необходимо обработать так, чтобы на стандартный поток ошибок была выведена строка "no one would guess the answer to this code".
+
+\begin{verbatim}
+$ cat <(tail -n 2 file) <(head -n 5 file) | paste -sd ' ' | tr -s ' ' >&2
+no one would guess the answer to this code
+\end{verbatim}
+
+Затем обработать так, чтобы на стандартный поток ошибок была выведена строка "programming is not for impatient man".
+
+\begin{verbatim}
+$ dunno
+\end{verbatim}
+
+\section*{Дополнительное заданиe №2}
+
+Необходимо обработать \textit{file} так, чтобы на стандартный поток ошибок была выведена строка "answer to THAT code -- no one would guess".
+
+\begin{verbatim}
+$ tail -n +3 file | paste -sd ' ' | sed 's/this code/THAT code --/' >&2
+answer to THAT code -- no one would guess
+\end{verbatim}
+
 \section*{Вывод}
 
 WIP
