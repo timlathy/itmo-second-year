@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+( cd forthress; cat ../collatz.frt - | ./start )
