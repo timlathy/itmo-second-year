@@ -4,7 +4,7 @@ import numpy
 import subprocess
 
 FORTH_WORD = 'is-prime'
-PATH_TO_FRT = 'numeric.frt'
+PATH_TO_FRT = 'exercises.frt'
 
 # https://stackoverflow.com/a/3035188
 def primes(n):

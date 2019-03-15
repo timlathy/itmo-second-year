@@ -1,4 +1,49 @@
-include ../collatz.frt
+0 constant false
+1 constant true
+
+( Task 3 )
+
+: is-even 2 % not ;
+: is-odd 2 % ;
+
+( Task 4 )
+
+: is-prime dup 4 <
+    ( n [n < 4] )
+    if
+        1 > ( [1 > n] )
+    else
+        dup is-even ( n even? )
+        if ( even numbers greater than 2 are not primes )
+            drop false ( false )
+        else
+            3 >r ( n ) ( i )
+            repeat
+                dup r@ % ( n [n % i] ) ( i )
+                if ( n % i != 0 )
+                    dup r@ dup * ( n n [i^2] ) ( i )
+                    > ( n [n > i^2] ) ( i )
+                    if
+                        r> 2 + >r ( n ) ( [i + 2] )
+                        false
+                        ( n finished? )
+                    else
+                        true true
+                        ( n prime? finished? )
+                    then
+                else
+                    false true
+                    ( n prime? finished? )
+                then
+            until
+            ( n prime? ) ( i )
+            r> drop
+            ( n prime? ) ( )
+            swap drop
+            ( prime? ) ( )
+        then
+    then
+;
 
 ( Task 5 )
 
@@ -51,4 +96,27 @@ include ../collatz.frt
     0 swap
     c! ( write the null terminator )
     r> ( str3 ) ( )
+;
+
+( Task 8 )
+
+: collatz-step ( n )
+    dup is-odd
+    if
+        3 * 1 + ( [3n + 1] )
+    else
+        2 / ( [n / 2] )
+    then
+;
+
+: collatz ( n )
+    dup . cr
+    dup 1 >
+    if
+        repeat
+            collatz-step
+            dup . cr
+            dup 1 >
+        not until
+    then
 ;
