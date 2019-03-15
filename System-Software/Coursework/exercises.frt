@@ -3,13 +3,13 @@
 
 ( Task 3 )
 
-: is-even 2 % not ;
-: is-odd 2 % ;
+: is-even 2 % not ; ( n -- even? )
+: is-odd 2 % ; ( n -- odd? )
 
 ( Task 4 )
 
-: is-prime dup 4 <
-    ( n [n < 4] )
+: is-prime ( n -- prime? )
+    dup 4 < ( n [n < 4] )
     if
         1 > ( [1 > n] )
     else
@@ -53,7 +53,7 @@
     c! ( addr )
 ;
 
-: print-bool-char ( char addr -- )
+: print-bool-char ( addr -- )
     c@ .
 ;
 
@@ -100,7 +100,7 @@
 
 ( Task 8 )
 
-: collatz-step ( n )
+: collatz-step ( n_i -- n_{i+1} )
     dup is-odd
     if
         3 * 1 + ( [3n + 1] )
@@ -109,7 +109,7 @@
     then
 ;
 
-: collatz ( n )
+: collatz ( n -- 1 )
     dup . cr
     dup 1 >
     if
