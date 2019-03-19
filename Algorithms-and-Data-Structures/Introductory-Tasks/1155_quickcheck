@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+NONADJ_IDXS = [0, 2, 5, 7]
+NONADJ_COMPL_IDXS = [1, 3, 4, 6]
+VNAME_MAP = ('A'..'H').zip(0..8).to_h
+
+def generate_input
+  vertices = Array.new(8) do |i|
+    if NONADJ_IDXS.include? i
+      rand(0..6)
+    else
+      0
+    end
+  end
+
+  nonadj_count = NONADJ_IDXS.map { |i| vertices[i] }.sum
+  nonadj_compl_count = 0
+
+  NONADJ_COMPL_IDXS.each do |i|
+    vertices[i] = rand(0..(nonadj_count - nonadj_compl_count))
+    nonadj_compl_count += vertices[i]
+  end
+
+  input = vertices.join(' ')
+  comp_impossible = nonadj_count != nonadj_compl_count
+
+  IO.write('1155', input)
+
+  [vertices, input, comp_impossible]
+end
+
+loop do
+  vertices, input, comp_impossible = generate_input
+  puts "#{input} : expecting #{comp_impossible ? '"impossible"' : 'total count = 0'}"
+
+  IO.popen("../runcpptask 1155").each do |line|
+    line.chomp!
+    
+    if line == 'IMPOSSIBLE'
+      if comp_impossible
+        puts '=> passed'
+        break
+      else
+        puts '=> failed: impossible computation reported'
+        fail
+      end
+    end
+
+    a, b, action = line.chars
+    if action == '-'
+      vertices[VNAME_MAP[a]] -= 1
+      vertices[VNAME_MAP[b]] -= 1
+    else
+      vertices[VNAME_MAP[a]] += 1
+      vertices[VNAME_MAP[b]] += 1
+    end
+  end
+
+  if !comp_impossible
+    if vertices.sum == 0
+      puts '=> passed'
+    else
+      puts "=> failed: resulting vertex array is #{vertices}"
+      fail
+    end
+  end
+end
+
