@@ -14,29 +14,35 @@ module fsm(
     localparam S2 = 2'b10;
     localparam S3 = 2'b11;
     
-    always @(posedge clk)
+    always@(posedge clk) begin
         if (rst) begin
             state = S0;
             next_state = S0;
         end
-        else
+        else begin
             state = next_state;
-    
-    always@(posedge clk)
-        case (state)
-            S0:
-                if (a[1]) next_state = S1;
-            S1:
-                if (a[0]) next_state = S0;
-                else if (!a[1]) next_state = S2;
-            S2:
-                if (a[0]) next_state = S3;
-            S3:
-                if (!a[0]) next_state = S1;
-                else if (a[0] && a[1]) next_state = S0;
-            default:
-                next_state = state;
-        endcase
+            case (state)
+                S0:
+                    if (a[1])
+                        next_state = S1;
+                S1:
+                    if (a[0])
+                        next_state = S0;
+                    else if (!a[1])
+                        next_state = S2;
+                S2:
+                    if (a[0])
+                        next_state = S3;
+                S3:
+                    if (!a[0])
+                        next_state = S1;
+                    else if (a[0] && a[1])
+                        next_state = S0;
+                default:
+                    next_state = state;
+            endcase
+        end
+    end
     
     always@(posedge clk)
         case (state)
