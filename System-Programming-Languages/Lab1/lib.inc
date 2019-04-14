@@ -10,8 +10,8 @@ global print_string
 global print_char
 global print_newline
 
-global exit
-global panic
+global system_exit
+global system_panic
 
 global read_char
 global read_word
@@ -111,22 +111,22 @@ print_string:
     syscall
     ret
 
-; ===== exit =====
+; ===== system_exit =====
 ;
 ; Terminates the program with an exit code of 0 (indicating success).
-exit:
+system_exit:
     mov rax, 60        ; syscall (60 = exit)
     mov rdi, 0         ; return code
     syscall
 
-; ===== panic =====
+; ===== system_panic =====
 ;
 ; Prints an error string to stderr and terminates the program
 ; with an exit code of 1.
 ;
 ; Inputs:
 ; * rdi — pointer to the first character of a null-terminated error string
-panic:
+system_panic:
     call string_length ; compute the length of the string
     mov rdx, rax       ; string length
     mov rsi, rdi       ; pointer to the string buffer

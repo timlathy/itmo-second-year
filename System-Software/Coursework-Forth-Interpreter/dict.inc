@@ -1,3 +1,5 @@
+; vim: syntax=nasm
+
 %define __dict_prev_word__ 0
 
 ; Forth dictionary:
