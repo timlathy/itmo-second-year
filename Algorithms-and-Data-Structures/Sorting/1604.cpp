@@ -31,7 +31,7 @@ int main() {
 
   std::sort(groups.begin(), groups.end(), sort_groups_descending);
 
-  unsigned int previously_chosen_index = -1;
+  unsigned short previously_chosen_index = -1;
 
 // Pick the group with the highest frequency that hasn't been chosen the last time
 Loop_Find_Next_From_Another_Group:
@@ -44,7 +44,7 @@ Loop_Find_Next_From_Another_Group:
       // Ensure that the groups are always sorted by their frequency
       auto next_group = std::next(group);
       if (next_group != groups.end() && group->frequency < next_group->frequency) {
-        std::iter_swap(group, std::next(group));
+        std::iter_swap(group, next_group);
       }
 
       goto Loop_Find_Next_From_Another_Group;
@@ -52,9 +52,8 @@ Loop_Find_Next_From_Another_Group:
   }
 
   // At this point, there's either no groups left or just one.
-  // In the latter case have no choice but to repeat it.
-  // (It'll always be the first group because we keep the groups sorted by
-  // frequency)
+  // In the latter case we have no choice but to repeat it.
+  // (It'll always be the first group because we keep the groups sorted by frequency)
   for (unsigned short freq = 0; freq < groups[0].frequency; ++freq) {
     std::cout << groups[0].index << " ";
   }
