@@ -2,8 +2,6 @@
 #include <iostream>
 #include <vector>
 
-// TODO: explain the algorithm & implementation
-
 struct Point {
   int x;
   int y;
@@ -19,6 +17,7 @@ struct Line {
 };
 
 int main() {
+  // Given n points
   unsigned short n;
   std::cin >> n;
 
@@ -28,11 +27,18 @@ int main() {
     std::cin >> points[i].x >> points[i].y;
   }
 
+  // Find two points such that the line passing through them
+  // divides the entire set of points into two equally sized parts.
+
+  // First, we find the most distant point
   auto most_distant = std::min_element(points.begin(), points.end());
   unsigned short most_distant_index = std::distance(points.begin(), most_distant);
 
+  // Then we compute line slopes between the point we picked
+  // and each of the remaining ones.
   std::vector<Line> lines;
   lines.reserve(n - 1);
+
   for (auto point = points.begin(); point < points.end(); ++point) {
     if (point != most_distant) {
       Line line;
@@ -42,6 +48,8 @@ int main() {
     }
   }
 
+  // The line that's located in the middle (has the median slope)
+  // is the one we're looking for.
   std::sort(lines.begin(), lines.end());
 
   std::cout << most_distant_index + 1 << std::endl;
