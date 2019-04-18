@@ -1,0 +1,78 @@
+\documentclass[listings]{labreport}
+\departmentsubject{Кафедра вычислительной техники}{Системное программное обеспечение}
+\titleparts{Лабораторная работа №4}{Основы регулярных выражений}
+\students{Лабушев Тимофей Михайлович}
+\usepackage{multicol}
+
+\begin{document}
+
+\maketitlepage
+
+\section*{Задание №1}
+
+\begin{enumerate}
+\item Вывести все строки, содержащие строку Sun:
+\begin{verbatim}
+grep Sun /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки, где имена людей начинаются с J:
+\begin{verbatim}
+grep '^J' /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки, заканчивающиеся на 700:
+\begin{verbatim}
+grep '700$' /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки, которые не содержат 834:
+\begin{verbatim}
+grep -v 834 /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки, содержащие людей с днем рождения в декабре:
+\begin{verbatim}
+grep -E "^([^:]+:){3}12/" /usr/local/regexp/datebook
+\end{verbatim}
+
+\begin{small}
+  Дата рождения находится в третьем поле. Поля отделяются сиволом \texttt{:}.
+  Дата записана в американском формате, где первое число — месяц, числа разделены \texttt{/}.
+  \vspace{2mm}
+\end{small}
+
+\item Вывести все строки с телефонными номерами, начинающимися с 408:
+\begin{verbatim}
+grep "408-[0-9]\{3\}-[0-9]\{4\}" /usr/local/regexp/datebook
+\end{verbatim}
+
+\begin{small}
+  Формат телефонных номеров: \texttt{ddd-ddd-dddd}, где \texttt{d} — цифра.
+  \vspace{2mm}
+\end{small}
+
+\item Вывести все строки, содержащие последовательность символов из
+  заглавной буквы, четырех строчных букв, запятой, пробела и одной заглавной буквы:
+\begin{verbatim}
+grep -E "[A-Z][a-z]{4},[ ][A-Z]" /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки, в которых фамилия начинается с K или k:
+\begin{verbatim}
+grep -i "^\w\+ k" /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки с их порядковыми номерами, где последнее числовое поле записи состоит из шести цифр:
+\begin{verbatim}
+grep -nE ":[0-9]{6}$" /usr/local/regexp/datebook
+\end{verbatim}
+
+\item Вывести все строки, содержащие слова Lincoln или lincoln:
+\begin{verbatim}
+grep "[Ll]incoln" /usr/local/regexp/datebook
+\end{verbatim}
+
+\end{enumerate}
+
+\end{document}
