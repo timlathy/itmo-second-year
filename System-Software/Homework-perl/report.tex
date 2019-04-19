@@ -100,4 +100,40 @@
 
 \end{itemize}
 
+\section*{Написание шаблонов}
+
+\begin{itemize}
+\item не менее пяти маленьких латинских букв, либо буква \texttt{a}, если она стоит в начале строки
+
+\begin{verbatim}
+/[a-z]{5,}|^a/
+\end{verbatim}
+
+\item цифра \texttt{1} или слово \texttt{one} (в любом регистре)
+
+\begin{verbatim}
+/1|one/i
+\end{verbatim}
+
+\item число, возможно, дробное (с десятичной точкой)
+
+\begin{verbatim}
+/\d+(.\d+)?/
+\end{verbatim}
+
+\item любая буква, за которой следует гласная, повторяется еще раз (пример: \texttt{pop}, \texttt{fifth}, \texttt{daddy})
+
+\begin{verbatim}
+/([A-Za-z])[aeiouAEIOU]\1/
+\end{verbatim}
+
+\item хотя бы один \texttt{+}
+
+\begin{verbatim}
+/[+]+/
+/\++/
+\end{verbatim}
+
+\end{itemize}
+
 \end{document}
