@@ -4,6 +4,11 @@
 \students{Лабушев Тимофей Михайлович}
 \usepackage{multicol}
 
+\usepackage{etoolbox}
+\makeatletter
+\preto{\@verbatim}{\topsep=1pt \partopsep=1pt}
+\makeatother
+
 \begin{document}
 
 \maketitlepage
@@ -39,7 +44,6 @@ grep -E "^([^:]+:){3}12/" /usr/local/regexp/datebook
 \begin{small}
   Дата рождения находится в третьем поле. Поля отделяются сиволом \texttt{:}.
   Дата записана в американском формате, где первое число — месяц, числа разделены \texttt{/}.
-  \vspace{2mm}
 \end{small}
 
 \item Вывести все строки с телефонными номерами, начинающимися с 408:
@@ -49,7 +53,6 @@ grep "408-[0-9]\{3\}-[0-9]\{4\}" /usr/local/regexp/datebook
 
 \begin{small}
   Формат телефонных номеров: \texttt{ddd-ddd-dddd}, где \texttt{d} — цифра.
-  \vspace{2mm}
 \end{small}
 
 \item Вывести все строки, содержащие последовательность символов из
@@ -74,6 +77,7 @@ grep "[Ll]incoln" /usr/local/regexp/datebook
 \end{verbatim}
 \end{enumerate}
 
+\newpage
 \section*{Задание 2}
 
 С точки зрения интепретатора командной оболочки, \verb|grep regex file| —
