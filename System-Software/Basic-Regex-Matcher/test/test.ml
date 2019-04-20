@@ -7,8 +7,8 @@ let assert_expr_equal expected actual =
 let suite =
     "Parser" >::: [
         "symbols" >:: (fun _ ->
-            let sym = Symbol "h"
-            in assert_expr_equal sym (Symbol "h")
+            let sym = Character 'h'
+            in assert_expr_equal sym (Character 'h')
         )
     ]
 

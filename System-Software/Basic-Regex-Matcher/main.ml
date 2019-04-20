@@ -1,6 +1,6 @@
 open Lib.Types
 
 let () =
-    Symbol "h"
+    Character 'h'
     |> format_expr
     |> print_endline
