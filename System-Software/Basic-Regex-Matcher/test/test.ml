@@ -1,15 +1,14 @@
 open OUnit
-open Lib.Types
+open Lib
 
-let assert_expr_equal expected actual =
-    assert_equal expected actual ~printer:format_expr
+let parser_case regex (expected : Types.expr) = fun () ->
+    let parsed = Parser.parse_regex regex in
+    let expected_result : (Types.expr, string) result = Ok expected in
+    assert_equal expected_result parsed ~printer:Types.format_parse_result
 
 let suite =
     "Parser" >::: [
-        "symbols" >:: (fun _ ->
-            let sym = Character 'h'
-            in assert_expr_equal sym (Character 'h')
-        )
+        "char sequence" >:: parser_case "abcd" (Sequence "abcd")
     ]
 
 let _ = run_test_tt_main suite

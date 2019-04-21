@@ -1,6 +1,6 @@
 open Lib.Types
 
 let () =
-    Character 'h'
+    Sequence "h"
     |> format_expr
     |> print_endline

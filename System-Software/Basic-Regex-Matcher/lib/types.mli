@@ -6,6 +6,10 @@ type expr =
     | Grouping of expr
     | CharacterClass of char list
     | NegatedCharacterClass of char list
-    | Character of char
+    | Sequence of string
+
+type parse_result = (expr, string) result
 
 val format_expr : expr -> string
+
+val format_parse_result : parse_result -> string
