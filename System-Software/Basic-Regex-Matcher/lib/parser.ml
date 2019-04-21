@@ -89,6 +89,8 @@ and sequence input =
     in match gather_exprs [] input with
     | ([], _) ->
         NotMatched
+    | (expr :: [], rest) ->
+        Matched (expr, rest)
     | (exprs, rest) ->
         Matched (Types.Sequence (List.rev exprs), rest)
 and subexpression = function

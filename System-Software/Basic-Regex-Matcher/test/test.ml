@@ -16,22 +16,23 @@ let ch c : Types.char_class_entry = CharLiteral c
 let suite =
     "Parser" >::: [
         "char sequence" >::
-            parser_case "greps" (seq [lit "greps"]);
+            parser_case "greps" (lit "greps");
         "simple alternation" >::
             parser_case "rewind|that|its|so|cold" (alt [
-                seq [lit "rewind"]; seq [lit "that"]; seq [lit "its"]; seq [lit "so"]; seq [lit "cold"]
+                lit "rewind"; lit "that"; lit "its"; lit "so"; lit "cold"
             ]);
         "simple grouping" >::
             parser_case "(it|goes)|(it|goes|it|goes)|it|goes" (alt [
-                seq [grp (alt [seq [lit "it"]; seq [lit "goes"]])];
-                seq [grp (alt [seq [lit "it"]; seq [lit "goes"]; seq [lit "it"]; seq [lit "goes"]])];
-                seq [lit "it"]; seq [lit "goes"]
+                grp (alt [lit "it"; lit "goes"]);
+                grp (alt [lit "it"; lit "goes"; lit "it"; lit "goes"]);
+                lit "it";
+                lit "goes"
             ]);
         "character classes" >::: [
             "literals" >::
                 parser_case "ch[oa]se|that|l[aieou]fe" (alt [
                     seq [lit "ch"; chcls [ch 'o'; ch 'a']; lit "se"];
-                    seq [lit "that"];
+                    lit "that";
                     seq [lit "l"; chcls [ch 'a'; ch 'i'; ch 'e'; ch 'o'; ch 'u']; lit "fe"]
                 ])
         ]
