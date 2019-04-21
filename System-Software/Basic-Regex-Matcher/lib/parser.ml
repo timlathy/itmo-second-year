@@ -4,9 +4,9 @@ open Base
 
 pattern = alternation ;
 
-alternation = quantified expression , { "|" , quantified expression } ;
+alternation = sequence , { "|" , sequence } ;
 
-quantified expression = subexpression , [ quantifier ] ;
+sequence = { subexpression , [ quantifier ] }
 
 quantifier = "?" | "*" | "+" ;
 
@@ -14,8 +14,10 @@ subexpression = "(" , alternation , ")"
               | "[" , character class , "]"
               | { character literal } ;
 
-character class = "^" , { character literal }
-                | { character literal } ;
+character class = "^" , { character literal | character range }
+                | { character literal | character range } ;
+
+character range = character literal , "-" , character literal
 
 character literal = A-Za-z0-9 (* todo: punctuation & special chars *)
 
@@ -25,6 +27,12 @@ type intermediate =
     NotMatched
     | Matched of Types.expr * char list
     | Failed of string;;
+
+module Intermediate = struct
+    let map (f: Types.expr -> Types.expr) = function
+        | Matched (expr, input) -> Matched (f expr, input)
+        | other -> other
+end
 
 let is_character_literal = function
     | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> true
@@ -38,14 +46,30 @@ let required char = function
     | failed ->
         failed
 
-let char_sequence input =
+let literal input =
     input
     |> List.split_while ~f:is_character_literal
     |> (function
         | ([], _) -> NotMatched
-        | (seq, rest) -> Matched (Types.Sequence (String.of_char_list seq), rest))
+        | (seq, rest) -> Matched (Types.Literal (String.of_char_list seq), rest))
 
-let rec alternation input = match subexpression input with
+let character_class input =
+    let rec character_class_entries = function
+        | (acc, a :: '-' :: b :: rest) when not (Char.equal a ']') ->
+            let (next_entries, class_end) = character_class_entries (acc, rest)
+            in ((Types.CharRange (a, b)) :: next_entries, class_end)
+        | (acc, a :: rest) when not (Char.equal a ']') ->
+            let (next_entries, class_end) = character_class_entries (acc, rest)
+            in ((Types.CharLiteral a) :: next_entries, class_end)
+        | (acc, other) ->
+            (acc, other)
+    in match character_class_entries ([], input) with
+    | ([], _) ->
+        Failed ("Empty character class encountered at \"" ^ String.of_char_list input ^ "\"")
+    | (entries, rest) ->
+        Matched ((Types.CharClass entries), rest)
+
+let rec alternation input = match sequence input with
     | Matched (lhs, '|' :: alt) ->
         (match alternation alt with
         | Matched (Alternation rhss, rest) ->
@@ -56,10 +80,24 @@ let rec alternation input = match subexpression input with
         | _ ->
             Failed ("Expected an expression after the alternation (|) operator at \"" ^ String.of_char_list alt ^ "\""))
     | other -> other
-    and subexpression = function
-    | '(' :: a -> a |> alternation |> required ')'
-    | '[' :: _ -> Failed "unimplemented"
-    | input -> char_sequence input
+and sequence input =
+    let rec gather_exprs acc input' = match subexpression input' with
+        | Matched (expr, rest) ->
+            gather_exprs (expr :: acc) rest
+        | _ ->
+            (acc, input')
+    in match gather_exprs [] input with
+    | ([], _) ->
+        NotMatched
+    | (exprs, rest) ->
+        Matched (Types.Sequence (List.rev exprs), rest)
+and subexpression = function
+    | '(' :: a ->
+        a |> alternation |> required ')' |> Intermediate.map (fun e -> Grouping e)
+    | '[' :: cs ->
+        cs |> character_class |> required ']'
+    | input ->
+        literal input
 
 let pattern = alternation
 
