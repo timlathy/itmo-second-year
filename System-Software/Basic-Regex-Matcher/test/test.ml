@@ -8,7 +8,12 @@ let parser_case regex (expected : Types.expr) = fun () ->
 
 let suite =
     "Parser" >::: [
-        "char sequence" >:: parser_case "abcd" (Sequence "abcd")
+        "char sequence" >::
+            parser_case "abcd" (Sequence "abcd");
+        "simple alternation" >::
+            parser_case "rewind|that|its|so|cold" (Alternation [
+                Sequence "rewind"; Sequence "that"; Sequence "its"; Sequence "so"; Sequence "cold"
+            ])
     ]
 
 let _ = run_test_tt_main suite

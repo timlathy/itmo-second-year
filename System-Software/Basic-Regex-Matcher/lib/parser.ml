@@ -21,33 +21,54 @@ character literal = A-Za-z0-9 (* todo: punctuation & special chars *)
 
 *)
 
-type parsing_result = (Types.expr, string) Caml.result
-
-type intermediate_result = (Types.expr * char list, string) Caml.result
+type intermediate =
+    NotMatched
+    | Matched of Types.expr * char list
+    | Failed of string;;
 
 let is_character_literal = function
     | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> true
     | _ -> false
 
-let subexpression = function
-    | '(' :: alt -> Error "unimplemented"
-    | '[' :: charcls -> Error "unimplemented"
-    | charseq ->
-        charseq
-        |> List.split_while ~f:is_character_literal
-        |> (function
-            | ([], unparsed) -> Error
-                ("Expected one or more character literals, got \"" ^ String.of_char_list unparsed ^ "\"")
-            | (seq, rest) -> Ok
-                (Types.Sequence (String.of_char_list seq), rest))
+let required char = function
+    | Matched (expr, c :: rest) when Char.equal c char ->
+        Matched (expr, rest)
+    | Matched (_, input) ->
+        Failed ("Expected \"" ^ String.of_char char ^ "\" starting at \"" ^ String.of_char_list input ^ "\"")
+    | failed ->
+        failed
 
-let pattern = subexpression
+let char_sequence input =
+    input
+    |> List.split_while ~f:is_character_literal
+    |> (function
+        | ([], _) -> NotMatched
+        | (seq, rest) -> Matched (Types.Sequence (String.of_char_list seq), rest))
+
+let rec alternation input = match subexpression input with
+    | Matched (lhs, '|' :: alt) ->
+        (match alternation alt with
+        | Matched (Alternation rhss, rest) ->
+            (* Flatten binary alternation expressions into a single list *)
+            Matched (Alternation (lhs :: rhss), rest)
+        | Matched (rhs, rest) ->
+            Matched (Alternation ([lhs; rhs]), rest)
+        | _ ->
+            Failed ("Expected an expression after the alternation (|) operator at \"" ^ String.of_char_list alt ^ "\""))
+    | other -> other
+    and subexpression = function
+    | '(' :: a -> a |> alternation |> required ')'
+    | '[' :: _ -> Failed "unimplemented"
+    | input -> char_sequence input
+
+let pattern = alternation
 
 let parse_regex regex =
     regex
     |> String.to_list
     |> pattern
     |> (function
-        | Ok (expr, []) -> Ok expr
-        | Ok (_, unparsed) -> Error ("Unexpected \"" ^ String.of_char_list unparsed ^ "\" at the end of the expression")
-        | Error err -> Error err)
+        | Matched (expr, []) -> Ok expr
+        | Matched (_, unparsed) -> Error ("Unexpected \"" ^ String.of_char_list unparsed ^ "\" at the end of the expression")
+        | NotMatched -> Error "Invalid syntax"
+        | Failed err -> Error err)
