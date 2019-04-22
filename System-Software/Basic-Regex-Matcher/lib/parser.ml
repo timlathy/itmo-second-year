@@ -53,6 +53,21 @@ let literal input =
         | ([], _) -> NotMatched
         | (seq, rest) -> Matched (Types.Literal (String.of_char_list seq), rest))
 
+let rec quantify_subexpression expr = function
+    | '?' :: rest -> (quantify_with_precedence (fun e -> Types.ZeroOrOne e) expr, rest)
+    | '*' :: rest -> (quantify_with_precedence (fun e -> Types.ZeroOrMore e) expr, rest)
+    | '+' :: rest -> (quantify_with_precedence (fun e -> Types.OneOrMore e) expr, rest)
+    | input -> ([expr], input)
+and quantify_with_precedence q = function
+    | Types.Literal lit when String.length lit = 1 ->
+        [q (Types.Literal lit)]
+    | Types.Literal lit ->
+        let quantified_suffix = String.suffix lit 1
+        in let prefix = String.drop_suffix lit 1
+        in [q (Types.Literal quantified_suffix); Types.Literal prefix]
+    | expr ->
+        [q expr]
+
 let character_class input =
     let rec character_class_entries = function
         | (acc, a :: '-' :: b :: rest) when not (Char.equal a ']') ->
@@ -83,7 +98,8 @@ let rec alternation input = match sequence input with
 and sequence input =
     let rec gather_exprs acc input' = match subexpression input' with
         | Matched (expr, rest) ->
-            gather_exprs (expr :: acc) rest
+            let (quantified, rest) = quantify_subexpression expr rest
+            in gather_exprs (quantified @ acc) rest
         | _ ->
             (acc, input')
     in match gather_exprs [] input with

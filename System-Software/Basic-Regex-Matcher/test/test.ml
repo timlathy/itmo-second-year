@@ -13,6 +13,10 @@ let lit l : Types.expr = Literal l
 let chcls cc : Types.expr  = CharClass cc
 let ch c : Types.char_class_entry = CharLiteral c
 
+let zeroone e : Types.expr = ZeroOrOne e
+let zeromany e : Types.expr = ZeroOrMore e
+let onemany e : Types.expr = OneOrMore e
+
 let suite =
     "Parser" >::: [
         "char sequence" >::
@@ -35,7 +39,18 @@ let suite =
                     lit "that";
                     seq [lit "l"; chcls [ch 'a'; ch 'i'; ch 'e'; ch 'o'; ch 'u']; lit "fe"]
                 ])
-        ]
+            ];
+        "quantifiers" >::: [
+            "single chars" >::
+                parser_case "mid?night+lamp*" (seq [
+                    lit "mi"; zeroone (lit "d"); lit "nigh"; onemany (lit "t"); lit "lam"; zeromany (lit "p")
+                ]);
+            "expressions" >::
+                parser_case "(stucco)?cav[ei]*|a+" (alt [
+                    seq [zeroone (grp (lit "stucco")); lit "cav"; zeromany (chcls [ch 'e'; ch 'i'])];
+                    onemany (lit "a")
+                ])
+            ]
     ]
 
 let _ = run_test_tt_main suite
