@@ -9,7 +9,7 @@ module mul(
     input [7:0] b_in,
     
     output reg busy,
-    output reg [15:0] y
+    output reg [15:0] out
 );
     reg [7:0] a, b;
     reg [2:0] step;
@@ -27,13 +27,13 @@ module mul(
             busy <= 0;
         else if (start && !busy) begin
             busy <= 1;
-            step <= 4'h0;
+            step <= 0;
             a <= a_in;
             b <= b_in;
-            y <= 0;
+            out <= 0;
         end
         else if (busy) begin
-            y = y + shifted_part_sum;
+            out = out + shifted_part_sum;
             
             if (step == FinalStep)
                 busy <= 0;

@@ -8,7 +8,7 @@ module mul_testbench;
     
     mul m(
         .clk(clk_in), .rst(rst_in), .start(start_in), .a_in(a_in), .b_in(b_in),
-        .busy(busy_out), .y(mul_out)
+        .busy(busy_out), .out(mul_out)
     );
     
     initial begin
