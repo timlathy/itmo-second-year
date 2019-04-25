@@ -1,6 +1,8 @@
 `timescale 1ns / 1ps
 
 module mul_testbench;
+    parameter CLOCK_HALF_PERIOD = 500; // 1000ns = 100MHz
+    
     reg clk_in, rst_in, start_in;
     reg [7:0] a_in, b_in;
     wire busy_out;
@@ -13,7 +15,7 @@ module mul_testbench;
     
     initial begin
         clk_in = 0;
-        forever #8 clk_in = !clk_in; // alternate clock every 8ns
+        forever #CLOCK_HALF_PERIOD clk_in = !clk_in;
     end
     
     integer expected;

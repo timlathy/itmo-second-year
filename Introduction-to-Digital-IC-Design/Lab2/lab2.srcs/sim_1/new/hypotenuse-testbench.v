@@ -1,6 +1,8 @@
 `timescale 1ns / 1ps
 
 module hypotenuse_testbench;
+    parameter CLOCK_HALF_PERIOD = 500; // 1000ns = 100MHz
+
     reg clk_in, rst_in, start_in;
     reg [7:0] a_in, b_in;
     wire busy_out;
@@ -13,22 +15,24 @@ module hypotenuse_testbench;
 
     initial begin
         clk_in = 0;
-        forever #8 clk_in = !clk_in; // alternate clock every 8ns
+        forever #CLOCK_HALF_PERIOD clk_in = !clk_in;
     end
     
     integer test_i, test_expected, cycles_taken;
     
-    integer a_test [0:3];
-    integer b_test [0:3];
-    integer out_test [0:3];
+    localparam TestCount = 4;
+    
+    integer a_test [0:(TestCount - 1)];
+    integer b_test [0:(TestCount - 1)];
+    integer out_test [0:(TestCount - 1)];
     
     initial begin
         a_test[0] = 4; b_test[0] = 7; out_test[0] = 8;
         a_test[1] = 44; b_test[1] = 24; out_test[1] = 50;
         a_test[2] = 123; b_test[2] = 79; out_test[2] = 146;
-        a_test[3] = 241; b_test[3] = 254; out_test[3] = 350;
+        a_test[3] = 181; b_test[3] = 181; out_test[3] = 255;
         
-        for (test_i = 0; test_i < 4; test_i = test_i + 1) begin
+        for (test_i = 0; test_i < TestCount; test_i = test_i + 1) begin
             rst_in = 1;
             a_in = a_test[test_i];
             b_in = b_test[test_i];
