@@ -20,17 +20,28 @@ module hypotenuse_testbench;
     
     integer test_i, test_expected, cycles_taken;
     
-    localparam TestCount = 4;
+    localparam TestCount = 13;
     
     integer a_test [0:(TestCount - 1)];
     integer b_test [0:(TestCount - 1)];
     integer out_test [0:(TestCount - 1)];
     
     initial begin
-        a_test[0] = 4; b_test[0] = 7; out_test[0] = 8;
-        a_test[1] = 44; b_test[1] = 24; out_test[1] = 50;
-        a_test[2] = 123; b_test[2] = 79; out_test[2] = 146;
-        a_test[3] = 181; b_test[3] = 181; out_test[3] = 255;
+        a_test[0] = 0; b_test[0] = 0; out_test[0] = 0;
+        
+        a_test[1] = 0; b_test[1] = 1; out_test[1] = 1;
+        a_test[2] = 1; b_test[2] = 0; out_test[2] = 1;
+        a_test[3] = 1; b_test[3] = 1; out_test[3] = 1;
+        a_test[4] = 2; b_test[4] = 2; out_test[4] = 2;
+        a_test[5] = 4; b_test[5] = 7; out_test[5] = 8;
+        a_test[6] = 11; b_test[6] = 3; out_test[6] = 11;
+        a_test[7] = 44; b_test[7] = 24; out_test[7] = 50;
+        a_test[8] = 123; b_test[8] = 79; out_test[8] = 146;
+        a_test[9] = 140; b_test[9] = 180; out_test[9] = 228;
+        a_test[10] = 181; b_test[10] = 181; out_test[10] = 255;
+        
+        a_test[11] = 182; b_test[11] = 182; out_test[11] = 26;
+        a_test[12] = 200; b_test[12] = 200; out_test[12] = 120;
         
         for (test_i = 0; test_i < TestCount; test_i = test_i + 1) begin
             rst_in = 1;

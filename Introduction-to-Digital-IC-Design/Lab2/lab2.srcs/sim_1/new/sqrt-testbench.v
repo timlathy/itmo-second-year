@@ -21,7 +21,7 @@ module sqrt_testbench;
     integer x_sqrt;
     
     initial begin
-        for (x_sqrt = 1; x_sqrt < 255; x_sqrt = x_sqrt + 1) begin
+        for (x_sqrt = 0; x_sqrt < 255; x_sqrt = x_sqrt + 1) begin
             for (x_in = x_sqrt * x_sqrt; x_in < (x_sqrt + 1) * (x_sqrt + 1); x_in = x_in + 1) begin
                 repeat(1) @(posedge clk_in);
                 rst_in = 1'b1;
