@@ -35,7 +35,7 @@ module Intermediate = struct
 end
 
 let is_character_literal = function
-    | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' -> true
+    | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | ' ' -> true
     | _ -> false
 
 let required char = function

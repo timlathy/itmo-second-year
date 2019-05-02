@@ -24,13 +24,25 @@ let suite = [
         parser_case "rewind|that|its|so|cold" (alt [
             lit "rewind"; lit "that"; lit "its"; lit "so"; lit "cold"
         ]);
-    "simple grouping" >::
-        parser_case "(it|goes)|(it|goes|it|goes)|it|goes" (alt [
-            grp (alt [lit "it"; lit "goes"]);
-            grp (alt [lit "it"; lit "goes"; lit "it"; lit "goes"]);
-            lit "it";
-            lit "goes"
-        ]);
+    "grouping" >::: [
+        "simple" >::
+            parser_case "(it|goes)|(it|goes|it|goes)|it|goes" (alt [
+                grp (alt [lit "it"; lit "goes"]);
+                grp (alt [lit "it"; lit "goes"; lit "it"; lit "goes"]);
+                lit "it";
+                lit "goes"
+            ]);
+        "quantified" >::
+            parser_case "everything is (up|my?|slee+ves*)+ nothing" (seq [
+                lit "everything is ";
+                onemany (grp (alt [
+                    lit "up";
+                    seq [lit "m"; zeroone (lit "y")];
+                    seq [lit "sle"; onemany (lit "e"); lit "ve"; zeromany (lit "s")];
+                ]));
+                lit " nothing"
+            ])
+        ];
     "character classes" >::: [
         "literals" >::
             parser_case "ch[oa]se|that|l[aieou]fe" (alt [
