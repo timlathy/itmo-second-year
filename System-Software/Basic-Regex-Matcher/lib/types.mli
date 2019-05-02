@@ -8,7 +8,8 @@ type graph_edge_condition =
 
 type graph_node =
     | Node of (graph_edge_condition * graph_node) list
-    | Fail
+    | GroupStart of graph_node
+    | GroupEnd of graph_node
     | Finish
 
 val format_graph_edge : (graph_edge_condition * graph_node) -> string

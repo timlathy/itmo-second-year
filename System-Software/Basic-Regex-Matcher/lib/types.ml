@@ -10,12 +10,14 @@ type graph_edge_condition =
 
 type graph_node =
     | Node of (graph_edge_condition * graph_node) list
-    | Fail
+    | GroupStart of graph_node
+    | GroupEnd of graph_node
     | Finish
 
 let rec format_graph_node = function
-    | Fail -> "fail"
     | Finish -> "finish"
+    | GroupStart next -> "(group: " ^ format_graph_node next
+    | GroupEnd next -> ") -> " ^ format_graph_node next
     | Node edges -> edges
         |> List.map ~f:format_graph_edge
         |> String.concat ~sep:" "
