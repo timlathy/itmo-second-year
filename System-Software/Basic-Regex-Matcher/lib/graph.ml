@@ -29,6 +29,10 @@ let rec build_up_to next = function
             in Unconditional, { attrs; edges = edges @ [Unconditional, return_node] }
         )
         in { attrs = []; edges }
+    | Sequence (exp :: []) ->
+        build_up_to next exp
+    | Sequence (head :: rest) ->
+        let tail_expr = build_up_to next (Sequence rest) in build_up_to tail_expr head
     | e ->
         failwith ("unimplemented expr " ^ Types.format_expr e)
 

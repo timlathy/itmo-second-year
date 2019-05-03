@@ -31,6 +31,14 @@ let suite = [
         graph_case (notchcls [ch 'h'; chrng 'E' 'Y'; ch '^']) { node with edges = [
             CondNegated (CondEitherOf [CondLiteral "h"; CondCharInAsciiRange ('E', 'Y'); CondLiteral "^"]), finish
         ]};
+    "sequences" >::
+        graph_case (seq [lit "what"; chcls [ch 't']; lit "f"]) { node with edges = [
+            CondLiteral "what", { node with edges = [
+                CondEitherOf [CondLiteral "t"], { node with edges = [
+                    CondLiteral "f", finish
+                ]}
+            ]}
+        ]};
     "alternation" >::
         graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"]) { node with edges = [
             Unconditional, { node with edges = [
