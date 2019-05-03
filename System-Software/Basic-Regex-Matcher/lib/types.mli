@@ -12,6 +12,8 @@ type graph_node_attribute =
     | GroupStartNode
     | GroupEndNode
     | StepBackNode
+    | OptionalNode
+    | RepeatingNode
 
 type graph_node =
     { attrs: graph_node_attribute list;

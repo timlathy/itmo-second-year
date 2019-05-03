@@ -32,7 +32,17 @@ let rec build_up_to next = function
     | Sequence (exp :: []) ->
         build_up_to next exp
     | Sequence (head :: rest) ->
-        let tail_expr = build_up_to next (Sequence rest) in build_up_to tail_expr head
+        let tail_expr = build_up_to next (Sequence rest)
+        in build_up_to tail_expr head
+    | OneOrMore expr ->
+        let { attrs; edges } = build_up_to next expr
+        in { attrs = RepeatingNode :: attrs; edges }
+    | ZeroOrOne expr ->
+        let { attrs; edges } = build_up_to next expr
+        in { attrs = OptionalNode :: attrs; edges }
+    | ZeroOrMore expr ->
+        let { attrs; edges } = build_up_to next expr
+        in { attrs = OptionalNode :: RepeatingNode :: attrs; edges }
     | e ->
         failwith ("unimplemented expr " ^ Types.format_expr e)
 

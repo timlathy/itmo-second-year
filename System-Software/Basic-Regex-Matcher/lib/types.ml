@@ -14,6 +14,8 @@ type graph_node_attribute =
     | GroupStartNode
     | GroupEndNode
     | StepBackNode
+    | OptionalNode
+    | RepeatingNode
 
 type graph_node =
     { attrs: graph_node_attribute list;
@@ -34,6 +36,8 @@ and format_grap_edge_cond = function
     | Unconditional -> "always"
     | _ -> "???"
 and format_graph_attr = function
+    | OptionalNode -> "option"
+    | RepeatingNode -> "repeat"
     | MatchCompleteNode -> "finish"
     | GroupStartNode -> "group: "
     | GroupEndNode -> "endgroup"
