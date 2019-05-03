@@ -2,6 +2,9 @@
 
 ## Prerequisites
 
+* `clang-format`
+* [opam](http://opam.ocaml.org/doc/Install.html)
+
 ```sh
 opam install -y dune base ounit
 ```
