@@ -10,6 +10,7 @@ type graph_node_attribute =
     MatchCompleteNode
     | GroupStartNode
     | GroupEndNode
+    | StepBackNode
 
 type graph_node =
     { attrs: graph_node_attribute list;

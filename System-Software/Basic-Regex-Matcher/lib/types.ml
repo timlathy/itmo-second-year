@@ -12,6 +12,7 @@ type graph_node_attribute =
     MatchCompleteNode
     | GroupStartNode
     | GroupEndNode
+    | StepBackNode
 
 type graph_node =
     { attrs: graph_node_attribute list;
@@ -27,8 +28,9 @@ and format_graph_edge (edge : (graph_edge_condition * graph_node)) = match edge 
     | _ -> "unimplemented"
 and format_graph_attr = function
     | MatchCompleteNode -> "finish"
-    | GroupStartNode -> "group"
+    | GroupStartNode -> "group: "
     | GroupEndNode -> "endgroup"
+    | StepBackNode -> "stepback"
 
 (* Regex syntax tree types *)
 
