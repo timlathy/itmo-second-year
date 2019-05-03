@@ -8,22 +8,27 @@ type graph_edge_condition =
     | CondCharAscii of char
     | Unconditional
 
-type graph_node =
-    | Node of (graph_edge_condition * graph_node) list
-    | GroupStart of graph_node
-    | GroupEnd of graph_node
-    | Finish
+type graph_node_attribute =
+    MatchCompleteNode
+    | GroupStartNode
+    | GroupEndNode
 
-let rec format_graph_node = function
-    | Finish -> "finish"
-    | GroupStart next -> "(group: " ^ format_graph_node next
-    | GroupEnd next -> ") -> " ^ format_graph_node next
-    | Node edges -> edges
-        |> List.map ~f:format_graph_edge
-        |> String.concat ~sep:" "
+type graph_node =
+    { attrs: graph_node_attribute list;
+      edges: (graph_edge_condition * graph_node) list; }
+
+let rec format_graph_node { attrs; edges } =
+    let edge_display = edges |> List.map ~f:format_graph_edge |> String.concat ~sep: ", "
+    in let attrs_display = attrs |> List.map ~f:format_graph_attr |> String.concat ~sep: "+"
+    in "(" ^ attrs_display ^ edge_display ^ ")"
 and format_graph_edge (edge : (graph_edge_condition * graph_node)) = match edge with
-    | (CondLiteral lit, next) -> "\"" ^ lit ^ "\" -> " ^ (format_graph_node next)
+    | (CondLiteral lit, next) -> "\"" ^ lit ^ "\" -> " ^ format_graph_node next
+    | (Unconditional, next) -> format_graph_node next
     | _ -> "unimplemented"
+and format_graph_attr = function
+    | MatchCompleteNode -> "finish"
+    | GroupStartNode -> "group"
+    | GroupEndNode -> "endgroup"
 
 (* Regex syntax tree types *)
 

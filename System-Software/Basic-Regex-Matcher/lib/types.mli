@@ -6,11 +6,14 @@ type graph_edge_condition =
     | CondCharAscii of char
     | Unconditional
 
+type graph_node_attribute =
+    MatchCompleteNode
+    | GroupStartNode
+    | GroupEndNode
+
 type graph_node =
-    | Node of (graph_edge_condition * graph_node) list
-    | GroupStart of graph_node
-    | GroupEnd of graph_node
-    | Finish
+    { attrs: graph_node_attribute list;
+      edges: (graph_edge_condition * graph_node) list; }
 
 val format_graph_edge : (graph_edge_condition * graph_node) -> string
 
