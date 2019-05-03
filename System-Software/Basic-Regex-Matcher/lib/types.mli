@@ -1,13 +1,13 @@
 (* Regex graph types *)
 
 type graph_edge_condition =
-    CondLiteral of string
+    | CondEitherOf of graph_edge_condition list
+    | CondLiteral of string
     | CondCharInAsciiRange of char * char
-    | CondCharAscii of char
     | Unconditional
 
 type graph_node_attribute =
-    MatchCompleteNode
+    | MatchCompleteNode
     | GroupStartNode
     | GroupEndNode
     | StepBackNode

@@ -19,6 +19,10 @@ let suite = [
         graph_case (grp (lit "I see")) { groupstart with edges = [
             CondLiteral "I see", endgroupandfinish
         ]};
+    "one of characters in a class" >::
+        graph_case (chcls [ch 'i'; ch 'a'; ch 'm']) { node with edges = [
+            CondEitherOf [CondLiteral "i"; CondLiteral "a"; CondLiteral "m"], finish
+        ] };
     "alternation" >::
         graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"]) { node with edges = [
             Unconditional, { node with edges = [

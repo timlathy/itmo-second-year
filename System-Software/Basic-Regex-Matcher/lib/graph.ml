@@ -1,9 +1,17 @@
 open Base
 open Types
 
+let char_class_entries_condition (entries: Types.char_class_entry list) = entries
+    |> List.map ~f:(function
+        | CharLiteral c -> CondLiteral (String.of_char c)
+        | CharRange (a, b) -> CondCharInAsciiRange (a, b))
+    |> (fun entries -> CondEitherOf entries)
+
 let rec build_up_to next = function
     | Literal lit ->
         { attrs = []; edges = [CondLiteral lit, next] }
+    | CharClass entries ->
+        { attrs = []; edges = [char_class_entries_condition entries, next] }
     | Grouping grp ->
         let group_end = match next with
         | { edges = []; attrs } -> { next with attrs = GroupEndNode :: attrs }

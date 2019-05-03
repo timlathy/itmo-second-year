@@ -3,13 +3,13 @@ open Base
 (* Regex graph types *)
 
 type graph_edge_condition =
-    CondLiteral of string
+    | CondEitherOf of graph_edge_condition list
+    | CondLiteral of string
     | CondCharInAsciiRange of char * char
-    | CondCharAscii of char
     | Unconditional
 
 type graph_node_attribute =
-    MatchCompleteNode
+    | MatchCompleteNode
     | GroupStartNode
     | GroupEndNode
     | StepBackNode
@@ -22,10 +22,15 @@ let rec format_graph_node { attrs; edges } =
     let edge_display = edges |> List.map ~f:format_graph_edge |> String.concat ~sep: ", "
     in let attrs_display = attrs |> List.map ~f:format_graph_attr |> String.concat ~sep: "+"
     in "(" ^ attrs_display ^ edge_display ^ ")"
-and format_graph_edge (edge : (graph_edge_condition * graph_node)) = match edge with
-    | (CondLiteral lit, next) -> "\"" ^ lit ^ "\" -> " ^ format_graph_node next
-    | (Unconditional, next) -> format_graph_node next
-    | _ -> "unimplemented"
+and format_graph_edge ((cond, next) : (graph_edge_condition * graph_node)) =
+    format_grap_edge_cond cond ^ " -> " ^ format_graph_node next
+and format_grap_edge_cond = function
+    | CondLiteral lit -> "\"" ^ lit ^ "\""
+    | CondEitherOf conds ->
+        let conds_display = conds |> List.map ~f:format_grap_edge_cond |> String.concat ~sep: " | "
+        in "(" ^ conds_display ^ ")"
+    | Unconditional -> "always"
+    | _ -> "???"
 and format_graph_attr = function
     | MatchCompleteNode -> "finish"
     | GroupStartNode -> "group: "
