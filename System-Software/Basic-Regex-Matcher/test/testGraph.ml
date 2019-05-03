@@ -23,6 +23,10 @@ let suite = [
         graph_case (chcls [ch 'i'; ch 'a'; ch 'm']) { node with edges = [
             CondEitherOf [CondLiteral "i"; CondLiteral "a"; CondLiteral "m"], finish
         ] };
+    "complex character classes" >::
+        graph_case (chcls [ch 'i'; chrng 'a' 'z'; ch '9']) { node with edges = [
+            CondEitherOf [CondLiteral "i"; CondCharInAsciiRange ('a', 'z'); CondLiteral "9"], finish
+        ]};
     "alternation" >::
         graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"]) { node with edges = [
             Unconditional, { node with edges = [
