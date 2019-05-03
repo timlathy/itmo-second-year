@@ -2,6 +2,7 @@
 
 type graph_edge_condition =
     | CondEitherOf of graph_edge_condition list
+    | CondNegated of graph_edge_condition
     | CondLiteral of string
     | CondCharInAsciiRange of char * char
     | Unconditional

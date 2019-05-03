@@ -4,6 +4,7 @@ open Base
 
 type graph_edge_condition =
     | CondEitherOf of graph_edge_condition list
+    | CondNegated of graph_edge_condition
     | CondLiteral of string
     | CondCharInAsciiRange of char * char
     | Unconditional
@@ -29,6 +30,7 @@ and format_grap_edge_cond = function
     | CondEitherOf conds ->
         let conds_display = conds |> List.map ~f:format_grap_edge_cond |> String.concat ~sep: " | "
         in "(" ^ conds_display ^ ")"
+    | CondNegated cond -> "not (" ^ format_grap_edge_cond cond ^ ")"
     | Unconditional -> "always"
     | _ -> "???"
 and format_graph_attr = function

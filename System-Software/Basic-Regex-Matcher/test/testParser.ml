@@ -11,6 +11,7 @@ let seq s : Types.expr = Sequence s
 let grp g : Types.expr = Grouping g
 let lit l : Types.expr = Literal l
 let chcls cc : Types.expr  = CharClass cc
+let notchcls cc : Types.expr = NegatedCharClass cc
 let ch c : Types.char_class_entry = CharLiteral c
 let chrng a b : Types.char_class_entry = CharRange (a, b)
 
@@ -54,6 +55,10 @@ let suite = [
         "ranges" >::
             parser_case "[A-Hya-h0-89y]" (chcls [
                 chrng 'A' 'H'; ch 'y'; chrng 'a' 'h'; chrng '0' '8'; ch '9'; ch 'y'
+            ]);
+        "negated" >::
+            parser_case "[^^A-Z0-9.]" (notchcls [
+                ch '^'; chrng 'A' 'Z'; chrng '0' '9'; ch '.'
             ])
         ];
     "quantifiers" >::: [

@@ -27,6 +27,10 @@ let suite = [
         graph_case (chcls [ch 'i'; chrng 'a' 'z'; ch '9']) { node with edges = [
             CondEitherOf [CondLiteral "i"; CondCharInAsciiRange ('a', 'z'); CondLiteral "9"], finish
         ]};
+    "negated character classes" >::
+        graph_case (notchcls [ch 'h'; chrng 'E' 'Y'; ch '^']) { node with edges = [
+            CondNegated (CondEitherOf [CondLiteral "h"; CondCharInAsciiRange ('E', 'Y'); CondLiteral "^"]), finish
+        ]};
     "alternation" >::
         graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"]) { node with edges = [
             Unconditional, { node with edges = [

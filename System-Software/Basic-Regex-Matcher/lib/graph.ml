@@ -12,6 +12,8 @@ let rec build_up_to next = function
         { attrs = []; edges = [CondLiteral lit, next] }
     | CharClass entries ->
         { attrs = []; edges = [char_class_entries_condition entries, next] }
+    | NegatedCharClass entries ->
+        { attrs = []; edges = [CondNegated (char_class_entries_condition entries), next]}
     | Grouping grp ->
         let group_end = match next with
         | { edges = []; attrs } -> { next with attrs = GroupEndNode :: attrs }

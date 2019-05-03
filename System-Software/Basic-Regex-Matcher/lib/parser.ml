@@ -68,7 +68,7 @@ and quantify_with_precedence q = function
     | expr ->
         [q expr]
 
-let character_class input =
+let character_class input ~negated =
     let rec character_class_entries = function
         | (acc, a :: '-' :: b :: rest) when not (Char.equal a ']') ->
             let (next_entries, class_end) = character_class_entries (acc, rest)
@@ -81,6 +81,8 @@ let character_class input =
     in match character_class_entries ([], input) with
     | ([], _) ->
         Failed ("Empty character class encountered at \"" ^ String.of_char_list input ^ "\"")
+    | (entries, rest) when negated ->
+        Matched ((Types.NegatedCharClass entries), rest)
     | (entries, rest) ->
         Matched ((Types.CharClass entries), rest)
 
@@ -112,8 +114,9 @@ and sequence input =
 and subexpression = function
     | '(' :: a ->
         a |> alternation |> required ')' |> Intermediate.map (fun e -> Grouping e)
-    | '[' :: cs ->
-        cs |> character_class |> required ']'
+    | '[' :: cs -> (match cs with
+        | '^' :: cs -> cs |> character_class ~negated:true |> required ']'
+        | _ ->  cs |> character_class ~negated:false |> required ']')
     | input ->
         literal input
 
