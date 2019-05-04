@@ -10,5 +10,5 @@ let c_code_file_case (input : string) (code_path : string) = fun () ->
 
 let suite = [
     "literal match" >::
-        c_code_file_case "test?" "literals-optional.c"
+        c_code_file_case "1234567" "literals.c"
 ]
