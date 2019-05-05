@@ -3,7 +3,7 @@ open Base
 (* Compiled function result type *)
 
 type match_result =
-    { match_found: bool;
+    { matched_range: (int * int) option;
       groups: (int * int) list }
 
 (* Regex graph types *)

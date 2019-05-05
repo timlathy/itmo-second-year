@@ -4,7 +4,8 @@ struct match_group {
   int group_end;
 };
 struct match_result {
-  int match_found;
+  int match_start;
+  int match_end;
   int group_count;
   struct match_group* match_groups;
 };
@@ -28,7 +29,7 @@ s0:
 fail:
   if (++match_start < end)
     goto loop;
-  return (struct match_result){0, 0, groups};
+  return (struct match_result){0, 0, 0, groups};
 finish:
-  return (struct match_result){1, 0, groups};
+  return (struct match_result){match_start - str, pos - str, 0, groups};
 }

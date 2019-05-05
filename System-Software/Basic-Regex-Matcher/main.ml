@@ -2,11 +2,12 @@ open Lib
 open Lib.Types
 
 let apply_matcher str matcher =
-    let result = matcher str (String.length str) in
-    if result.match_found then
-        print_endline "Matched!"
-    else
+    match matcher str (String.length str) with
+    | { matched_range = None; _ } ->
         print_endline "No matches found"
+    | { matched_range = Some (range); _ } ->
+        let match_start, match_end = range in
+        print_endline ("Matched from " ^ string_of_int match_start ^ " to " ^ string_of_int match_end)
 
 let () =
     if Array.length (Sys.argv) != 3 then

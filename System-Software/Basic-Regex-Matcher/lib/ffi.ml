@@ -8,7 +8,8 @@ let () = seal c_match_group
 
 type c_match_result
 let c_match_result : c_match_result structure typ = structure "match_result"
-let c_match_found = field c_match_result "match_found" bool
+let c_match_start = field c_match_result "match_start" int
+let c_match_end = field c_match_result "match_end" int
 let c_group_count = field c_match_result "group_count" int
 let c_groups = field c_match_result "groups" (ptr c_match_group)
 let () = seal c_match_result
@@ -24,9 +25,11 @@ let rec read_groups acc remaining = function
         read_groups acc (remaining - 1) (c_ptr +@ 1)
 
 let convert_c_match_result c_result =
-    let match_found = getf c_result c_match_found in
-    let group_count = getf c_result c_group_count in
-    let groups = if match_found
-        then read_groups [] group_count (getf c_result c_groups)
-        else []
-    in Types.({ match_found; groups })
+    let match_start = getf c_result c_match_start
+    and match_end = getf c_result c_match_end in
+    match (match_start, match_end) with
+    | (0, 0) -> Types.({ matched_range = None; groups = [] })
+    | range ->
+        let group_count = getf c_result c_group_count in
+        let groups = read_groups [] group_count (getf c_result c_groups) in
+        Types.({ matched_range = Some range; groups })
