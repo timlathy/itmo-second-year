@@ -1,3 +1,4 @@
+#include <memory.h>
 #include <stdint.h>
 struct match_group {
   int group_start;

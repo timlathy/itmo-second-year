@@ -16,14 +16,15 @@ let format_c_code str =
     Stdlib.close_in ch_in;
     formatted
 
-let regex_to_c regex =
+let regex_to_c regex ~format_code =
     match Parser.parse_regex regex with
     | Ok syntax_tree ->
-        let c_code = syntax_tree
-        |> Graph.from_expr
-        |> Codegen.graph_to_c
-        |> format_c_code
-        in Ok c_code
+        let graph = Graph.from_expr syntax_tree in
+        let group_count = Graph.group_count graph in
+        let c_code = Codegen.graph_with_groups_to_c group_count graph in
+        if format_code
+            then Ok (format_c_code c_code)
+            else Ok c_code
     | Error err -> Error err
 
 let compile_c_to_temp_so code =
@@ -35,7 +36,7 @@ let compile_c_to_temp_so code =
     | _ -> Error "clang has exited with a non-zero status code"
 
 let compile_regex regex =
-    match regex_to_c regex with
+    match regex_to_c ~format_code:false regex with
     | Ok c_code -> (match compile_c_to_temp_so c_code with
         | Ok so_path ->
             Ok (Dl.dlopen ~filename:so_path ~flags:[Dl.RTLD_NOW])

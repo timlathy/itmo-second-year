@@ -1,4 +1,4 @@
-val regex_to_c : string -> (string, string) Caml.result
+val regex_to_c : string -> format_code:bool -> (string, string) Caml.result
 
 type match_handler = (string -> int -> Types.match_result) -> unit
 

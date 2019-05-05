@@ -61,13 +61,16 @@ and append_node nodes = function
         node :: nodes
     | n -> failwith ("unhandled node " ^ Types.format_graph_node n)
 
-let graph_to_c graph =
+let graph_with_groups_to_c group_count graph =
     let nodes = graph |> append_node [] |> String.concat ~sep:"\n" in
-    "#include <stdint.h>\n" ^
+    "#include <stdint.h>\n#include <memory.h>\n" ^
     "struct match_group { int group_start; int group_end; };" ^
     "struct match_result { int match_start; int match_end; int group_count; struct match_group* match_groups; };" ^
     "struct match_result match(const char* str, int len) {" ^
-    "struct match_group* const groups = 0;" ^
+    "struct match_group* const groups = " ^ (if group_count = 0
+        then "0;"
+        else "calloc(" ^ Int.to_string group_count ^ ", sizeof(struct match_group));"
+    ) ^
     "const char* const end = str + len;" ^
     "const char* match_start = str;" ^
     "const char* pos;" ^
