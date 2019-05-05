@@ -15,8 +15,8 @@ type graph_edge_condition =
 
 type graph_node_attribute =
     | MatchCompleteNode
-    | GroupStartNode
-    | GroupEndNode
+    | GroupStartNode of int
+    | GroupEndNode of int
     | StepBackNode
     | OptionalNode
     | RepeatingNode

@@ -19,8 +19,7 @@ let format_c_code str =
 let regex_to_c regex ~format_code =
     match Parser.parse_regex regex with
     | Ok syntax_tree ->
-        let graph = Graph.from_expr syntax_tree in
-        let group_count = Graph.group_count graph in
+        let graph, group_count = Graph.graph_with_group_count syntax_tree in
         let c_code = Codegen.graph_with_groups_to_c group_count graph in
         if format_code
             then Ok (format_c_code c_code)

@@ -17,8 +17,8 @@ type graph_edge_condition =
 
 type graph_node_attribute =
     | MatchCompleteNode
-    | GroupStartNode
-    | GroupEndNode
+    | GroupStartNode of int
+    | GroupEndNode of int
     | StepBackNode
     | OptionalNode
     | RepeatingNode
@@ -28,9 +28,13 @@ type graph_node =
       edges: (graph_edge_condition * graph_node) list; }
 
 let rec format_graph_node { attrs; edges } =
-    let edge_display = edges |> List.map ~f:format_graph_edge |> String.concat ~sep: ", "
-    in let attrs_display = attrs |> List.map ~f:format_graph_attr |> String.concat ~sep: "+"
-    in "(" ^ attrs_display ^ edge_display ^ ")"
+    let attrs_display = attrs |> List.map ~f:format_graph_attr |> String.concat ~sep: "+" in
+    if List.is_empty edges
+        then "(" ^ attrs_display ^ ")"
+        else let edge_display = edges |> List.map ~f:format_graph_edge |> String.concat ~sep: ", " in
+            if List.is_empty attrs
+                then "(" ^ edge_display ^ ")"
+                else "(" ^ attrs_display ^ ": " ^ edge_display ^ ")"
 and format_graph_edge ((cond, next) : (graph_edge_condition * graph_node)) =
     format_grap_edge_cond cond ^ " -> " ^ format_graph_node next
 and format_grap_edge_cond = function
@@ -45,8 +49,8 @@ and format_graph_attr = function
     | OptionalNode -> "option"
     | RepeatingNode -> "repeat"
     | MatchCompleteNode -> "finish"
-    | GroupStartNode -> "group: "
-    | GroupEndNode -> "endgroup"
+    | GroupStartNode idx -> "group " ^ Int.to_string idx
+    | GroupEndNode idx -> "endgroup " ^ Int.to_string idx
     | StepBackNode -> "stepback"
 
 (* Regex syntax tree types *)

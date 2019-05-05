@@ -7,59 +7,45 @@ let char_class_entries_condition (entries: Types.char_class_entry list) = entrie
         | CharRange (a, b) -> CondCharInAsciiRange (a, b))
     |> (fun entries -> CondEitherOf entries)
 
-let rec build_up_to next = function
+let rec build_up_to next ~group_idx = function
     | Literal lit ->
-        { attrs = []; edges = [CondLiteral lit, next] }
+        { attrs = []; edges = [CondLiteral lit, next] }, group_idx
     | CharClass entries ->
-        { attrs = []; edges = [char_class_entries_condition entries, next] }
+        { attrs = []; edges = [char_class_entries_condition entries, next] }, group_idx
     | NegatedCharClass entries ->
-        { attrs = []; edges = [CondNegated (char_class_entries_condition entries), next]}
+        { attrs = []; edges = [CondNegated (char_class_entries_condition entries), next]}, group_idx
     | Grouping grp ->
         let group_end = match next with
-        | { edges = []; attrs } -> { next with attrs = GroupEndNode :: attrs }
-        | _ -> { attrs = [GroupEndNode]; edges = [Unconditional, next] }
-        in let group = build_up_to group_end grp
+        | { edges = []; attrs } -> { next with attrs = GroupEndNode group_idx :: attrs }
+        | _ -> { attrs = [GroupEndNode group_idx]; edges = [Unconditional, next] }
+        in let group, new_group_idx = build_up_to group_end ~group_idx:(group_idx + 1) grp
         in (match group with
-        | { attrs = []; edges } -> { attrs = [GroupStartNode]; edges }
-        | _ -> { attrs = [GroupStartNode]; edges = [Unconditional, group] })
+        | { attrs = []; edges } ->
+            { attrs = [GroupStartNode group_idx]; edges }, new_group_idx
+        | _ ->
+            { attrs = [GroupStartNode group_idx]; edges = [Unconditional, group] }, group_idx)
     | Alternation alt ->
         let return_node = { attrs = [StepBackNode]; edges = [] }
-        in let edges = alt |> List.map ~f:(fun e ->
-            let { attrs; edges } = build_up_to next e
-            in Unconditional, { attrs; edges = edges @ [Unconditional, return_node] }
+        in let edges, group_idx = alt |> List.fold ~init:([], group_idx) ~f:(fun (acc, group_idx) e ->
+            let { attrs; edges }, group_idx = build_up_to next ~group_idx e
+            in ((Unconditional, { attrs; edges = edges @ [Unconditional, return_node] }) :: acc), group_idx
         )
-        in { attrs = []; edges }
+        in { attrs = []; edges = List.rev edges }, group_idx
     | Sequence (exp :: []) ->
-        build_up_to next exp
+        build_up_to next ~group_idx exp
     | Sequence (head :: rest) ->
-        let tail_expr = build_up_to next (Sequence rest)
-        in build_up_to tail_expr head
+        let tail_expr, group_idx = build_up_to next ~group_idx (Sequence rest)
+        in build_up_to tail_expr ~group_idx head
     | OneOrMore expr ->
-        let { attrs; edges } = build_up_to next expr
-        in { attrs = RepeatingNode :: attrs; edges }
+        let { attrs; edges }, group_idx = build_up_to next ~group_idx expr
+        in { attrs = RepeatingNode :: attrs; edges }, group_idx
     | ZeroOrOne expr ->
-        let { attrs; edges } = build_up_to next expr
-        in { attrs = OptionalNode :: attrs; edges }
+        let { attrs; edges }, group_idx = build_up_to next  ~group_idx expr
+        in { attrs = OptionalNode :: attrs; edges }, group_idx
     | ZeroOrMore expr ->
-        let { attrs; edges } = build_up_to next expr
-        in { attrs = OptionalNode :: RepeatingNode :: attrs; edges }
+        let { attrs; edges }, group_idx = build_up_to next  ~group_idx expr
+        in { attrs = OptionalNode :: RepeatingNode :: attrs; edges }, group_idx
     | e ->
         failwith ("unimplemented expr " ^ Types.format_expr e)
 
-let from_expr = build_up_to { attrs = [MatchCompleteNode]; edges = [] }
-
-let rec recurse_nodes_and_count_groups (count : int) = function
-    | { edges = []; _ } ->
-        count
-    | { attrs; edges; } when Stdlib.List.mem GroupStartNode attrs ->
-        recurse_edges_and_count_groups (count + 1) edges
-    | { edges; _ } ->
-        recurse_edges_and_count_groups count edges
-and recurse_edges_and_count_groups count_inside = function
-    | [] ->
-        count_inside
-    | (_, node) :: rest ->
-        let count_inside = recurse_nodes_and_count_groups count_inside node in
-        recurse_edges_and_count_groups count_inside rest
-
-let group_count graph = recurse_nodes_and_count_groups 0 graph
+let graph_with_group_count = build_up_to { attrs = [MatchCompleteNode]; edges = [] } ~group_idx:0
