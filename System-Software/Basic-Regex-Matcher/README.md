@@ -2,11 +2,12 @@
 
 ## Prerequisites
 
-* `clang-format`
 * [opam](http://opam.ocaml.org/doc/Install.html)
+* `clang`, `clang-format`
+* `libffi-devel`
 
 ```sh
-opam install -y dune base ounit
+opam install -y dune base ctypes ctypes-foreign ounit
 ```
 
 ## Building
