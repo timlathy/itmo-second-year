@@ -1,14 +1,16 @@
 open Lib
+open Lib.Types
 
 let apply_matcher str matcher =
-    if matcher str (String.length str) then
-        print_string "Matched!\n"
+    let result = matcher str (String.length str) in
+    if result.match_found then
+        print_endline "Matched!"
     else
-        print_string "No matches found\n"
+        print_endline "No matches found"
 
 let () =
     if Array.length (Sys.argv) != 3 then
-        print_string ("Usage: " ^ Sys.argv.(0) ^ " regex string\n")
+        print_endline ("Usage: " ^ Sys.argv.(0) ^ " regex string")
     else
         let regex = Sys.argv.(1) in
         let str = Sys.argv.(2) in

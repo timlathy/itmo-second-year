@@ -1,3 +1,9 @@
+(* Compiled function result type *)
+
+type match_result =
+    { match_found: bool;
+      groups: (int * int) list }
+
 (* Regex graph types *)
 
 type graph_edge_condition =

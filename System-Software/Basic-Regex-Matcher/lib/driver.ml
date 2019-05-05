@@ -3,7 +3,7 @@ open Base
 let clang_format_style = "{BasedOnStyle: Chromium, AllowShortBlocksOnASingleLine: false}"
 let clang_format_cmd = "clang-format --style=\"" ^ clang_format_style ^ "\""
 
-let clang_cmd path = "clang -x c -std=c99 -O2 -shared -o " ^ path ^ " -"
+let clang_cmd path = "clang -x c -std=c99 -O2 -shared -fPIC -o " ^ path ^ " -"
 
 let compiled_regex_dylib_path =
     Stdlib.Filename.get_temp_dir_name() ^ "/bre-compiled-" ^ Int.to_string (Unix.getpid()) ^ ".so"
@@ -44,11 +44,14 @@ let compile_regex regex =
     | Error err ->
         Error err
 
+type match_handler = (string -> int -> Types.match_result) -> unit
+
 let run_matcher_and_dispose_dylib regex matcher =
     match compile_regex regex with
     | Ok library ->
-        let match_fun = Foreign.foreign ~from:library "match" Ctypes.(string @-> int @-> returning bool) in
-        matcher match_fun;
+        let match_fun_ffi = Foreign.foreign ~from:library "match" Ctypes.(string @-> int @-> returning Ffi.c_match_result) in
+        let match_fun = fun str len -> Ffi.convert_c_match_result (match_fun_ffi str len) in
+        let () = matcher match_fun in
         Dl.dlclose ~handle:library;
         Unix.unlink compiled_regex_dylib_path;
         Ok ()
