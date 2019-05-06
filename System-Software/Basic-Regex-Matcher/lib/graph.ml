@@ -7,45 +7,50 @@ let char_class_entries_condition (entries: Types.char_class_entry list) = entrie
         | CharRange (a, b) -> CondCharInAsciiRange (a, b))
     |> (fun entries -> CondEitherOf entries)
 
-let rec build_up_to next ~group_idx = function
+type intermediate_state = { group_idx: int }
+
+let rec build_tail_nodes (state : intermediate_state) (tail_lazy : intermediate_state -> graph_node * intermediate_state) = function
     | Literal lit ->
-        { attrs = []; edges = [CondLiteral lit, next] }, group_idx
+        let tail, state = tail_lazy state in
+        { attrs = []; edges = [CondLiteral lit, tail] }, state
     | CharClass entries ->
-        { attrs = []; edges = [char_class_entries_condition entries, next] }, group_idx
+        let tail, state = tail_lazy state in
+        { attrs = []; edges = [char_class_entries_condition entries, tail] }, state
     | NegatedCharClass entries ->
-        { attrs = []; edges = [CondNegated (char_class_entries_condition entries), next]}, group_idx
+        let tail, state = tail_lazy state in
+        { attrs = []; edges = [CondNegated (char_class_entries_condition entries), tail] }, state
+    | OneOrMore expr ->
+        let { attrs; edges }, state = build_tail_nodes state tail_lazy expr
+        in { attrs = RepeatingNode :: attrs; edges }, state
+    | ZeroOrOne expr ->
+        let { attrs; edges }, state = build_tail_nodes state tail_lazy expr
+        in { attrs = OptionalNode :: attrs; edges }, state
+    | ZeroOrMore expr ->
+        let { attrs; edges }, state = build_tail_nodes state tail_lazy expr
+        in { attrs = OptionalNode :: RepeatingNode :: attrs; edges }, state
+    | Sequence [] ->
+        tail_lazy state
+    | Sequence (head :: rest) ->
+        build_tail_nodes state (fun s -> build_tail_nodes s tail_lazy (Sequence rest)) head
     | Grouping grp ->
-        let group_end = match next with
-        | { edges = []; attrs } -> { next with attrs = GroupEndNode group_idx :: attrs }
-        | _ -> { attrs = [GroupEndNode group_idx]; edges = [Unconditional, next] }
-        in let group, new_group_idx = build_up_to group_end ~group_idx:(group_idx + 1) grp
+        let group_end = (fun s -> match tail_lazy s with
+        | { edges = []; attrs }, s -> { edges = []; attrs = GroupEndNode state.group_idx :: attrs }, s
+        | next, s -> { attrs = [GroupEndNode state.group_idx]; edges = [Unconditional, next] }, s)
+        in let group, s = build_tail_nodes { group_idx = state.group_idx + 1 } group_end grp
         in (match group with
         | { attrs = []; edges } ->
-            { attrs = [GroupStartNode group_idx]; edges }, new_group_idx
+            { attrs = [GroupStartNode state.group_idx]; edges }, s
         | _ ->
-            { attrs = [GroupStartNode group_idx]; edges = [Unconditional, group] }, group_idx)
+            { attrs = [GroupStartNode state.group_idx]; edges = [Unconditional, group] }, s)
     | Alternation alt ->
         let return_node = { attrs = [StepBackNode]; edges = [] }
-        in let edges, group_idx = alt |> List.fold ~init:([], group_idx) ~f:(fun (acc, group_idx) e ->
-            let { attrs; edges }, group_idx = build_up_to next ~group_idx e
-            in ((Unconditional, { attrs; edges = edges @ [Unconditional, return_node] }) :: acc), group_idx
+        in let edges, s = alt |> List.fold ~init:([], state) ~f:(fun (acc, s) e ->
+            let { attrs; edges }, s = build_tail_nodes s tail_lazy e
+            in ((Unconditional, { attrs; edges = edges @ [Unconditional, return_node] }) :: acc), s
         )
-        in { attrs = []; edges = List.rev edges }, group_idx
-    | Sequence (exp :: []) ->
-        build_up_to next ~group_idx exp
-    | Sequence (head :: rest) ->
-        let tail_expr, group_idx = build_up_to next ~group_idx (Sequence rest)
-        in build_up_to tail_expr ~group_idx head
-    | OneOrMore expr ->
-        let { attrs; edges }, group_idx = build_up_to next ~group_idx expr
-        in { attrs = RepeatingNode :: attrs; edges }, group_idx
-    | ZeroOrOne expr ->
-        let { attrs; edges }, group_idx = build_up_to next  ~group_idx expr
-        in { attrs = OptionalNode :: attrs; edges }, group_idx
-    | ZeroOrMore expr ->
-        let { attrs; edges }, group_idx = build_up_to next  ~group_idx expr
-        in { attrs = OptionalNode :: RepeatingNode :: attrs; edges }, group_idx
-    | e ->
-        failwith ("unimplemented expr " ^ Types.format_expr e)
+        in { attrs = []; edges = List.rev edges }, s
 
-let graph_with_group_count = build_up_to { attrs = [MatchCompleteNode]; edges = [] } ~group_idx:0
+let graph_with_group_count e =
+    let lazy_finish = fun s -> { attrs = [MatchCompleteNode]; edges = [] }, s in
+    let graph, { group_idx } = build_tail_nodes { group_idx = 0 } lazy_finish e in
+    graph, group_idx
