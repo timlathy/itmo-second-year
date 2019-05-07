@@ -16,7 +16,7 @@ I decided to take a stab at automating this with [Pywinauto](https://pywinauto.g
 pip install --user Pillow pywinauto
 ```
 
-## Generating `results.json`
+## Generating `result.json`
 
 1. Place `main.py` alongside `rexp.gps` and `erlang.gps`
 2. Open `main.py` in an editor and substitute the value of `GPSS_PATH` with the path to your GPSS World installation
@@ -26,7 +26,7 @@ pip install --user Pillow pywinauto
 
 This can be done on Linux (`pywin32` and `pywinauto` packages are not needed).
 
-1. Place `table.py` alongside your `results.json`
+1. Place `table.py` alongside your `result.json`
 2. Run `python3 table.py`
 3. Create a TeX file to wrap the generated `table1.tex` (refer to `report.tex` as an example)
 4. Render it (`xelatex report.tex`)
