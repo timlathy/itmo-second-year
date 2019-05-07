@@ -22,4 +22,12 @@ pip install --user Pillow pywinauto
 2. Open `main.py` in an editor and substitute the value of `GPSS_PATH` with the path to your GPSS World installation
 3. Run `python3 main.py`
 
+## Creating the report
+
+This can be done on Linux (`pywin32` and `pywinauto` packages are not needed).
+
+1. Place `table.py` alongside your `results.json`
+2. Run `python3 table.py`
+3. Create a TeX file to wrap the generated `table1.tex` (refer to `report.tex` as an example)
+4. Render it (`xelatex report.tex`)
 
