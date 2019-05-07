@@ -64,4 +64,14 @@ for file, sections in LAB_FILES:
     with open(file + '.json', 'w') as f:
         json.dump({'reports': reports, 'journal': journal}, f)
 
+    for section in sections:
+        send_keys('%wwt') # Alt+W = Window, +W = Simulation Window, +T = Table Window
+        table_selector = gpss.top_window().child_window(title="Open Table Window", control_type="Window")
+        table_selector.child_window(control_type="ComboBox").select(section)
+        send_keys('{ENTER}')
+        sleep(1)
+        table_pane = workspace.child_window(control_type="Pane")
+        table_pane.capture_as_image().save(file + '_' + section + '.png')
+        table_pane.parent().close()
+
     gpss.kill()
