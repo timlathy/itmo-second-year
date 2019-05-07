@@ -3,13 +3,18 @@
 \titleparts{Лабораторная работа №1}{}
 \students{Лабушев Тимофей Михайлович}
 \usepackage{multirow}
-\usepackage{rotating}
+\usepackage{adjustbox}
 
 \begin{document}
 
-\begin{sidewaystable}
-\centering
+\subsection*{Таблица 1. Характеристики генераторов случайных величин с равномерным распределением}
+\begin{adjustbox}{width=\columnwidth,center}
 \input{table1.tex}
-\end{sidewaystable}
+\end{adjustbox}
+
+\subsection*{Таблица 2. Характеристики генераторов случайных величин с экспоненциальным распределением}
+\begin{adjustbox}{width=\columnwidth,center}
+\input{table2.tex}
+\end{adjustbox}
 
 \end{document}
