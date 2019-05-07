@@ -5,9 +5,18 @@ import json
 import re
 
 GPSS_PATH = 'C:\Program Files (x86)\GPSS World\GPSS World Student.exe'
-LAB_FILE = 'rexp.gps'
+LAB_FILES = [
+    ('rexp176.gps', ['T_RAN', 'T_EXP']),
+    ('rexp924.gps', ['T_RAN', 'T_EXP']),
+    ('erlang176_k2.gps', ['TA5']),
+    ('erlang176_k4.gps', ['TA5']),
+    ('erlang176_k8.gps', ['TA5']),
+    ('erlang924_k2.gps', ['TA5']),
+    ('erlang924_k4.gps', ['TA5']),
+    ('erlang924_k8.gps', ['TA5'])
+]
 
-def extract_report_data(raw):
+def extract_report_data(raw, report_sections):
     def parse_freq_lines(num_ranges, lines):
         freqs = [0 for i in range(num_ranges)]
         for l in lines:
@@ -27,30 +36,32 @@ def extract_report_data(raw):
         return {'mean': float(mean), 'stddev': float(stddev), 'freqs': freqs}
 
     lines = raw.split('\r')
-    return {'ran': parse_freq_section('T_RAN', lines), 'exp': parse_freq_section('T_EXP', lines)}
+    return {k: parse_freq_section(k, lines) for k in report_sections}
 
-def simulation_report(gpss, workspace, num_values):
+def simulation_report(gpss, workspace, num_values, report_sections):
     send_keys('%ct') # Alt+C = Command, +T = START
-    start_command_window = gpss.top_window().child_window(title='Start Command', control_type='Window')
+    start_command_window = gpss.top_window().child_window(title="Start Command", control_type="Window")
     start_command_window.Edit.set_edit_text(f'START {num_values}')
     send_keys('{ENTER}')
     
     report_window = workspace.Dialog
-    report_text = report_window.Edit.get_value()
-    report_window.Close.click()
-    gpss['GPSS WorldDialog'].No.click() # save report? no
+    report_text = report_window.child_window(control_type="Edit").get_value()
+    report_window.close()
+    send_keys('{TAB}{ENTER}') # save report? no - yes - cancel, tab selects "yes", enter presses it (send_keys is faster than looking up the button)
 
-    return extract_report_data(report_text)
+    return extract_report_data(report_text, report_sections)
 
-gpss = Application(backend='uia').start(GPSS_PATH + ' ' + LAB_FILE)
-workspace = gpss.top_window().child_window(title='Workspace', control_type='Pane')
+for file, sections in LAB_FILES:
+    gpss = Application(backend='uia').start(GPSS_PATH + ' ' + file)
+    workspace = gpss.top_window().child_window(title="Workspace", control_type="Pane")
 
-send_keys('^%s') # Ctrl+Alt+S = Create Simulation
+    send_keys('^%s') # Ctrl+Alt+S = Create Simulation
 
-reports = [simulation_report(gpss, workspace, num_values)
-           for num_values in [10, 90, 900, 4000, 5000, 10000]]
-journal = workspace.Dialog.Edit.get_value().replace('\r', '\n')
+    reports = [simulation_report(gpss, workspace, num_values, sections)
+               for num_values in [10, 90, 900, 4000, 5000, 10000]]
+    journal = workspace.Dialog.Edit.get_value().replace('\r', '\n')
 
-with open('result.json', 'w') as f:
-    json.dump({'reports': reports, 'journal': journal}, f)
+    with open(file + '.json', 'w') as f:
+        json.dump({'reports': reports, 'journal': journal}, f)
 
+    gpss.kill()
