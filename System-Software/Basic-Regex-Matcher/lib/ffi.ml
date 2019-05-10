@@ -16,7 +16,7 @@ let () = seal c_match_result
 
 let rec read_groups acc remaining = function
     | _ when remaining = 0 ->
-        acc
+        List.rev acc
     | c_ptr ->
         let c_group = !@ c_ptr in
         let group_start = getf c_group c_group_start in

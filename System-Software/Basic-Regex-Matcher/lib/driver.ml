@@ -1,6 +1,6 @@
 open Base
 
-let clang_format_style = "{BasedOnStyle: Chromium, AllowShortBlocksOnASingleLine: false}"
+let clang_format_style = "{BasedOnStyle: Chromium, BreakBeforeBraces: Custom, BraceWrapping: {BeforeElse: true}}"
 let clang_format_cmd = "clang-format --style=\"" ^ clang_format_style ^ "\""
 
 let clang_cmd path = "clang -x c -std=c99 -O2 -shared -fPIC -o " ^ path ^ " -"

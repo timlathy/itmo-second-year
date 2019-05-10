@@ -1,6 +1,8 @@
 open Base
 open Types
 
+type intermediate_state = { node_idx: int; nodes: string list }
+
 let rec charseq_as_little_endian_hex chars =
     chars
     |> List.rev_map ~f:Char.to_int (* rev map to account for endianness *)
@@ -39,31 +41,42 @@ let edge_condition_and_pos_incr = function
     | _ ->
         failwith "unsupported condition"
 
-let rec emit_edge_blocks acc nodes = function
+let rec emit_node_prelude = function
     | [] ->
-        acc ^ "else { goto fail; }", nodes
+        ""
+    | MatchCompleteNode :: _ ->
+        "goto finish;"
+    | GroupStartNode gidx :: rest ->
+        "groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;" ^ emit_node_prelude rest
+    | GroupEndNode gidx :: rest ->
+        "groups[" ^ Int.to_string gidx ^ "].group_end = pos - str;" ^ emit_node_prelude rest
+    | _ ->
+        failwith "unsupported node attribute"
+
+let rec emit_edge_branches acc (state : intermediate_state) = function
+    | [] when not (String.is_empty acc) ->
+        acc ^ "else { goto fail; }", state
+    | [] ->
+        acc, state
+    | (Unconditional, node) :: _ ->
+        let branch = "goto s" ^ Int.to_string state.node_idx ^ ";" in
+        acc ^ branch, append_node state node
     | (cond, node) :: rest ->
         let (ccond, pos_incr) = edge_condition_and_pos_incr cond in
-        let node_label = "s" ^ (nodes |> List.length |> Int.to_string) in
-        let block = "{ pos += " ^ Int.to_string pos_incr ^ "; goto " ^ node_label ^ "; }" in
-        let nodes = append_node nodes node in
-        let acc = acc ^ "if (" ^ ccond ^ ")" ^ block in
-        emit_edge_blocks acc nodes rest
-and append_node nodes = function
-    | { attrs = []; edges } ->
-        let (edge_block, nodes) = emit_edge_blocks "" nodes edges in
-        let node_index = nodes |> List.length |> Int.to_string in
-        let node = "s" ^ node_index ^ ": " ^ edge_block in
-        node :: nodes
-    | { attrs = [MatchCompleteNode]; edges = [] } ->
-        let node_index = nodes |> List.length |> Int.to_string in
-        let node = "s" ^ node_index ^ ": goto finish;" in
-        node :: nodes
-    | n -> failwith ("unhandled node " ^ Types.format_graph_node n)
+        let branch = "{ pos += " ^ Int.to_string pos_incr ^ "; goto s" ^ Int.to_string state.node_idx ^ "; }" in
+        let state = append_node state node in
+        let acc = acc ^ "if (" ^ ccond ^ ")" ^ branch in
+        emit_edge_branches acc state rest
+and append_node state { attrs; edges } =
+    let prelude = emit_node_prelude attrs in
+    let node_idx = state.node_idx in
+    let (branches, state) = emit_edge_branches "" { state with node_idx = node_idx + 1 } edges in
+    { state with nodes = ("s" ^ Int.to_string node_idx ^ ": " ^ prelude ^ branches) :: state.nodes }
 
 let graph_with_groups_to_c group_count graph =
-    let nodes = graph |> append_node [] |> String.concat ~sep:"\n" in
-    "#include <stdint.h>\n#include <memory.h>\n" ^
+    let { nodes; _ } = graph |> append_node { nodes = []; node_idx = 0 } in
+    let c_body = String.concat ~sep:"\n" nodes in
+    "#include <stdint.h>\n#include <stdlib.h>\n" ^
     "struct match_group { int group_start; int group_end; };" ^
     "struct match_result { int match_start; int match_end; int group_count; struct match_group* match_groups; };" ^
     "struct match_result match(const char* str, int len) {" ^
@@ -75,6 +88,6 @@ let graph_with_groups_to_c group_count graph =
     "const char* match_start = str;" ^
     "const char* pos;" ^
     "loop: pos = match_start;" ^
-    nodes ^
-    "fail: if (++match_start < end) goto loop; return (struct match_result){0,0,0,groups};" ^
-    "finish: return (struct match_result){match_start - str,pos - str,0,groups}; }"
+    c_body ^
+    "fail: if (++match_start < end) { goto loop; } return (struct match_result){0,0,0,groups};" ^
+    "finish: return (struct match_result){match_start - str,pos - str," ^ Int.to_string group_count ^ ",groups}; }"

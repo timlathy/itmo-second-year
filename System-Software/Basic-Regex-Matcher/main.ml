@@ -5,9 +5,12 @@ let apply_matcher str matcher =
     match matcher str (String.length str) with
     | { matched_range = None; _ } ->
         print_endline "No matches found"
-    | { matched_range = Some (range); _ } ->
+    | { matched_range = Some (range); groups } ->
         let match_start, match_end = range in
-        print_endline ("Matched from " ^ string_of_int match_start ^ " to " ^ string_of_int match_end)
+        let _ = print_endline ("Matched from " ^ string_of_int match_start ^ " to " ^ string_of_int match_end) in
+        List.iteri (fun i (s, e) -> print_endline (
+            "Group #" ^ string_of_int i ^ ": from " ^ string_of_int s ^ " to " ^ string_of_int e)
+        ) groups
 
 let () =
     if Array.length (Sys.argv) != 3 then

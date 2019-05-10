@@ -1,13 +1,13 @@
 open Base
 open Types
 
+type intermediate_state = { group_idx: int }
+
 let char_class_entries_condition (entries: Types.char_class_entry list) = entries
     |> List.map ~f:(function
         | CharLiteral c -> CondLiteral (String.of_char c)
         | CharRange (a, b) -> CondCharInAsciiRange (a, b))
     |> (fun entries -> CondEitherOf entries)
-
-type intermediate_state = { group_idx: int }
 
 let rec build_tail_nodes (state : intermediate_state) (tail_lazy : intermediate_state -> graph_node * intermediate_state) = function
     | Literal lit ->
