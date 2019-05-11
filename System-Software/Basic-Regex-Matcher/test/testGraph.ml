@@ -52,6 +52,18 @@ let suite = [
                     CondLiteral "*", { attrs = [RepeatingNode]; edges = [CondLiteral "+", finish] }
                 ] }
             ] };
+    "quantified groups" >::
+        graph_case (seq [zeromany (grp (seq [lit "*"; chcls [ch 'a']])); onemany (grp (lit "+"))]) ~groups:2 {
+            attrs = [OptionalNode; RepeatingNode; GroupStartNode 0]; edges = [
+                CondLiteral "*", { attrs = []; edges = [
+                    CondEitherOf [CondLiteral "a"], { attrs = [GroupEndNode 0]; edges = [
+                        Unconditional, { attrs = [RepeatingNode; GroupStartNode 1]; edges = [
+                            CondLiteral "+", { attrs = [GroupEndNode 1; MatchCompleteNode]; edges = [] }
+                        ] }
+                    ] }
+                ] }
+            ]
+        };
     "alternation" >::
         graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"])  ~groups:2 { node with edges = [
             Unconditional, { node with edges = [
