@@ -1,7 +1,9 @@
 open Base
 open Types
 
-type intermediate_state = { node_idx: int; nodes: string list }
+type intermediate_state = { node_idx: int; nodes: string list; group_stack: int list }
+
+let init_state = { node_idx = 0; nodes = []; group_stack = [] }
 
 let rec charseq_as_little_endian_hex chars =
     chars
@@ -41,43 +43,71 @@ let edge_condition_and_pos_incr = function
     | _ ->
         failwith "unsupported condition"
 
-let rec emit_node_prelude = function
-    | [] ->
-        ""
+let rec emit_node_prelude state = function
     | MatchCompleteNode :: _ ->
-        "goto finish;"
-    | GroupStartNode gidx :: rest ->
-        "groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;" ^ emit_node_prelude rest
-    | GroupEndNode gidx :: rest ->
-        "groups[" ^ Int.to_string gidx ^ "].group_end = pos - str;" ^ emit_node_prelude rest
-    | _ ->
-        failwith "unsupported node attribute"
-
-let rec emit_edge_branches acc (state : intermediate_state) = function
-    | [] when not (String.is_empty acc) ->
-        acc ^ "else { goto fail; }", state
-    | [] ->
+        "goto finish;", state
+    | GroupStartNode gidx :: [] ->
+        let state = { state with group_stack = gidx :: state.group_stack } in
+        "g" ^ Int.to_string gidx ^ ": groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;", state
+    | GroupEndNode gidx :: RepeatingNode :: rest ->
+        let acc, state = emit_node_prelude state rest in
+        let state = (match state.group_stack with
+            | _ :: rest -> { state with group_stack = rest }
+            | _ -> state) in
+        let gidx = Int.to_string gidx in
+        "groups[" ^ gidx ^ "].group_end = pos - str;" ^
+        "groups[" ^ gidx ^ "]._reserved_rep_prev = groups[" ^ gidx ^ "].group_start;" ^
+        "goto g" ^ gidx ^ "; g" ^ gidx ^ "_fail: if (groups[" ^ gidx ^ "].group_end == 0) goto fail;" ^
+        "groups[" ^ gidx ^ "].group_start = groups[" ^ gidx ^ "]._reserved_rep_prev;" ^
         acc, state
-    | (Unconditional, node) :: _ ->
-        let branch = "goto s" ^ Int.to_string state.node_idx ^ ";" in
-        acc ^ branch, append_node state node
-    | (cond, node) :: rest ->
-        let (ccond, pos_incr) = edge_condition_and_pos_incr cond in
-        let branch = "{ pos += " ^ Int.to_string pos_incr ^ "; goto s" ^ Int.to_string state.node_idx ^ "; }" in
-        let state = append_node state node in
-        let acc = acc ^ "if (" ^ ccond ^ ")" ^ branch in
-        emit_edge_branches acc state rest
+    | GroupEndNode gidx :: rest ->
+        let acc, state = emit_node_prelude state rest in
+        let state = (match state.group_stack with
+            | _ :: rest -> { state with group_stack = rest }
+            | _ -> state) in
+        let gidx = Int.to_string gidx in
+        "goto g" ^ gidx ^ "_success;" ^ "g" ^ gidx ^ "_fail: goto fail; g" ^ gidx ^ "_success:" ^
+        "groups[" ^ gidx ^ "].group_end = pos - str;" ^ acc, state
+    | _ :: rest ->
+        emit_node_prelude state rest
+    | _ ->
+        "", state
+
+let rec emit_edge_branches (state : intermediate_state) = function
+    | [] ->
+        "", state
+    | conditions ->
+        let conditions, epilogue_lazy = (match List.last_exn conditions with
+            | Unconditional, node ->
+                let conditions = List.take conditions ((List.length conditions) - 1) in
+                conditions, (fun s ->
+                    "goto s" ^ Int.to_string s.node_idx ^ ";", append_node s node)
+            | _ ->
+                conditions, (match state.group_stack with
+                    | gidx :: _ -> fun s -> "goto g" ^ Int.to_string gidx ^ "_fail;", s
+                    | _ -> fun s -> "goto fail;", s
+            )) in
+        let cond_blocks = List.map conditions ~f:(fun (cond, node) ->
+            let (c_cond, pos_incr) = edge_condition_and_pos_incr cond in
+            "if (" ^ c_cond ^ ")", pos_incr, node
+        ) in
+        let blocks, state = List.fold cond_blocks ~init:([], state) ~f:(fun (blocks, state) (cond_expr, pos_incr, node) ->
+            let branch = "{ pos += " ^ Int.to_string pos_incr ^ "; goto s" ^ Int.to_string state.node_idx ^ "; }" in
+            (cond_expr ^ branch) :: blocks, append_node state node
+        ) in
+        let epilogue, state = epilogue_lazy state in
+        String.concat (blocks @ [epilogue]) ~sep:" else ", state
 and append_node state { attrs; edges } =
-    let prelude = emit_node_prelude attrs in
     let node_idx = state.node_idx in
-    let (branches, state) = emit_edge_branches "" { state with node_idx = node_idx + 1 } edges in
+    let prelude, state = emit_node_prelude state attrs in
+    let branches, state = emit_edge_branches { state with node_idx = node_idx + 1 } edges in
     { state with nodes = ("s" ^ Int.to_string node_idx ^ ": " ^ prelude ^ branches) :: state.nodes }
 
 let graph_with_groups_to_c group_count graph =
-    let { nodes; _ } = graph |> append_node { nodes = []; node_idx = 0 } in
+    let { nodes; _ } = graph |> append_node init_state in
     let c_body = String.concat ~sep:"\n" nodes in
     "#include <stdint.h>\n#include <stdlib.h>\n" ^
-    "struct match_group { int group_start; int group_end; };" ^
+    "struct match_group { int group_start; int group_end; int _reserved_rep_prev; };" ^
     "struct match_result { int match_start; int match_end; int group_count; struct match_group* match_groups; };" ^
     "struct match_result match(const char* str, int len) {" ^
     "struct match_group* const groups = " ^ (if group_count = 0
