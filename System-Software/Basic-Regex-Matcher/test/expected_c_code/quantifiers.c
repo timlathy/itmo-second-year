@@ -19,50 +19,54 @@ struct match_result match(const char* str, int len) {
 loop:
   pos = match_start;
 s0:
-  if (end - pos >= 1 && pos[0] == '1') {
-    pos += 1;
+g0:
+  groups[0].group_start = pos - str;
+  if (end - pos >= 3 && *(int16_t*)(pos + 0) == 0x6874 && pos[2] == 'e') {
+    pos += 3;
     goto s1;
   }
   else
-    goto fail;
-s1:
-g0:
-  groups[0].group_start = pos - str;
-  if (end - pos >= 4 && *(int32_t*)(pos + 0) == 0x74736574) {
-    pos += 4;
-    goto s2;
-  }
-  else
     goto g0_fail;
-s2:
+s1:
   groups[0].group_end = pos - str;
-  goto g0_success;
+  groups[0].reserved_prev_start = groups[0].group_start;
+  goto g0;
 g0_fail:
-  goto fail;
-g0_success:
-  goto s3;
-s3:
-  if (end - pos >= 1 && pos[0] == '2') {
-    pos += 1;
-    goto s4;
-  }
-  else
+  if (groups[0].group_end == 0)
     goto fail;
-s4:
+  groups[0].group_start = groups[0].reserved_prev_start;
+  goto s2;
+s2:
 g1:
   groups[1].group_start = pos - str;
-  if (end - pos >= 4 && *(int32_t*)(pos + 0) == 0x74736574) {
+  if (end - pos >= 6 && *(int32_t*)(pos + 0) == 0x776f6c66 &&
+      *(int16_t*)(pos + 4) == 0x7265) {
+    pos += 6;
+    goto s3;
+  }
+  else
+    goto g1_fail;
+s3:
+  groups[1].group_end = pos - str;
+  goto g1_success;
+g1_fail:
+g1_success:
+  goto s4;
+s4:
+  if (end - pos >= 4 && *(int32_t*)(pos + 0) == 0x61736577) {
     pos += 4;
     goto s5;
   }
   else
-    goto g1_fail;
+    goto fail;
 s5:
-  groups[1].group_end = pos - str;
-  goto g1_success;
-g1_fail:
-  goto fail;
-g1_success:
+  if (end - pos >= 1 && pos[0] == 'w') {
+    pos += 1;
+    goto s6;
+  }
+  else
+    goto fail;
+s6:
   goto finish;
 fail:
   if (++match_start < end) {

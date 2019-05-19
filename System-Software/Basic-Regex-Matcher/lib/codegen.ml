@@ -49,25 +49,31 @@ let rec emit_node_prelude state = function
     | GroupStartNode gidx :: [] ->
         let state = { state with group_stack = gidx :: state.group_stack } in
         "g" ^ Int.to_string gidx ^ ": groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;", state
-    | GroupEndNode gidx :: RepeatingNode :: rest ->
+    | GroupEndNode gidx :: rest ->
+        let is_repeating, is_optional, rest = (match rest with
+            | RepeatingNode :: OptionalNode :: rest -> true, true, rest
+            | RepeatingNode :: rest -> true, false, rest
+            | OptionalNode :: rest -> false, true, rest
+            | _ -> false, false, rest) in
         let acc, state = emit_node_prelude state rest in
         let state = (match state.group_stack with
             | _ :: rest -> { state with group_stack = rest }
             | _ -> state) in
         let gidx = Int.to_string gidx in
         "groups[" ^ gidx ^ "].group_end = pos - str;" ^
-        "groups[" ^ gidx ^ "]._reserved_rep_prev = groups[" ^ gidx ^ "].group_start;" ^
-        "goto g" ^ gidx ^ "; g" ^ gidx ^ "_fail: if (groups[" ^ gidx ^ "].group_end == 0) goto fail;" ^
-        "groups[" ^ gidx ^ "].group_start = groups[" ^ gidx ^ "]._reserved_rep_prev;" ^
+        (if is_repeating
+            then "groups[" ^ gidx ^ "].reserved_prev_start = groups[" ^ gidx ^ "].group_start; goto g" ^ gidx ^ ";"
+            else "goto g" ^ gidx ^ "_success;") ^
+        "g" ^ gidx ^ "_fail:" ^
+        (if is_optional
+            then ""
+            else if is_repeating
+                then "if (groups[" ^ gidx ^ "].group_end == 0) goto fail;"
+                else "goto fail;") ^
+        (if is_repeating
+            then "groups[" ^ gidx ^ "].group_start = groups[" ^ gidx ^ "].reserved_prev_start;"
+            else "g" ^ gidx ^ "_success:") ^
         acc, state
-    | GroupEndNode gidx :: rest ->
-        let acc, state = emit_node_prelude state rest in
-        let state = (match state.group_stack with
-            | _ :: rest -> { state with group_stack = rest }
-            | _ -> state) in
-        let gidx = Int.to_string gidx in
-        "goto g" ^ gidx ^ "_success;" ^ "g" ^ gidx ^ "_fail: goto fail; g" ^ gidx ^ "_success:" ^
-        "groups[" ^ gidx ^ "].group_end = pos - str;" ^ acc, state
     | _ :: rest ->
         emit_node_prelude state rest
     | _ ->
@@ -107,7 +113,7 @@ let graph_with_groups_to_c group_count graph =
     let { nodes; _ } = graph |> append_node init_state in
     let c_body = String.concat ~sep:"\n" nodes in
     "#include <stdint.h>\n#include <stdlib.h>\n" ^
-    "struct match_group { int group_start; int group_end; int _reserved_rep_prev; };" ^
+    "struct match_group { int group_start; int group_end; int reserved_prev_start; };" ^
     "struct match_result { int match_start; int match_end; int group_count; struct match_group* match_groups; };" ^
     "struct match_result match(const char* str, int len) {" ^
     "struct match_group* const groups = " ^ (if group_count = 0

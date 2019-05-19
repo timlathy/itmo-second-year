@@ -4,7 +4,7 @@ type c_match_group
 let c_match_group : c_match_group structure typ = structure "match_group"
 let c_group_start = field c_match_group "group_start" int
 let c_group_end = field c_match_group "group_end" int
-let _c_group_reserved = field c_match_group "_reserved_rep_prev" int
+let _c_group_reserved = field c_match_group "reserved_prev_start" int
 let () = seal c_match_group
 
 type c_match_result

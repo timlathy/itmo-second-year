@@ -3,6 +3,7 @@
 struct match_group {
   int group_start;
   int group_end;
+  int reserved_prev_start;
 };
 struct match_result {
   int match_start;
@@ -23,9 +24,8 @@ s0:
     pos += 7;
     goto s1;
   }
-  else {
+  else
     goto fail;
-  }
 s1:
   goto finish;
 fail:
