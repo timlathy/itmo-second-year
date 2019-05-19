@@ -82,5 +82,23 @@ let suite = [
                 CondLiteral "fg", finish;
                 Unconditional, stepback
             ] }
-        ] }
+        ] };
+    "quantified alternation" >::
+        graph_case (zeroone (grp (alt [seq [chcls [ch 'a']; lit "b"]; lit "c"; lit "d"])))  ~groups:1 (
+            { attrs = [GroupStartNode 0]; edges = [
+                Unconditional, { attrs = []; edges = [
+                    CondEitherOf [CondLiteral "a"], { attrs = []; edges = [
+                        CondLiteral "b", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] }
+                    ] };
+                    Unconditional, { attrs = [StepBackNode]; edges = [] }
+                ]};
+                Unconditional, { attrs = []; edges = [
+                    CondLiteral "c", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
+                    Unconditional, { attrs = [StepBackNode]; edges = [] }
+                ]};
+                Unconditional, { attrs = []; edges = [
+                    CondLiteral "d", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
+                    Unconditional, { attrs = [StepBackNode]; edges = [] }
+                ]}
+            ] })
 ]
