@@ -54,11 +54,11 @@ let suite = [
             ] };
     "quantified groups" >::
         graph_case (seq [zeromany (grp (seq [lit "*"; chcls [ch 'a']])); onemany (grp (lit "+"))]) ~groups:2 {
-            attrs = [OptionalNode; RepeatingNode; GroupStartNode 0]; edges = [
+            attrs = [GroupStartNode 0]; edges = [
                 CondLiteral "*", { attrs = []; edges = [
-                    CondEitherOf [CondLiteral "a"], { attrs = [GroupEndNode 0]; edges = [
-                        Unconditional, { attrs = [RepeatingNode; GroupStartNode 1]; edges = [
-                            CondLiteral "+", { attrs = [GroupEndNode 1; MatchCompleteNode]; edges = [] }
+                    CondEitherOf [CondLiteral "a"], { attrs = [GroupEndNode 0; OptionalNode; RepeatingNode]; edges = [
+                        Unconditional, { attrs = [GroupStartNode 1]; edges = [
+                            CondLiteral "+", { attrs = [GroupEndNode 1; RepeatingNode; MatchCompleteNode]; edges = [] }
                         ] }
                     ] }
                 ] }
