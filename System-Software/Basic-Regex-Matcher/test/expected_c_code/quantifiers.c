@@ -40,17 +40,13 @@ s1_repeat:
     goto fail;
 }
 s2 : {
-  int repeats = 0;
 s2_repeat:
   if (end - pos >= 1 && pos[0] == '3') {
     pos += 1;
-    repeats = 1;
     goto s2_repeat;
   }
-  else if (repeats == 1)
-    goto s3;
   else
-    goto fail;
+    goto s3;
 }
 s3:
   goto finish;

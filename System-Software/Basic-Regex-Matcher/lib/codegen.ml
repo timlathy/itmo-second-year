@@ -48,7 +48,7 @@ let edge_condition_and_pos_incr = function
 let rec emit_node_prologue state = function
     | RepeatingNode :: [] -> Repetition, state
     | OptionalNode :: [] -> Optional, state
-    | RepeatingNode :: OptionalNode :: [] -> OptionalRepetition, state
+    | OptionalNode :: RepeatingNode :: [] -> OptionalRepetition, state
     | MatchCompleteNode :: _ ->
         Code "goto finish;", state
     | GroupStartNode gidx :: [] ->
@@ -100,7 +100,8 @@ let rec emit_edge_branches (state : intermediate_state) prologue = function
             | _ -> ""
         ) in
         let gen_branch = (match prologue with
-            | Repetition | OptionalRepetition -> fun _ -> "repeats = 1; goto s" ^ curr_node ^ "_repeat;"
+            | Repetition -> fun _ -> "repeats = 1; goto s" ^ curr_node ^ "_repeat;"
+            | OptionalRepetition -> fun _ -> "goto s" ^ curr_node ^ "_repeat;"
             | _ -> fun s -> "goto s" ^ Int.to_string s.node_idx ^ ";"
         ) in
         let conditions, epilogue_lazy = (match List.last_exn conditions with
