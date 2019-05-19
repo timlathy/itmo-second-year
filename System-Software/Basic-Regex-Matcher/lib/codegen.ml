@@ -3,6 +3,8 @@ open Types
 
 type intermediate_state = { node_idx: int; nodes: string list; group_stack: int list }
 
+type node_prologue = Code of string | Repetition | Optional | OptionalRepetition | None
+
 let init_state = { node_idx = 0; nodes = []; group_stack = [] }
 
 let rec charseq_as_little_endian_hex chars =
@@ -43,24 +45,27 @@ let edge_condition_and_pos_incr = function
     | _ ->
         failwith "unsupported condition"
 
-let rec emit_node_prelude state = function
+let rec emit_node_prologue state = function
+    | RepeatingNode :: [] -> Repetition, state
+    | OptionalNode :: [] -> Optional, state
+    | RepeatingNode :: OptionalNode :: [] -> OptionalRepetition, state
     | MatchCompleteNode :: _ ->
-        "goto finish;", state
+        Code "goto finish;", state
     | GroupStartNode gidx :: [] ->
         let state = { state with group_stack = gidx :: state.group_stack } in
-        "g" ^ Int.to_string gidx ^ ": groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;", state
+        Code ("g" ^ Int.to_string gidx ^ ": groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;"), state
     | GroupEndNode gidx :: rest ->
         let is_repeating, is_optional, rest = (match rest with
             | RepeatingNode :: OptionalNode :: rest -> true, true, rest
             | RepeatingNode :: rest -> true, false, rest
             | OptionalNode :: rest -> false, true, rest
             | _ -> false, false, rest) in
-        let acc, state = emit_node_prelude state rest in
+        let acc, state = emit_node_prologue state rest in
         let state = (match state.group_stack with
             | _ :: rest -> { state with group_stack = rest }
             | _ -> state) in
         let gidx = Int.to_string gidx in
-        "groups[" ^ gidx ^ "].group_end = pos - str;" ^
+        let code = "groups[" ^ gidx ^ "].group_end = pos - str;" ^
         (if is_repeating
             then "groups[" ^ gidx ^ "].reserved_prev_start = groups[" ^ gidx ^ "].group_start; goto g" ^ gidx ^ ";"
             else "goto g" ^ gidx ^ "_success;") ^
@@ -72,42 +77,66 @@ let rec emit_node_prelude state = function
                 else "goto fail;") ^
         (if is_repeating
             then "groups[" ^ gidx ^ "].group_start = groups[" ^ gidx ^ "].reserved_prev_start;"
-            else "g" ^ gidx ^ "_success:") ^
-        acc, state
+            else "g" ^ gidx ^ "_success:") ^ (match acc with | Code c -> c | _ -> "") in
+        Code code, state
     | _ :: rest ->
-        emit_node_prelude state rest
+        emit_node_prologue state rest
     | _ ->
-        "", state
+        None, state
 
-let rec emit_edge_branches (state : intermediate_state) = function
+let rec emit_edge_branches (state : intermediate_state) prologue = function
     | [] ->
-        "", state
+        (match prologue with
+            | Code c -> c, state
+            | _ -> "", state)
     | conditions ->
+        let curr_node_idx = state.node_idx - 1 in
+        let curr_node = Int.to_string curr_node_idx in
+        let start_code = (match prologue with
+            | Code c -> c
+            | Repetition -> "{ int repeats = 0; s" ^ curr_node ^ "_repeat:"
+            | Optional -> "{"
+            | OptionalRepetition -> "{ s" ^ curr_node ^ "_repeat:"
+            | _ -> ""
+        ) in
+        let gen_branch = (match prologue with
+            | Repetition | OptionalRepetition -> fun _ -> "repeats = 1; goto s" ^ curr_node ^ "_repeat;"
+            | _ -> fun s -> "goto s" ^ Int.to_string s.node_idx ^ ";"
+        ) in
         let conditions, epilogue_lazy = (match List.last_exn conditions with
             | Unconditional, node ->
                 let conditions = List.take conditions ((List.length conditions) - 1) in
-                conditions, (fun s ->
-                    "goto s" ^ Int.to_string s.node_idx ^ ";", append_node s node)
+                conditions, (fun s -> "goto s" ^ Int.to_string s.node_idx ^ ";", append_node s node)
             | _ ->
-                conditions, (match state.group_stack with
-                    | gidx :: _ -> fun s -> "goto g" ^ Int.to_string gidx ^ "_fail;", s
-                    | _ -> fun s -> "goto fail;", s
+                conditions, (fun s ->
+                    let fail_label, s = (match state.group_stack with
+                        | gidx :: _ -> "g" ^ Int.to_string gidx ^ "_fail", s
+                        | _ -> "fail", s) in
+                    match prologue with
+                        | Repetition ->
+                            "if (repeats == 1) goto s" ^ Int.to_string (curr_node_idx + 1) ^ ";" ^
+                            "else goto " ^ fail_label ^ "; }", s
+                        | Optional | OptionalRepetition ->
+                            "goto s" ^ Int.to_string (curr_node_idx + 1) ^ "; }", s
+                        | _ ->
+                            "goto " ^ fail_label ^ ";", s
             )) in
         let cond_blocks = List.map conditions ~f:(fun (cond, node) ->
             let (c_cond, pos_incr) = edge_condition_and_pos_incr cond in
             "if (" ^ c_cond ^ ")", pos_incr, node
         ) in
         let blocks, state = List.fold cond_blocks ~init:([], state) ~f:(fun (blocks, state) (cond_expr, pos_incr, node) ->
-            let branch = "{ pos += " ^ Int.to_string pos_incr ^ "; goto s" ^ Int.to_string state.node_idx ^ "; }" in
+            let branch = "{ pos += " ^ Int.to_string pos_incr ^ ";" ^ gen_branch state ^ " }" in
             (cond_expr ^ branch) :: blocks, append_node state node
         ) in
         let epilogue, state = epilogue_lazy state in
-        String.concat (blocks @ [epilogue]) ~sep:" else ", state
+        let body = String.concat (blocks @ [epilogue]) ~sep:" else "
+        in start_code ^ body, state
 and append_node state { attrs; edges } =
     let node_idx = state.node_idx in
-    let prelude, state = emit_node_prelude state attrs in
-    let branches, state = emit_edge_branches { state with node_idx = node_idx + 1 } edges in
-    { state with nodes = ("s" ^ Int.to_string node_idx ^ ": " ^ prelude ^ branches) :: state.nodes }
+    let prologue, state = emit_node_prologue state attrs in
+    let branches, state = emit_edge_branches { state with node_idx = node_idx + 1 } prologue edges in
+    { state with nodes = ("s" ^ Int.to_string node_idx ^ ": " ^ branches) :: state.nodes }
 
 let graph_with_groups_to_c group_count graph =
     let { nodes; _ } = graph |> append_node init_state in

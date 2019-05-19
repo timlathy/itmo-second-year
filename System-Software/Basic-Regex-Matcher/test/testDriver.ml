@@ -14,5 +14,7 @@ let suite = [
     "capturing groups" >::
         c_code_file_case "1(test)2(test)" "groups.c";
     "quantifiers" >::
-        c_code_file_case "(the)+(flower)?wesaw*" "quantifiers.c";
+        c_code_file_case "1?2+3*" "quantifiers.c";
+    "quantified groups" >::
+        c_code_file_case "(the)+(flower)?wesaw" "quantified_groups.c";
 ]
