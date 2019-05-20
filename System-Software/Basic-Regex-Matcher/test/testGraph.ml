@@ -11,7 +11,7 @@ let node : Types.graph_node = { attrs = []; edges = [] }
 let finish : Types.graph_node = { node with attrs = [MatchCompleteNode] }
 let groupstart idx : Types.graph_node = { node with attrs = [GroupStartNode idx] }
 let endgroupandfinish idx : Types.graph_node = { node with attrs = [GroupEndNode idx; MatchCompleteNode] }
-let switchalt idx : Types.graph_node = { node with attrs = [SwitchAlternativeNode idx] }
+let jmpalt idx : Types.graph_node = { node with attrs = [JumpToAlternativeNode idx] }
 
 let suite = [
     "literals" >::
@@ -66,45 +66,45 @@ let suite = [
         };
     "alternation" >::
         graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"]) ~groups:2 { node with edges = [
-            CondEnterAlternative 0, { node with edges = [
+            Unconditional, { attrs = [EnterAlternativeNode 0]; edges = [
                 CondLiteral "a", finish;
-                Unconditional, switchalt 1
+                Unconditional, jmpalt 1
             ] };
-            CondEnterAlternative 1, { (groupstart 0) with edges = [
+            Unconditional, { attrs = [GroupStartNode 0; EnterAlternativeNode 1]; edges = [
                 CondLiteral "bc", endgroupandfinish 0;
-                Unconditional, switchalt 2
+                Unconditional, jmpalt 2
             ] };
-            CondEnterAlternative 2, { (groupstart 1) with edges = [
+            Unconditional, { attrs = [GroupStartNode 1; EnterAlternativeNode 2]; edges = [
                 CondLiteral "ed", endgroupandfinish 1;
-                Unconditional, switchalt 3
+                Unconditional, jmpalt 3
             ] };
-            CondEnterAlternative 3, { node with edges = [
+            Unconditional, { attrs = [EnterAlternativeNode 3]; edges = [
                 CondLiteral "fg", finish
             ] }
         ] };
     "messy nested alternation" >::
-        graph_case (alt [alt [lit "a"; lit "b"; lit "c"]; alt [lit "d"; lit "e"]]) ~groups:0 { node with edges = [
-            CondEnterAlternative 0, { node with edges = [
-                CondEnterAlternative 2, { node with edges = [
-                    CondLiteral "a", finish;
-                    Unconditional, switchalt 3
+        graph_case (alt [grp (alt [lit "a"; lit "b"; lit "c"]); alt [lit "d"; lit "e"]]) ~groups:1 { node with edges = [
+            Unconditional, { attrs = [GroupStartNode 0; EnterAlternativeNode 0]; edges = [
+                Unconditional, { attrs = [EnterAlternativeNode 2]; edges = [
+                    CondLiteral "a", endgroupandfinish 0;
+                    Unconditional, jmpalt 3
                 ] };
-                CondEnterAlternative 3, { node with edges = [
-                    CondLiteral "b", finish;
-                    Unconditional, switchalt 4
+                Unconditional, { attrs = [EnterAlternativeNode 3]; edges = [
+                    CondLiteral "b", endgroupandfinish 0;
+                    Unconditional, jmpalt 4
                 ] };
-                CondEnterAlternative 4, { node with edges = [
-                    CondLiteral "c", finish;
-                    Unconditional, switchalt 1
+                Unconditional, { attrs = [EnterAlternativeNode 4]; edges = [
+                    CondLiteral "c", endgroupandfinish 0;
+                    Unconditional, jmpalt 1
                 ] };
-                Unconditional, switchalt 1 (* this is superfluous but hard to remove *)
+                Unconditional, jmpalt 1 (* this is superfluous but hard to remove *)
             ] };
-            CondEnterAlternative 1, { node with edges = [
-                CondEnterAlternative 5, { node with edges = [
+            Unconditional, { attrs = [EnterAlternativeNode 1]; edges = [
+                Unconditional, { attrs = [EnterAlternativeNode 5]; edges = [
                     CondLiteral "d", finish;
-                    Unconditional, switchalt 6
+                    Unconditional, jmpalt 6
                 ] };
-                CondEnterAlternative 6, { node with edges = [
+                Unconditional, { attrs = [EnterAlternativeNode 6]; edges = [
                     CondLiteral "e", finish;
                 ] };
             ] };
@@ -112,18 +112,18 @@ let suite = [
     "quantified alternation" >::
         graph_case (zeroone (grp (alt [seq [chcls [ch 'a']; lit "b"]; lit "c"; lit "d"])))  ~groups:1 (
             { attrs = [GroupStartNode 0]; edges = [
-                CondEnterAlternative 0, { node with edges = [
+                Unconditional, { attrs = [EnterAlternativeNode 0]; edges = [
                      CondEitherOf [CondLiteral "a"], { attrs = []; edges = [
                         CondLiteral "b", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
-                        Unconditional, switchalt 1
+                        Unconditional, jmpalt 1
                     ] };
-                    Unconditional, switchalt 1
+                    Unconditional, jmpalt 1
                 ] };
-                CondEnterAlternative 1, { node with edges = [
+                Unconditional, { attrs = [EnterAlternativeNode 1]; edges = [
                     CondLiteral "c", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
-                    Unconditional, switchalt 2
+                    Unconditional, jmpalt 2
                 ] };
-                CondEnterAlternative 2, { node with edges = [
+                Unconditional, { attrs = [EnterAlternativeNode 2]; edges = [
                     CondLiteral "d", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
                 ] };
             ] })

@@ -11,14 +11,14 @@ type graph_edge_condition =
     | CondNegated of graph_edge_condition
     | CondLiteral of string
     | CondCharInAsciiRange of char * char
-    | CondEnterAlternative of int
     | Unconditional
 
 type graph_node_attribute =
     | MatchCompleteNode
     | GroupStartNode of int
     | GroupEndNode of int
-    | SwitchAlternativeNode of int
+    | EnterAlternativeNode of int
+    | JumpToAlternativeNode of int
     | OptionalNode
     | RepeatingNode
 

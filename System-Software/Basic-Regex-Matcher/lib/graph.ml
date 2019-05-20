@@ -54,12 +54,12 @@ let rec build_tail_nodes (state : intermediate_state) (tail_lazy : intermediate_
             in let tail_node = if has_alts_left
                 then insert_alt_backtrack (global_alt_idx + i + 1) tail_node
                 else tail_node
-            in ((CondEnterAlternative (global_alt_idx + i), tail_node) :: acc), s
+            in ((Unconditional, { tail_node with attrs = tail_node.attrs @ [EnterAlternativeNode (global_alt_idx + i)] }) :: acc), s
         )
         in { attrs = []; edges = List.rev edges }, s
 and edges_need_alt_backtrack = function
     | [] -> true
-    | [Unconditional, { attrs = [SwitchAlternativeNode _]; _ }] -> false
+    | [Unconditional, { attrs = [JumpToAlternativeNode _]; _ }] -> false
     | [Unconditional, { attrs; _ }] -> not (Stdlib.List.mem MatchCompleteNode attrs)
     | _ :: rest -> edges_need_alt_backtrack rest
 and insert_alt_backtrack alt_idx = function
@@ -70,7 +70,7 @@ and insert_alt_backtrack alt_idx = function
     | { edges; attrs } ->
         if edges_need_alt_backtrack edges
         then let edges = List.map edges ~f:(fun (c, n) -> c, insert_alt_backtrack alt_idx n)
-             in { edges = edges @ [Unconditional, { attrs = [SwitchAlternativeNode alt_idx]; edges = [] }]; attrs }
+             in { edges = edges @ [Unconditional, { attrs = [JumpToAlternativeNode alt_idx]; edges = [] }]; attrs }
         else { edges; attrs }
 and build_nodes_with_stacked_attrs attrs state tail_lazy expr =
     let state = { state with attr_stack = attrs :: state.attr_stack } in
