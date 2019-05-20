@@ -7,8 +7,8 @@ let apply_matcher str matcher =
         "No matches found"
     | { matched_range = Some (range); groups } ->
         let match_start, match_end = range in
-        let header = "Matched from " ^ Int.to_string match_start ^ " to " ^ Int.to_string match_end ^ "\n" in
+        let header = "Matched from " ^ Int.to_string match_start ^ " to " ^ Int.to_string (match_end - 1) ^ "\n" in
         List.foldi groups ~init:header ~f:(fun i acc (s, e) -> acc ^
-            "Group #" ^ Int.to_string i ^ ": from " ^ Int.to_string s ^ " to " ^ Int.to_string e ^ "\n")
+            "Group #" ^ Int.to_string i ^ ": from " ^ Int.to_string s ^ " to " ^ Int.to_string (e - 1) ^ "\n")
 
 let run regex input = Driver.run_matcher_and_dispose_dylib regex (apply_matcher input)

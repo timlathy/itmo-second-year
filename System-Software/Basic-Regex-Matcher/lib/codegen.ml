@@ -87,16 +87,19 @@ let rec emit_node_prologue state = function
         let code = "groups[" ^ gidx ^ "].group_end = pos - str;" ^
         (if is_repeating
             then "groups[" ^ gidx ^ "].reserved_prev_start = groups[" ^ gidx ^ "].group_start; goto g" ^ gidx ^ ";"
-            else "goto g" ^ gidx ^ "_success;") ^
+            else if is_optional
+                then "groups[" ^ gidx ^ "].reserved_prev_start = groups[" ^ gidx ^ "].group_start;goto g" ^ gidx ^ "_success;"
+                else "goto g" ^ gidx ^ "_success;") ^
         "g" ^ gidx ^ "_fail:" ^
         (if is_optional
             then ""
             else if is_repeating
                 then "if (groups[" ^ gidx ^ "].group_end == 0) goto fail;"
                 else "goto fail;") ^
-        (if is_repeating
-            then "groups[" ^ gidx ^ "].group_start = groups[" ^ gidx ^ "].reserved_prev_start;"
-            else "g" ^ gidx ^ "_success:") ^ (match acc with | Code c -> c | _ -> "") in
+        (if is_repeating || is_optional
+            then "groups[" ^ gidx ^ "].group_start = groups[" ^ gidx ^ "].reserved_prev_start;" else "") ^
+        (if not is_repeating
+            then "g" ^ gidx ^ "_success:" else "") ^ (match acc with | Code c -> c | _ -> "") in
         Code code, state
     | _ :: rest ->
         emit_node_prologue state rest

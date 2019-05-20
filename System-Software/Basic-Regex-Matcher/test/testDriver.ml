@@ -16,7 +16,7 @@ let suite = [
     "quantifiers" >::
         c_code_file_case "1?2+3*" "quantifiers.c";
     "quantified groups" >::
-        c_code_file_case "(the)+(flower)?wesaw" "quantified_groups.c";
+        c_code_file_case "(A(ba)?)+" "quantified_groups.c";
     "quantifier + alternation" >::
         c_code_file_case "(a|b|c)+" "quantified_alternation.c";
     "nested alternation" >::
@@ -24,5 +24,5 @@ let suite = [
     "simple character class" >::
         c_code_file_case "w[aeiou]n" "simple_charclass.c";
     "character ranges" >::
-        c_code_file_case "[A-Da-d0-9eF]" "char_ranges.c"
+        c_code_file_case "[A-Da-d0-9eF]" "char_ranges.c";
 ]

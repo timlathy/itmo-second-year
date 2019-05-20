@@ -21,12 +21,26 @@ loop:
 s0:
 g0:
   groups[0].group_start = pos - str;
-  if (end - pos >= 3 && *(int16_t*)(pos + 0) == 0x6874 && pos[2] == 'e') {
-    pos += 3;
+  if (end - pos >= 1 && pos[0] == 'A') {
+    pos += 1;
     goto s1;
   }
   goto g0_fail;
 s1:
+g1:
+  groups[1].group_start = pos - str;
+  if (end - pos >= 2 && *(int16_t*)(pos + 0) == 0x6162) {
+    pos += 2;
+    goto s2;
+  }
+  goto g1_fail;
+s2:
+  groups[1].group_end = pos - str;
+  groups[1].reserved_prev_start = groups[1].group_start;
+  goto g1_success;
+g1_fail:
+  groups[1].group_start = groups[1].reserved_prev_start;
+g1_success:
   groups[0].group_end = pos - str;
   groups[0].reserved_prev_start = groups[0].group_start;
   goto g0;
@@ -34,29 +48,6 @@ g0_fail:
   if (groups[0].group_end == 0)
     goto fail;
   groups[0].group_start = groups[0].reserved_prev_start;
-  goto s2;
-s2:
-g1:
-  groups[1].group_start = pos - str;
-  if (end - pos >= 6 && *(int32_t*)(pos + 0) == 0x776f6c66 &&
-      *(int16_t*)(pos + 4) == 0x7265) {
-    pos += 6;
-    goto s3;
-  }
-  goto g1_fail;
-s3:
-  groups[1].group_end = pos - str;
-  goto g1_success;
-g1_fail:
-g1_success:
-  goto s4;
-s4:
-  if (end - pos >= 5 && *(int32_t*)(pos + 0) == 0x61736577 && pos[4] == 'w') {
-    pos += 5;
-    goto s5;
-  }
-  goto fail;
-s5:
   goto finish;
 fail:
   if (++match_start < end) {
