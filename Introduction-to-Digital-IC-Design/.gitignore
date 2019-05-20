@@ -5,3 +5,5 @@
 *.hw/
 *.xpr
 *.wcfg
+*.jou
+*.log
