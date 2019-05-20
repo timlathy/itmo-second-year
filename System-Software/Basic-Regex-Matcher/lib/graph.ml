@@ -1,9 +1,9 @@
 open Base
 open Types
 
-type intermediate_state = { group_idx: int; attr_stack: (graph_node_attribute list) list; }
+type intermediate_state = { group_idx: int; attr_stack: (graph_node_attribute list) list; global_alt_idx: int }
 
-let init_state = { group_idx = 0; attr_stack = [] }
+let init_state = { group_idx = 0; attr_stack = []; global_alt_idx = 0 }
 
 let char_class_entries_condition (entries: Types.char_class_entry list) = entries
     |> List.map ~f:(function
@@ -45,13 +45,33 @@ let rec build_tail_nodes (state : intermediate_state) (tail_lazy : intermediate_
                 { attrs = [GroupStartNode state.group_idx]; edges }, s
             | _ ->
                 { attrs = [GroupStartNode state.group_idx]; edges = [Unconditional, group] }, s)
-    | Alternation alt ->
-        let return_node = { attrs = [StepBackNode]; edges = [] }
-        in let edges, s = alt |> List.fold ~init:([], state) ~f:(fun (acc, s) e ->
-            let { attrs; edges }, s = build_tail_nodes s tail_lazy e
-            in ((Unconditional, { attrs; edges = edges @ [Unconditional, return_node] }) :: acc), s
+    | Alternation alts ->
+        let alts_num = List.length alts
+        in let global_alt_idx, state = state.global_alt_idx, { state with global_alt_idx = state.global_alt_idx + alts_num }
+        in let edges, s = List.foldi alts ~init:([], state) ~f:(fun i (acc, s) e ->
+            let tail_node, s = build_tail_nodes s tail_lazy e
+            in let has_alts_left = i < alts_num - 1
+            in let tail_node = if has_alts_left
+                then insert_alt_backtrack (global_alt_idx + i + 1) tail_node
+                else tail_node
+            in ((CondEnterAlternative (global_alt_idx + i), tail_node) :: acc), s
         )
         in { attrs = []; edges = List.rev edges }, s
+and edges_need_alt_backtrack = function
+    | [] -> true
+    | [Unconditional, { attrs = [SwitchAlternativeNode _]; _ }] -> false
+    | [Unconditional, { attrs; _ }] -> not (Stdlib.List.mem MatchCompleteNode attrs)
+    | _ :: rest -> edges_need_alt_backtrack rest
+and insert_alt_backtrack alt_idx = function
+    | { edges = []; _ } as node ->
+        node
+    | { edges = [Unconditional, inner]; _ } as node ->
+        { node with edges = [Unconditional, insert_alt_backtrack alt_idx inner] }
+    | { edges; attrs } ->
+        if edges_need_alt_backtrack edges
+        then let edges = List.map edges ~f:(fun (c, n) -> c, insert_alt_backtrack alt_idx n)
+             in { edges = edges @ [Unconditional, { attrs = [SwitchAlternativeNode alt_idx]; edges = [] }]; attrs }
+        else { edges; attrs }
 and build_nodes_with_stacked_attrs attrs state tail_lazy expr =
     let state = { state with attr_stack = attrs :: state.attr_stack } in
     let { attrs; edges }, state = build_tail_nodes state tail_lazy expr

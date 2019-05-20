@@ -9,9 +9,9 @@ let graph_case (input : Types.expr) ~groups (expected : Types.graph_node) = fun 
 
 let node : Types.graph_node = { attrs = []; edges = [] }
 let finish : Types.graph_node = { node with attrs = [MatchCompleteNode] }
-let stepback : Types.graph_node = { node with attrs = [StepBackNode] }
 let groupstart idx : Types.graph_node = { node with attrs = [GroupStartNode idx] }
 let endgroupandfinish idx : Types.graph_node = { node with attrs = [GroupEndNode idx; MatchCompleteNode] }
+let switchalt idx : Types.graph_node = { node with attrs = [SwitchAlternativeNode idx] }
 
 let suite = [
     "literals" >::
@@ -65,40 +65,66 @@ let suite = [
             ]
         };
     "alternation" >::
-        graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"])  ~groups:2 { node with edges = [
-            Unconditional, { node with edges = [
+        graph_case (alt [lit "a"; grp (lit "bc"); grp (lit "ed"); lit "fg"]) ~groups:2 { node with edges = [
+            CondEnterAlternative 0, { node with edges = [
                 CondLiteral "a", finish;
-                Unconditional, stepback
+                Unconditional, switchalt 1
             ] };
-            Unconditional, { (groupstart 0) with edges = [
+            CondEnterAlternative 1, { (groupstart 0) with edges = [
                 CondLiteral "bc", endgroupandfinish 0;
-                Unconditional, stepback
+                Unconditional, switchalt 2
             ] };
-            Unconditional, { (groupstart 1) with edges = [
+            CondEnterAlternative 2, { (groupstart 1) with edges = [
                 CondLiteral "ed", endgroupandfinish 1;
-                Unconditional, stepback
+                Unconditional, switchalt 3
             ] };
-            Unconditional, { node with edges = [
-                CondLiteral "fg", finish;
-                Unconditional, stepback
+            CondEnterAlternative 3, { node with edges = [
+                CondLiteral "fg", finish
             ] }
         ] };
+    "messy nested alternation" >::
+        graph_case (alt [alt [lit "a"; lit "b"; lit "c"]; alt [lit "d"; lit "e"]]) ~groups:0 { node with edges = [
+            CondEnterAlternative 0, { node with edges = [
+                CondEnterAlternative 2, { node with edges = [
+                    CondLiteral "a", finish;
+                    Unconditional, switchalt 3
+                ] };
+                CondEnterAlternative 3, { node with edges = [
+                    CondLiteral "b", finish;
+                    Unconditional, switchalt 4
+                ] };
+                CondEnterAlternative 4, { node with edges = [
+                    CondLiteral "c", finish;
+                    Unconditional, switchalt 1
+                ] };
+                Unconditional, switchalt 1 (* this is superfluous but hard to remove *)
+            ] };
+            CondEnterAlternative 1, { node with edges = [
+                CondEnterAlternative 5, { node with edges = [
+                    CondLiteral "d", finish;
+                    Unconditional, switchalt 6
+                ] };
+                CondEnterAlternative 6, { node with edges = [
+                    CondLiteral "e", finish;
+                ] };
+            ] };
+        ]};
     "quantified alternation" >::
         graph_case (zeroone (grp (alt [seq [chcls [ch 'a']; lit "b"]; lit "c"; lit "d"])))  ~groups:1 (
             { attrs = [GroupStartNode 0]; edges = [
-                Unconditional, { attrs = []; edges = [
-                    CondEitherOf [CondLiteral "a"], { attrs = []; edges = [
-                        CondLiteral "b", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] }
+                CondEnterAlternative 0, { node with edges = [
+                     CondEitherOf [CondLiteral "a"], { attrs = []; edges = [
+                        CondLiteral "b", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
+                        Unconditional, switchalt 1
                     ] };
-                    Unconditional, { attrs = [StepBackNode]; edges = [] }
-                ]};
-                Unconditional, { attrs = []; edges = [
+                    Unconditional, switchalt 1
+                ] };
+                CondEnterAlternative 1, { node with edges = [
                     CondLiteral "c", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
-                    Unconditional, { attrs = [StepBackNode]; edges = [] }
-                ]};
-                Unconditional, { attrs = []; edges = [
+                    Unconditional, switchalt 2
+                ] };
+                CondEnterAlternative 2, { node with edges = [
                     CondLiteral "d", { attrs = [GroupEndNode 0; OptionalNode; MatchCompleteNode]; edges = [] };
-                    Unconditional, { attrs = [StepBackNode]; edges = [] }
-                ]}
+                ] };
             ] })
 ]

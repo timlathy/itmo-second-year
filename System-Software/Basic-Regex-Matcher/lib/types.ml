@@ -13,13 +13,14 @@ type graph_edge_condition =
     | CondNegated of graph_edge_condition
     | CondLiteral of string
     | CondCharInAsciiRange of char * char
+    | CondEnterAlternative of int
     | Unconditional
 
 type graph_node_attribute =
     | MatchCompleteNode
     | GroupStartNode of int
     | GroupEndNode of int
-    | StepBackNode
+    | SwitchAlternativeNode of int
     | OptionalNode
     | RepeatingNode
 
@@ -44,6 +45,7 @@ and format_grap_edge_cond = function
         in "(" ^ conds_display ^ ")"
     | CondNegated cond -> "not (" ^ format_grap_edge_cond cond ^ ")"
     | Unconditional -> "always"
+    | CondEnterAlternative alt -> "alt? " ^ Int.to_string alt
     | _ -> "???"
 and format_graph_attr = function
     | OptionalNode -> "option"
@@ -51,7 +53,7 @@ and format_graph_attr = function
     | MatchCompleteNode -> "finish"
     | GroupStartNode idx -> "group " ^ Int.to_string idx
     | GroupEndNode idx -> "endgroup " ^ Int.to_string idx
-    | StepBackNode -> "stepback"
+    | SwitchAlternativeNode idx -> "switchalt " ^ Int.to_string idx
 
 (* Regex syntax tree types *)
 
