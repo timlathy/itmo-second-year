@@ -44,15 +44,15 @@ let compile_regex regex =
     | Error err ->
         Error err
 
-type match_handler = (string -> int -> Types.match_result) -> unit
+type 'a match_handler = (string -> int -> Types.match_result) -> 'a
 
 let run_matcher_and_dispose_dylib regex matcher =
     match compile_regex regex with
     | Ok library ->
         let match_fun_ffi = Foreign.foreign ~from:library "match" Ctypes.(string @-> int @-> returning Ffi.c_match_result) in
         let match_fun = fun str len -> Ffi.convert_c_match_result (match_fun_ffi str len) in
-        let () = matcher match_fun in
+        let result = matcher match_fun in
         Dl.dlclose ~handle:library;
         Unix.unlink compiled_regex_dylib_path;
-        Ok ()
+        Ok result
     | Error err -> Error err
