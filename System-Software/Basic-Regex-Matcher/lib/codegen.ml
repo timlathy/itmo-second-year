@@ -40,7 +40,17 @@ and literal_comparison_fused_chars cnt ccast charptr chars =
 let edge_condition_and_pos_incr = function
     | CondLiteral lit ->
         let charcnt = String.length lit in
-        let cond = "end - pos >= " ^ (Int.to_string charcnt) ^ " && " ^ (literal_comparison 0 (String.to_list lit)) in
+        let cond = "end - pos >= " ^ Int.to_string charcnt ^ " && " ^ literal_comparison 0 (String.to_list lit) in
+        cond, charcnt
+    | CondEitherOf conds ->
+        let charcnt = (match conds with
+            | CondLiteral lit :: _ -> String.length lit
+            | _ -> failwith "either-of condition must only include literals of the same length") in
+        let comparisons = List.map conds ~f:(function
+            | CondLiteral lit -> literal_comparison 0 (String.to_list lit)
+            | _ -> failwith "either-of condition must only include literals of the same length") in
+        let disjunction = String.concat comparisons ~sep:" || " in
+        let cond = "end - pos >= " ^ Int.to_string charcnt ^ " && (" ^ disjunction ^ ")" in
         cond, charcnt
     | c ->
         failwith ("unsupported condition " ^ Types.format_graph_edge (c, { attrs = []; edges = []}))

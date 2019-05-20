@@ -20,5 +20,7 @@ let suite = [
     "quantifier + alternation" >::
         c_code_file_case "(a|b|c)+" "quantified_alternation.c";
     "nested alternation" >::
-        c_code_file_case "(a|b)|cd" "nested_alternation.c"
+        c_code_file_case "(a|b)|cd" "nested_alternation.c";
+    "simple character class" >::
+        c_code_file_case "w[aeiou]n" "simple_charclass.c";
 ]
