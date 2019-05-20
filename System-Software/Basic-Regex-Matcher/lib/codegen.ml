@@ -42,16 +42,21 @@ let edge_condition_and_pos_incr = function
         let charcnt = String.length lit in
         let cond = "end - pos >= " ^ (Int.to_string charcnt) ^ " && " ^ (literal_comparison 0 (String.to_list lit)) in
         cond, charcnt
-    | _ ->
-        failwith "unsupported condition"
+    | c ->
+        failwith ("unsupported condition " ^ Types.format_graph_edge (c, { attrs = []; edges = []}))
+
+let enter_alternative_attr = function | EnterAlternativeNode _ -> true | _ -> false
 
 let rec emit_node_prologue state = function
-    | RepeatingNode :: [] -> Repetition, state
-    | OptionalNode :: [] -> Optional, state
-    | OptionalNode :: RepeatingNode :: [] -> OptionalRepetition, state
+    | [RepeatingNode] -> Repetition, state
+    | [OptionalNode] -> Optional, state
+    | [OptionalNode; RepeatingNode] -> OptionalRepetition, state
+    | [RepeatingNode; EnterAlternativeNode _] -> Repetition, state
+    | [OptionalNode; EnterAlternativeNode _] -> Optional, state
+    | [OptionalNode; RepeatingNode; EnterAlternativeNode _] -> OptionalRepetition, state
     | MatchCompleteNode :: _ ->
         Code "goto finish;", state
-    | GroupStartNode gidx :: [] ->
+    | GroupStartNode gidx :: _ ->
         let state = { state with group_stack = gidx :: state.group_stack } in
         Code ("g" ^ Int.to_string gidx ^ ": groups[" ^ Int.to_string gidx ^ "].group_start = pos - str;"), state
     | GroupEndNode gidx :: rest ->
@@ -105,7 +110,10 @@ let rec emit_edge_branches (state : intermediate_state) prologue = function
             | _ -> fun s -> "goto s" ^ Int.to_string s.node_idx ^ ";"
         ) in
         let conditions, epilogue_lazy = (match List.last_exn conditions with
-            | Unconditional, node ->
+            | Unconditional, { attrs = [JumpToAlternativeNode idx]; _ } ->
+                let conditions = List.take conditions ((List.length conditions) - 1) in
+                conditions, (fun s -> "goto alt_" ^ Int.to_string idx ^ ";", s)
+            | Unconditional, node when not (List.exists node.attrs ~f:enter_alternative_attr) ->
                 let conditions = List.take conditions ((List.length conditions) - 1) in
                 conditions, (fun s -> "goto s" ^ Int.to_string s.node_idx ^ ";", append_node s node)
             | _ ->
@@ -122,16 +130,21 @@ let rec emit_edge_branches (state : intermediate_state) prologue = function
                         | _ ->
                             "goto " ^ fail_label ^ ";", s
             )) in
-        let cond_blocks = List.map conditions ~f:(fun (cond, node) ->
-            let (c_cond, pos_incr) = edge_condition_and_pos_incr cond in
-            "if (" ^ c_cond ^ ")", pos_incr, node
-        ) in
-        let blocks, state = List.fold cond_blocks ~init:([], state) ~f:(fun (blocks, state) (cond_expr, pos_incr, node) ->
-            let branch = "{ pos += " ^ Int.to_string pos_incr ^ ";" ^ gen_branch state ^ " }" in
-            (cond_expr ^ branch) :: blocks, append_node state node
+        let blocks, state = List.fold conditions ~init:([], state) ~f:(fun (blocks, state) -> function
+            | Unconditional, ({ attrs; _ } as node) ->
+                let idx = List.find attrs ~f:enter_alternative_attr
+                    |> (function | Some(EnterAlternativeNode i) -> i | _ -> 0) |> Int.to_string in
+                let branch = "alt_" ^ idx ^ ": int alt_" ^ idx ^ "_pos = pos; goto s" ^ Int.to_string state.node_idx ^ ";" in
+                branch :: blocks, append_node state node
+            | cond, node ->
+                let (c_cond, pos_incr) = edge_condition_and_pos_incr cond in
+                let branch = "if (" ^ c_cond ^ ") { pos += " ^ Int.to_string pos_incr ^ ";" ^ gen_branch state ^ "}" in
+                match blocks with
+                    | [] -> [branch], append_node state node
+                    | _ -> branch :: " else " :: blocks, append_node state node
         ) in
         let epilogue, state = epilogue_lazy state in
-        let body = String.concat (blocks @ [epilogue]) ~sep:" else "
+        let body = String.concat ((List.rev blocks) @ [epilogue]) ~sep:""
         in start_code ^ body, state
 and append_node state { attrs; edges } =
     let node_idx = state.node_idx in
