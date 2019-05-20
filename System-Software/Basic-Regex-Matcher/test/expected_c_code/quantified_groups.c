@@ -25,8 +25,7 @@ g0:
     pos += 3;
     goto s1;
   }
-  else
-    goto g0_fail;
+  goto g0_fail;
 s1:
   groups[0].group_end = pos - str;
   groups[0].reserved_prev_start = groups[0].group_start;
@@ -44,8 +43,7 @@ g1:
     pos += 6;
     goto s3;
   }
-  else
-    goto g1_fail;
+  goto g1_fail;
 s3:
   groups[1].group_end = pos - str;
   goto g1_success;
@@ -57,8 +55,7 @@ s4:
     pos += 5;
     goto s5;
   }
-  else
-    goto fail;
+  goto fail;
 s5:
   goto finish;
 fail:

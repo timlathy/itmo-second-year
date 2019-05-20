@@ -23,8 +23,7 @@ s0 : {
     pos += 1;
     goto s1;
   }
-  else
-    goto s1;
+  goto s1;
 }
 s1 : {
   int repeats = 0;
@@ -34,7 +33,7 @@ s1_repeat:
     repeats = 1;
     goto s1_repeat;
   }
-  else if (repeats == 1)
+  if (repeats == 1)
     goto s2;
   else
     goto fail;
@@ -45,8 +44,7 @@ s2_repeat:
     pos += 1;
     goto s2_repeat;
   }
-  else
-    goto s3;
+  goto s3;
 }
 s3:
   goto finish;

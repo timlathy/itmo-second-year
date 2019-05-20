@@ -24,8 +24,7 @@ s0:
     pos += 7;
     goto s1;
   }
-  else
-    goto fail;
+  goto fail;
 s1:
   goto finish;
 fail:

@@ -17,4 +17,8 @@ let suite = [
         c_code_file_case "1?2+3*" "quantifiers.c";
     "quantified groups" >::
         c_code_file_case "(the)+(flower)?wesaw" "quantified_groups.c";
+    "quantifier + alternation" >::
+        c_code_file_case "(a|b|c)+" "quantified_alternation.c";
+    "nested alternation" >::
+        c_code_file_case "(a|b)|cd" "nested_alternation.c"
 ]
