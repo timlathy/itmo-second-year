@@ -43,11 +43,15 @@ let edge_condition_and_pos_incr = function
         let cond = "end - pos >= " ^ Int.to_string charcnt ^ " && " ^ literal_comparison 0 (String.to_list lit) in
         cond, charcnt
     | CondEitherOf conds ->
-        let charcnt = (match conds with
-            | CondLiteral lit :: _ -> String.length lit
-            | _ -> failwith "either-of condition must only include literals of the same length") in
+        let rec charcnt = (function
+            | [] -> 1
+            | CondCharInAsciiRange _ :: rest -> charcnt rest
+            | CondLiteral lit :: rest when String.length lit = 1 -> charcnt rest
+            | _ -> failwith "either-of condition must only include single-char literals and ranges") in
+        let charcnt = charcnt conds in
         let comparisons = List.map conds ~f:(function
-            | CondLiteral lit -> literal_comparison 0 (String.to_list lit)
+            | CondLiteral lit -> "pos[0] == '" ^ lit ^ "'"
+            | CondCharInAsciiRange (a, b) -> "(pos[0] >= '" ^ Char.to_string a ^ "' && pos[0] <= '" ^ Char.to_string b ^ "')"
             | _ -> failwith "either-of condition must only include literals of the same length") in
         let disjunction = String.concat comparisons ~sep:" || " in
         let cond = "end - pos >= " ^ Int.to_string charcnt ^ " && (" ^ disjunction ^ ")" in

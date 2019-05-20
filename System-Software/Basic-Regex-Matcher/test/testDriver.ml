@@ -23,4 +23,6 @@ let suite = [
         c_code_file_case "(a|b)|cd" "nested_alternation.c";
     "simple character class" >::
         c_code_file_case "w[aeiou]n" "simple_charclass.c";
+    "character ranges" >::
+        c_code_file_case "[A-Da-d0-9eF]" "char_ranges.c"
 ]
