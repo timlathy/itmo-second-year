@@ -8,7 +8,7 @@ module bist(
     output test_running,
     output reg [15:0] leds
 );
-    reg [2:0] state;
+    reg [4:0] state;
     reg [7:0] total_test_runs, test_iter;
     
     reg [7:0] hyp_a, hyp_b;
@@ -33,16 +33,16 @@ module bist(
     localparam Idle = 4'b0000;
     localparam BeginPassthrough = 4'b0001;
     localparam WaitPassthrough = 4'b0010;
-    localparam PrepareTest = 4'b0011;
-    localparam WaitResetTest = 4'b0100;
+    localparam StartTestIter = 4'b0011;
+    localparam PrepareTest = 4'b0100;
     localparam BeginTest = 4'b0101;
     localparam WaitTest = 4'b0110;
     localparam BeginCrc = 4'b0111;
     localparam WaitCrc = 4'b1000;
     
     assign test_running =
+        state == StartTestIter ||
         state == PrepareTest ||
-        state == WaitResetTest ||
         state == BeginTest ||
         state == WaitTest ||
         state == BeginCrc ||
@@ -51,6 +51,7 @@ module bist(
     always@(posedge clk)
         if (rst) begin
             state <= Idle;
+            leds <= 0;
             total_test_runs <= 0;
             hyp_rst <= 1;
             hyp_a <= 0;
@@ -59,7 +60,7 @@ module bist(
         else case (state)
             Idle:
                 if (toggle_test) begin
-                    state <= PrepareTest;
+                    state <= StartTestIter;
                     test_iter <= 0;
                     crc_rst <= 1;
                     lfsr_rst <= 1;
@@ -79,16 +80,16 @@ module bist(
                     state <= Idle;
                     leds <= hyp_out;
                 end
-            PrepareTest: begin
-                state <= WaitResetTest;
-                hyp_a <= lfsr_a_out;
-                hyp_b <= lfsr_b_out;
+            StartTestIter: begin
+                state <= PrepareTest;
                 lfsr_rst <= 0;
                 crc_rst <= 0;
                 hyp_rst <= 1;
             end
-            WaitResetTest: begin
+            PrepareTest: begin
                 state <= BeginTest;
+                hyp_a <= lfsr_a_out;
+                hyp_b <= lfsr_b_out;
                 hyp_rst <= 0;
                 hyp_start <= 1;
             end
@@ -112,7 +113,7 @@ module bist(
                         leds[7:0] <= total_test_runs + 1;
                     end
                     else begin
-                        state <= PrepareTest;
+                        state <= StartTestIter;
                         test_iter <= test_iter + 1;
                     end
                 end
