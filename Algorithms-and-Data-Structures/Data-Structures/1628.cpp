@@ -45,6 +45,14 @@ int main() {
 
   unsigned short streaks = 0;
 
+  if (k == 0) {
+    if (weeks == 1 || weekdays == 1)
+      std::cout << 1 << std::endl;
+    else
+      std::cout << weeks + weekdays << std::endl;
+    return 0;
+  }
+
   std::unordered_map<CalendarCell, unsigned char> single_cell_streaks;
 
   // First, count the rows
