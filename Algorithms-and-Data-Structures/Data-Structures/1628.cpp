@@ -58,18 +58,24 @@ int main() {
   // First, count the rows
   std::sort(bad_days.begin(), bad_days.end(), cmp_cell_week);
 
-  streaks += bad_days[0].week - 1;
-  streaks += weeks - bad_days[k - 1].week;
+  if (weekdays > 1) {
+    streaks += bad_days[0].week - 1;
+    streaks += weeks - bad_days[k - 1].week;
+  }
 
-  if (bad_days[0].day == 2)
+  if (bad_days[0].day == 2 && weeks == 1)
+    ++streaks;
+  else if (bad_days[0].day == 2)
     ++single_cell_streaks[{bad_days[0].week, 1}];
   else if (bad_days[0].day > 2)
-    streaks++;
+    ++streaks;
 
-  if (bad_days[k - 1].day == weekdays - 1)
+  if (bad_days[k - 1].day == weekdays - 1 && weeks == 1)
+    ++streaks;
+  else if (bad_days[k - 1].day == weekdays - 1)
     ++single_cell_streaks[{bad_days[k - 1].week, weekdays}];
   else if (bad_days[k - 1].day < weekdays - 1)
-    streaks++;
+    ++streaks;
 
   for (unsigned short i = 1; i < k; ++i) {
     CalendarCell cell = bad_days[i], prev_cell = bad_days[i - 1];
@@ -85,29 +91,35 @@ int main() {
       if (cell.day == 2)
         ++single_cell_streaks[{cell.week, 1}];
       else if (cell.day > 2)
-        streaks++;
+        ++streaks;
     }
     else if (cell.day - prev_cell.day == 2)
       ++single_cell_streaks[{cell.week, cell.day - 1}];
     else if (cell.day - prev_cell.day > 2)
-      streaks++;
+      ++streaks;
   }
 
   // Next, count the columns
   std::sort(bad_days.begin(), bad_days.end(), cmp_cell_day);
 
-  streaks += bad_days[0].day - 1;
-  streaks += weekdays - bad_days[k - 1].day;
+  if (weeks > 1) {
+    streaks += bad_days[0].day - 1;
+    streaks += weekdays - bad_days[k - 1].day;
+  }
 
-  if (bad_days[0].week == 2)  // above the first day
+  if (bad_days[0].week == 2 && weekdays == 1)  // above the first day
+    ++streaks;
+  else if (bad_days[0].week == 2)
     ++single_cell_streaks[{1, bad_days[0].day}];
   else if (bad_days[0].week > 2)
-    streaks++;
+    ++streaks;
 
+  if (bad_days[k - 1].week == weeks - 1 && weekdays == 1)  // below the last day
+    ++streaks;
   if (bad_days[k - 1].week == weeks - 1)  // below the last day
     ++single_cell_streaks[{weeks, bad_days[k - 1].day}];
   if (bad_days[k - 1].week < weeks - 1)  // below the last day
-    streaks++;
+    ++streaks;
 
   for (unsigned short i = 1; i < k; ++i) {
     CalendarCell cell = bad_days[i], prev_cell = bad_days[i - 1];
