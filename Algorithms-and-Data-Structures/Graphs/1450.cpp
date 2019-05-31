@@ -50,7 +50,7 @@ int main() {
         }
       }
     }
-    uint next_v = 0, max_weight = 0;
+    int next_v = -1, max_weight = 0;
     for (uint vis = 0; vis < vs; ++vis) {
       if (!visited[vis]) continue;
 
@@ -61,10 +61,17 @@ int main() {
         }
       }
     }
+    if (next_v == -1) {
+      break;
+    }
     v = next_v;
   }
 
-  std::cout << weights[v_to] << std::endl;
+
+  if (weights[v_to] == -1)
+    std::cout << "No solution" << std::endl;
+  else
+    std::cout << weights[v_to] << std::endl;
 
   //for (int i = 0; i < weights.size(); ++i) {
   //  std::cout << i << ": " << weights[i] << std::endl;
