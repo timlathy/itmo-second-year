@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdio>
 #include <vector>
 
 #define uint unsigned int
@@ -10,21 +10,32 @@ struct Edge {
   ushort weight;
 };
 
+template <class N>
+static N readnum() {
+  N num = 0;
+  char c;
+
+  do { c = getchar(); }
+  while (c == ' ' || c == '\n' || c == '\r');
+
+  while (c >= '0') {
+    num = 10 * num + (c - '0');
+    c = getchar();
+  }
+
+  return num;
+}
+
 int main() {
-  uint v_count, e_count;
-  std::cin >> v_count >> e_count;
+  uint v_count = readnum<uint>(), e_count = readnum<uint>();
 
   std::vector<Edge> edges(e_count);
   for (uint i = 0; i < e_count; ++i) {
-    ushort a, b, weight;
-    std::cin >> a >> b >> weight;
+    ushort a = readnum<ushort>(), b = readnum<ushort>(), weight = readnum<ushort>();
     edges[i] = {a - 1, b - 1, weight};
   }
 
-  ushort v_start, v_dest;
-  std::cin >> v_start >> v_dest;
-  --v_start;
-  --v_dest;
+  ushort v_start = readnum<uint>() - 1, v_dest = readnum<uint>() - 1;
 
   std::vector<int> weights(v_count, -1);
   weights[v_start] = 0;
@@ -37,9 +48,9 @@ int main() {
   }
 
   if (weights[v_dest] == -1)
-    std::cout << "No solution" << std::endl;
+    puts("No solution");
   else
-    std::cout << weights[v_dest] << std::endl;
+    printf("%d\n", weights[v_dest]);
 
   return 0;
 }
