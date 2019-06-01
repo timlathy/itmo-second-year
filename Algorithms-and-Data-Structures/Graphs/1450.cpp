@@ -10,17 +10,22 @@ struct Edge {
   ushort weight;
 };
 
+#ifdef _WIN32
+// getchar_unlocked is Unix-specific, on Windows it's _getchar_nolock
+#define getchar_unlocked _getchar_nolock
+#endif
+
 template <class N>
 static N readnum() {
   N num = 0;
   char c;
 
-  do { c = getchar(); }
+  do { c = getchar_unlocked(); }
   while (c == ' ' || c == '\n' || c == '\r');
 
   while (c >= '0') {
     num = 10 * num + (c - '0');
-    c = getchar();
+    c = getchar_unlocked();
   }
 
   return num;
