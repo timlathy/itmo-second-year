@@ -1,5 +1,7 @@
 ; vim: syntax=nasm
 
+%define max_word_length 64
+
 %define __dict_prev_word__ 0
 
 ; Forth dictionary:
@@ -22,6 +24,10 @@
   dq i_%+ %2
   section .text
   i_%+ %2:
+%endmacro
+
+%macro endnative 0
+  jmp next ; return to the interpreter
 %endmacro
 
 ; Non-native words consist of execution tokens only. The first token always points to _docol_.

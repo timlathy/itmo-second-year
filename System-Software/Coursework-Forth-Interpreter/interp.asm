@@ -5,12 +5,16 @@
 %define rstack r13 ; call stack for nested words
 
 section .bss
+
 resq 1023
 rstack_start: resq 1
 
-%include "native-words.inc"
+input_scratch: resb 256
 
 section .text
+
+%include "core.inc"
+
 global _start
 
 next:
@@ -26,12 +30,9 @@ docol:
   jmp next
 
 program:
-  dq xt_drop, xt_plus, xt_dot, xt_bye
+  dq xt_lit, 5, xt_lit, 7, xt_plus, xt_dot, xt_bye
 
 _start:
   mov rstack, rstack_start
   mov pc, program
-  push 5
-  push 7
-  push 9
   jmp next
