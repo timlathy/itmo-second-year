@@ -4,16 +4,22 @@
 %define w      r14 ; current word address
 %define rstack r13 ; call stack for nested words
 
+%include 'dict.inc'
+
 section .bss
 
 resq 1023
-rstack_start: resq 1
-
+rstack_head: resq 1
 input_scratch: resb 256
+
+section .data
+
+dict_last_word: dq __dict_last_word__
 
 section .text
 
-%include "core.inc"
+%include 'core.inc'
+%include 'native-dict.inc'
 
 global _start
 
@@ -33,6 +39,6 @@ program:
   dq xt_lit, 5, xt_lit, 7, xt_plus, xt_dot, xt_bye
 
 _start:
-  mov rstack, rstack_start
+  mov rstack, rstack_head
   mov pc, program
   jmp next
