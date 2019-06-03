@@ -18,8 +18,9 @@ dict_last_word: dq __dict_last_word__
 
 section .text
 
-%include 'core.inc'
-%include 'native-dict.inc'
+%include 'core-io.inc'
+%include 'core-dict.inc'
+%include 'native.inc'
 
 global _start
 
