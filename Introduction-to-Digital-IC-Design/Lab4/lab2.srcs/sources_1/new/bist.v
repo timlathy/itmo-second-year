@@ -8,13 +8,18 @@ module bist(
     output test_running,
     output reg [15:0] leds
 );
-    reg [4:0] state;
+    reg [3:0] state;
     reg [7:0] total_test_runs, test_iter;
     
     reg [7:0] hyp_a, hyp_b;
     reg hyp_rst, hyp_start;
     wire hyp_busy;
     wire [7:0] hyp_out;
+    
+    wire test_state;
+    btn_debouncer btn_toggle_test(
+        .clk(clk), .btn(toggle_test), .btn_state(test_state)
+    );
     
     hypotenuse hyp(
         .clk(clk), .rst(hyp_rst), .a_in(hyp_a), .b_in(hyp_b), .start(hyp_start),
@@ -39,6 +44,9 @@ module bist(
     localparam WaitTest = 4'b0110;
     localparam BeginCrc = 4'b0111;
     localparam WaitCrc = 4'b1000;
+    localparam TestFinished = 4'b1001;
+    localparam TestButtonUnpressed = 4'b1010;
+    localparam TestButtonPressed = 4'b1011;
     
     assign test_running =
         state == StartTestIter ||
@@ -46,35 +54,41 @@ module bist(
         state == BeginTest ||
         state == WaitTest ||
         state == BeginCrc ||
-        state == WaitCrc;
+        state == WaitCrc ||
+        state == TestFinished ||
+        state == TestButtonUnpressed ||
+        state == TestButtonPressed;
     
     always@(posedge clk)
         if (rst) begin
             state <= Idle;
-            leds <= 0;
             total_test_runs <= 0;
+            hyp_start <= 0;
             hyp_rst <= 1;
+            leds <= 0;
             hyp_a <= 0;
             hyp_b <= 0;
         end
         else case (state)
             Idle:
-                if (toggle_test) begin
+                if (test_state) begin
                     state <= StartTestIter;
                     test_iter <= 0;
                     crc_rst <= 1;
                     lfsr_rst <= 1;
                     crc_start <= 0;
                 end
-                else if (hyp_a != switches[7:0] && hyp_b != switches[15:8]) begin
+                else if (hyp_a != switches[7:0] || hyp_b != switches[15:8]) begin
                     state <= BeginPassthrough;
                     hyp_a <= switches[7:0];
                     hyp_b <= switches[15:8];
                     hyp_rst <= 0;
                     hyp_start <= 1;
                 end
-             BeginPassthrough:
+             BeginPassthrough: begin
                 state <= WaitPassthrough;
+                hyp_start <= 0;
+             end
              WaitPassthrough:
                 if (!hyp_busy) begin
                     state <= Idle;
@@ -93,8 +107,10 @@ module bist(
                 hyp_rst <= 0;
                 hyp_start <= 1;
             end
-            BeginTest:
+            BeginTest: begin
                 state <= WaitTest;
+                hyp_start <= 0;
+            end
             WaitTest:
                 if (!hyp_busy) begin
                     state <= BeginCrc;
@@ -108,7 +124,7 @@ module bist(
                 if (!crc_busy) begin
                     leds[15:8] <= crc_out;
                     if (test_iter == 255) begin
-                        state <= Idle;
+                        state <= TestFinished;
                         total_test_runs <= total_test_runs + 1;
                         leds[7:0] <= total_test_runs + 1;
                     end
@@ -116,6 +132,20 @@ module bist(
                         state <= StartTestIter;
                         test_iter <= test_iter + 1;
                     end
+                end
+            TestFinished:
+                if (!test_state)
+                    state <= TestButtonUnpressed;
+            TestButtonUnpressed:
+                if (test_state)
+                    state <= TestButtonPressed;           
+            TestButtonPressed:
+                if (!test_state) begin
+                    state <= Idle;
+                    hyp_rst <= 1;
+                    leds <= 0;
+                    hyp_a <= 0;
+                    hyp_b <= 0;
                 end
         endcase
 endmodule
