@@ -18,10 +18,13 @@ module bist_testbench;
         forever #CLOCK_HALF_PERIOD clk_in = !clk_in;
     end
     
-    integer test_a, test_b, test_out;
+    integer test_a [0:1];
+    integer test_b [0:1];
+    integer test_out [0:1];
     
     initial begin
-        test_a = 4; test_b = 7; test_out = 8;
+        test_a[0] = 4; test_b[0] = 7; test_out[0] = 8;
+        test_a[1] = 5; test_b[1] = 12; test_out[1] = 13;
 
         rst_in = 1;
         test_in = 0;
@@ -30,29 +33,33 @@ module bist_testbench;
         
         rst_in = 0;
         
-        switches[7:0] = test_a;
-        switches[15:8] = test_b;
+        switches[7:0] = test_a[0];
+        switches[15:8] = test_b[0];
 
         repeat(26) @(posedge clk_in);
-        
-        if (leds == test_out)
-            $display("[+]");
-        else
+        if (leds != test_out[0])
             $stop;
         
         test_in = 1;
-        
-        repeat (2) @(posedge clk_in);
-        
+        repeat (12) @(posedge clk_in); // debouncer delay
         if (test_running != 1)
             $stop;
-
-        @(negedge test_running) begin
-            repeat (1) @(posedge clk_in);
-            if (leds[7:0] != 1)
-                $stop;
-        end
-            
+        
+        repeat (1) @(posedge leds[0])
+        
+        if (leds[15:8] != 8'b11100100)
+            $stop;
+        
+        test_in = 0;
+        repeat (12) @(posedge clk_in);
+        test_in = 1;
+        repeat (12) @(posedge clk_in);
+        test_in = 0;
+        repeat (12) @(posedge clk_in);
+        
+        if (test_running != 0)
+            $stop;
+        
         $finish;
     end
 endmodule

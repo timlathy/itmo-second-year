@@ -18,7 +18,7 @@ module bist(
     
     wire test_state;
     btn_debouncer btn_toggle_test(
-        .clk(clk), .btn(toggle_test), .btn_state(test_state)
+        .clk(clk), .btn(toggle_test), .btn_state(test_state), .rst(rst)
     );
     
     hypotenuse hyp(
