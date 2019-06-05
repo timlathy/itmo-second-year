@@ -39,7 +39,7 @@ native '-', minus, 0
   sub [rsp], rax
 endnative
 
-; dictionary
+; interpreter
 
 ; ( str str-len -- word-header-ptr )
 native 'find', find, 0
@@ -47,6 +47,31 @@ native 'find', find, 0
   pop rsi ; rsi <- string
   call native_find_word ; rax <- word-header-ptr or 0 if not found
   push rax 
+endnative
+
+; ( word-header-ptr -- execution-token-ptr )
+; Execution token is the address of the first command in a word
+native 'cfa', cfa, 0
+  pop rax
+  movzx rcx, byte [rax + 8] ; first qword = word ptr, next byte = name length
+  lea rax, [rax + 8 + 1 + rcx] ; skip word ptr, name length, name string
+  push rax
+endnative
+
+; compile-only
+
+native 'branch', branch, 0
+  mov pc, [pc]
+endnative
+
+native '0branch', zbranch, 0
+  pop rax
+  test rax, rax
+  jnz zbranch_not_taken
+  mov pc, [pc] ; the qword immediately following 0branch is the target address
+endnative
+zbranch_not_taken:
+  add pc, 8 ; skip the target address qword
 endnative
 
 ; system
