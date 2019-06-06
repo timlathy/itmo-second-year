@@ -1,0 +1,97 @@
+\documentclass[listings]{labreport}
+\departmentsubject{Кафедра вычислительной техники}{Системное программное обеспечение}
+\titleparts{Лабораторная работа №5}{Основы регулярных выражений}
+\students{Лабушев Тимофей Михайлович}
+\usepackage{multicol}
+
+\usepackage{etoolbox}
+\makeatletter
+\preto{\@verbatim}{\topsep=1pt \partopsep=1pt}
+\makeatother
+
+\begin{document}
+
+\maketitlepage
+
+\section*{Задание №1. Файл datebook}
+
+\begin{enumerate}
+\item Замените имя Jon на Jonathan:
+\begin{verbatim}
+sed 's/\<Jon\>/Jonathan/g' datebook
+\end{verbatim}
+
+\item Удалите первые три строки:
+\begin{verbatim}
+sed '1,3d' datebook
+\end{verbatim}
+
+\item Выведите строки с 5-ой по 10-ю:
+\begin{verbatim}
+sed -n '1,5p' datebook
+\end{verbatim}
+
+\begin{small}
+  \verb|-n| отключает автоматический вывод строк — без этого ключа каждая из строк с 5 по 10 была бы напечатана дважды.
+\end{small}
+
+\item Удалите строки, содержащие Lane:
+\begin{verbatim}
+sed '/Lane/d' datebook
+\end{verbatim}
+
+\item Выведите все строки с с днем рождения в ноябре или декабре:
+\begin{verbatim}
+sed -nE '/^([^:]+:){3}(11|12)/p' datebook
+\end{verbatim}
+
+\begin{small}
+  С ключом \verb|-E| используются расширенные регулярные выражения.
+  Дата рождения находится в третьем поле. Поля отделяются сиволом \texttt{:}.
+  Дата записана в американском формате, где первое число соответствует месяцу.
+\end{small}
+
+\item Добавить три символа * в конец строк, начинающихся с Fred:
+\begin{verbatim}
+sed '/^Fred/ s/$/***/' datebook
+\end{verbatim}
+
+\item Замените строку, содержащую Jose, на JOSE HAS RETIRED:
+\begin{verbatim}
+sed '/Jose/ s/.*/JOSE HAS RETIRED/' datebook
+\end{verbatim}
+
+\item Замените дату рождения Popeye на 11/14/46. При этом подразумевается, что вы не знаете значение даты, хранящейся в файле. Составьте и используйте регулярное выражение для ее поиска:
+\begin{verbatim}
+sed -E 's/^(Popeye([^:]+:){3})[^:]+/\111\/14\/46/' datebook
+\end{verbatim}
+
+\begin{small}
+  \verb|\1| в шаблоне замены содержит первую группу, в которую входят все поля до даты.
+\end{small}
+
+\item Удалите все пустые строки:
+\begin{verbatim}
+sed '/^$/d' datebook
+\end{verbatim}
+
+\item Напишите программу на языке редактора sed, которая:
+\begin{small}
+\begin{enumerate}
+\item вставляет перед первой строкой заголовок TITLE OF FILE
+\item удаляет последнее поле, значение которого кратно 500
+\item меняет местами имя и фамилию
+\item добавляет к концу каждой строки фразу THE END
+\end{enumerate}
+\end{small}
+\begin{verbatim}
+> cat script.sed
+1 i\TITLE OF FILE
+s/:[0-9]*[05]00$//
+s/^([^ ]+) ([^ :]+)/\2 \1/
+s/$/THE END/
+> sed -E -f script.sed datebook
+\end{verbatim}
+
+\end{enumerate}
+\end{document}
