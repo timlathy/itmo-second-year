@@ -213,7 +213,113 @@ THE EASTERN REGION HAS BEEN TEMPORARILY CLOSED' datafile
 THE EASTERN REGION HAS BEEN TEMPORARILY CLOSED
 \end{verbatim}
 
-\end{enumerate}
+\item \verb|sed '/eastern/{ n; s/AM/Archie/; }' datafile|
 
+Команды внутри фигурных скобок применяются к одному условию — в данном случае
+наличию последовательности \verb|eastern| в строке. \verb|n| применяет
+дальнейшие команды ко следующей строке.
+Таким образом, на следующих после \verb|eastern| строк первое вхождение
+\verb|AM| будет заменено на \verb|Archie|.
+
+\item \verb|sed '1,4y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' datafile|
+
+Команда \verb|y| осуществляют замену каждого из искомых символов на соответствующий
+ему по позиции. В выводе строчные латинские буквы в первой, второй, третьей, четвертой
+строках будут заменены на заглавные.
+
+\item \verb|sed '6q' datafile|
+
+Команда \verb|q| прекращает исполнение скрипта. После вывода шестой строки выполнение
+завершится.
+
+\item \verb|sed '/Lewis/{ s/Lewis/Joseph/;q; }' datafile|
+
+В первой строке, содержащей \verb|Lewis|, первое вхождение этой последовательности
+будет заменено на \verb|Joseph|, после чего выполнение завершится.
+
+\item \verb|sed -e '/northeast/h' -e '$G' datafile|
+
+Последовательно исполняются две команды: \verb|h| записывает в буфер (\textit{hold space})
+строку, содержащую \verb|northeast|, а \verb|$G| заменяет последнюю строку на сохраненную
+в буфер.
+
+\item \verb|sed -e '/WE/{h; d; }' -e '/CT/{G; }' datafile|
+
+Строки, содержащие \verb|WE|, помещаются в буфер и удаляются из вывода.
+После строк, содержащих \verb|CT|, вставляется текущая строка из буфера.
+
+\item \verb|sed -e '/northeast/h' -e '$g' datafile|
+
+В отличии от \verb|G|, \verb|g| заменит строку на содержание буфера, а не
+вставит его после.
+
+\item \verb|sed -e '/WE/{h; d; }' -e '/CT/{g; }' datafile|
+
+См. выше
+
+\item \verb|sed -e '/Patricia/h' -e '/Margot/x' datafile|
+
+\verb|x| заменяет текущую строку на сохраненную и записывает текущую в буфер.
+Таким образом, если в файле будет несколько строк, содержащих \verb|Margot|,
+то первая из них будет заменена на последнюю с \verb|Particia|, а следующая
+на замененную при условии, что между двумя строками не встретилось еще одной
+с \verb|Particia|.
+
+\item \verb|sed -n '/sentimental/p' datafile|
+
+См. вторую разобранную команду.
+
+\item \verb|sed '0,6d' datafile > newfile|
+
+Ошибка: номера строк начинаются с 1.
+
+\item \verb|sed '/[Dd]aniel/d' datafile|
+
+Из вывода убираются строки, содержащие \verb|Daniel| или \verb|daniel|.
+
+\item \verb|sed -n '19,20p' datafile|
+
+Вывод 19 и 20 строк, которых в файле нет, то есть пустой вывод.
+
+\item \verb|sed '1,10s/Montana/MT/g' datafile|
+
+Замена всех вхождений \verb|Montana| на \verb|MT| в строках с первой по десятую.
+
+\item \verb|sed '/March/!d' datafile|
+
+Из вывода убираются строки, не соответствующие паттерну, то есть не содержащие \verb|March|.
+
+\item \verb|sed '/report/s/5/8/' datafile|
+
+В строках, содержащих \verb|report|, первое вхождение \verb|5| заменяется на \verb|8|.
+
+\item \verb|sed 's/....//' datafile|
+
+Первые четыре символа в строках, имеющих хотя бы четыре символа, удаляются.
+
+\item \verb|sed 's/...$//' datafile|
+
+Последние три символа в строках, имеющих хотя бы три символа, удаляются.
+
+\item \verb|sed '/east/,/west/s/North/South/' datafile|
+
+Начиная с первой строки, в которой встречается \verb|east|, до первой строки, содержащей
+\verb|west|, первое вхождение \verb|North| в каждой строке заменяется на \verb|South|.
+
+\item \verb|sed -n '/Time off/w timefile' datafile|
+
+Строки, содержащие \verb|Time off|, записываются в \verb|./timefile|.
+
+\item \verb|sed 's/\([Oo]ccur\)ence/\1rence/' datafile|
+
+В каждой строке первое вхождение \verb|Occurence| или \verb|occurence| заменяется
+на соответственно \verb|Occurrence| или \verb|occurrence|.
+
+\item \verb|sed -n l datafile|
+
+Команда \verb|l| выводит строки с заменой специальных символов (табуляции на \verb|\t|,
+окончания строки на \verb|$|).
+
+\end{enumerate}
 
 \end{document}
