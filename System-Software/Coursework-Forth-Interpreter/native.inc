@@ -39,12 +39,23 @@ native '-', minus, 0
   sub [rsp], rax
 endnative
 
+; strings
+
+; ( str str-len -- num parsed-str-len )
+native 'number', number, 0
+  pop rsi ; rsi <- string length
+  pop rdi ; rdi <- string
+  call parse_int
+  push rax ; number
+  push rdx ; parsed-str-len
+endnative
+
 ; interpreter
 
 ; ( str str-len -- word-header-ptr )
 native 'find', find, 0
-  pop rdx ; rdx <- string length
-  pop rsi ; rsi <- string
+  pop rsi ; rsi <- string length
+  pop rdi ; rdi <- string
   call native_find_word ; rax <- word-header-ptr or 0 if not found
   push rax 
 endnative

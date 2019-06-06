@@ -3,8 +3,8 @@
 ; === native_find_word ===
 ; Looks up a word in the dictionary.
 ;
-; * rsi — (in) string pointer
-; * rdx — (in) string length
+; * rdi — (in) string pointer
+; * rsi — (in) string length
 ; * rax — (out) word header address (0 if not found)
 native_find_word:
   mov rax, [dict_last_word]
@@ -14,17 +14,19 @@ find_word_loop:
                             ; but did not find the word we're looking for
   movzx rcx, byte [rax + 8] ; the first 8 bytes of WH are occupied by the next word
                             ; pointer, the byte after it is the word name length
-  cmp rcx, rdx              ; are name lengths equal?
-  je find_word_loop_cmp_loop
+  cmp rcx, rsi              ; are name lengths equal?
+  je find_word_loop_cmp
 find_word_loop_next:
   mov rax, [rax]
   jmp find_word_loop
+find_word_loop_cmp:
+  xor rcx, rcx
 find_word_loop_cmp_loop:
-  mov rdi, [rsi + rcx]
-  cmp [rax + 8 + 1 + rcx], rdi ; base + next ptr (8) + name length (1) = name start
+  mov rdx, [rdi + rcx]
+  cmp [rax + 8 + 1 + rcx], rdx ; base + next ptr (8) + name length (1) = name start
   jne find_word_loop_next
   inc rcx
-  cmp rcx, rdx
+  cmp rcx, rsi
   jne find_word_loop_cmp_loop
 find_word_return:
   ret ; if we arrive here from find_word_loop_cmp_loop,

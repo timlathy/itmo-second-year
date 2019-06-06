@@ -14,12 +14,14 @@ native_exit:
 ; === native_print_string ===
 ; Prints a string using the sys_write system call.
 ;
-; * rsi — (in) string pointer
-; * rdx — (in) string length
+; * rdi — (in) string pointer
+; * rsi — (in) string length
 native_print_string:
-  mov rax, 1 ; syscall (1 = write)
-  mov rdi, 1 ; fd (1 = stdout)
-  syscall    ; rsi (string pointer) and rdx (string length) are already filled in
+  xchg rdi, rsi ; rsi <- string pointer
+  mov rdx, rdi  ; rdx <- string length
+  mov rax, 1    ; syscall (1 = write)
+  mov rdi, 1    ; fd (1 = stdout)
+  syscall
   ret
 
 ; === native_print_int ===
@@ -40,8 +42,8 @@ print_int_negative:
 print_int_positive:
   call native_uint_to_string ; rax <- string length, stack <- string
 print_int_epilogue:
-  mov rsi, rsp ; rsi <- string pointer
-  mov rdx, rax ; rdx <- string length
+  mov rdi, rsp ; rdi <- string pointer
+  mov rsi, rax ; rsi <- string length
   call native_print_string
   mov rsp, rbx ; restore the initial stack position, clearing the string off of it
   pop rbx
