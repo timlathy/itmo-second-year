@@ -13,7 +13,7 @@
 
 \maketitlepage
 
-\section*{Задание №1. Файл datebook}
+\section*{Задание \#1. Файл datebook}
 
 \begin{enumerate}
 \item Замените имя Jon на Jonathan:
@@ -94,4 +94,126 @@ s/$/THE END/
 \end{verbatim}
 
 \end{enumerate}
+
+\section*{Задание \#2. Файл datafile}
+
+\begin{enumerate}
+\item \verb|sed '/north/p' datafile|
+
+Строки, содержащие \verb|north|, встретятся в выводе дважды: каждая строка
+печатается по умолчанию; команда \verb|p| также выводит строку.
+
+\item \verb|sed -n '/north/p' datafile|
+
+Ключ \verb|-n| отключает вывод строк по умолчанию, поэтому в выводе будут
+только строки, содержащие \verb|north|.
+
+\item \verb|sed '3d' datafile|
+
+Число перед командой указывает на номер строки. Команда \verb|d| удаляет строку из вывода.
+
+\item \verb|sed '3,$d' datafile|
+
+С помощью запятой задается интервал — в данном случае от 3 строки до конца файла (\verb|$|).
+
+\item \verb|sed '$d' datafile|
+
+\verb|$| указывает на последнюю строку в файле.
+
+\item \verb|sed '/north/d' datafile|
+
+Строки, содержащие \verb|north|, исключаются из вывода.
+
+\item \verb|sed 's/west/north/g' datafile|
+
+Все вхождения \verb|west| в файле заменяются в выводе на \verb|north|.
+
+\item \verb|sed -n 's/^west/north/p' datafile|
+
+Строки, начинающиеся на \verb|west|, попадают в вывод (\verb|p|) с заменой \verb|west|
+на \verb|north|. Остальное содержимое файла не выводится (\verb|-n|).
+
+\item \verb|sed 's/[0-9][0-9]$/&.5/' datafile|
+
+\verb|&| соответствует совпавшей части строки, поэтому в результате работы к строкам,
+оканчивающимся на две цифры, будет дописано \verb|.5|.
+
+\item \verb|sed -n 's/Hemenway/Jones/gp' datafile|
+
+Будут выведены (\verb|p|) только (\verb|-n|) те строки, которые содержат \verb|Hemenway|,
+с заменой всех вхождений \verb|Hemenway| на \verb|Jones|.
+
+\item \verb|sed -n 's/\(Stag\)got/\1ianne/p' datafile|
+
+Будут выведены только те строки, которые содержат \verb|Staggot|, с заменой первого
+в строке вхождения на \verb|Stagianne| (\verb|\1| — первая группа).
+
+\item \verb|sed 's#14#88#g' datafile|
+
+При использовании команды замены любой символ (кроме \verb|\| и перехода на новую строку),
+следующий за \verb|s|, принимается за разделитель — команда аналогична \verb|s/14/88/g|.
+
+\item \verb|sed -n '/west/,/east/p' datafile|
+
+В вывод попадут строки в диапазоне от первой, содержащей \verb|west|, до первой, содержащей
+\verb|east|.
+
+\item \verb|sed -n '5,/^northeast/p' datafile|
+
+В вывод попадут строки c пятой по первую после пятой, начинающуюся на \verb|northeast|.
+
+\item \verb|sed '/west/,/east/s/$/**WAKA**/' datafile|
+
+К концу каждой строки из диапазона от первого вхождения \verb|west| до первого вхождения
+\verb|east| будет добавлено \verb|**WAKA**|.
+
+\item \verb|sed -e '1,3d' -e 's/Hemenway/Jones/' datafile|
+
+Ключ \verb|-e| добавляет команду к выполняемым над исходными данными: в данном случае,
+из вывода будут удалены с первой по третью строки файла, а также произведена
+замена первых в каждой строке вхождений \verb|Hemenway| на \verb|Jones|.
+
+\item \verb|sed '/Suan/r newfile' datafile|
+
+После каждой строки, содержащей \verb|Suan|, будет добавлено содержание файла \verb|newfile|.
+
+\item \verb|sed -n '/north/w newfile' datafile|
+
+Вывод отсутствует, но каждая строка, содержащая \verb|north|, записывается в файл.
+
+\item \begin{verbatim}
+sed '/^north /a\
+--->THE NORTH SALES DISTRICT HAS MOVED<---' datafile
+\end{verbatim}
+
+После каждой строки, начинающейся на \verb|north|, будет добавлена строка
+\begin{verbatim}
+--->THE NORTH SALES DISTRICT HAS MOVED<---
+\end{verbatim}
+
+\item \begin{verbatim}
+sed '/eastern/i\
+NEW ENGLAND REGION\
+-------------------------------------' datafile
+\end{verbatim}
+
+Перед каждой строкой, содержащей \verb|eastern|, будет вставлено:
+\begin{verbatim}
+NEW ENGLAND REGION
+-------------------------------------
+\end{verbatim}
+
+\item \begin{verbatim}
+sed '/eastern/c\
+THE EASTERN REGION HAS BEEN TEMPORARILY CLOSED' datafile
+\end{verbatim}
+
+Вместо строк, содержащих \verb|eastern|, будет выведено:
+\begin{verbatim}
+THE EASTERN REGION HAS BEEN TEMPORARILY CLOSED
+\end{verbatim}
+
+\end{enumerate}
+
+
 \end{document}
