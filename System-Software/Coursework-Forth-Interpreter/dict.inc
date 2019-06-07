@@ -13,11 +13,10 @@
   %strlen __dict_name_len__ %1
 
   section .data
-  wh_%+ %2: dq __dict_last_word__ ; qword: pointer to the previous word (0 for the first word)
-  db __dict_name_len__            ; byte: word name length
-  db %1                           ; word name (up to 255 characters since the length is stored in a byte)
-  db %3                           ; byte: immediate flag
-  
+  wh_%+ %2: dq __dict_last_word__  ; qword: pointer to the previous word (0 for the first word)
+  db (__dict_name_len__ << 1) | %3 ; byte: word name length shifted by 1 and immediate flag in the lower bit
+  db %1                            ; word name (up to 255 characters since the length is stored in a byte)
+
   %define __dict_last_word__ wh_%+ %2
 
   xt_%+ %2: ; xt_... is the execution token — a pointer to the machine code implementation of the word
@@ -37,10 +36,9 @@
 
   section .data
   wh_%+ %2: dq __dict_last_word__
-  db __dict_name_len__
+  db (__dict_name_len__ << 1) ; immediate flag (in the lower bit) is always 0
   db %1
-  db 0
-  
+
   %define __dict_last_word__ wh_%+ %2
 
   xt_%+ %2:

@@ -14,6 +14,8 @@ find_word_loop:
                             ; but did not find the word we're looking for
   movzx rcx, byte [rax + 8] ; the first 8 bytes of WH are occupied by the next word
                             ; pointer, the byte after it is the word name length
+                            ; (shifted by 1) and immediate flag in the lower bit
+  shr rcx, 1                ; remove the flag to get word name length
   cmp rcx, rsi              ; are name lengths equal?
   je find_word_loop_cmp
 find_word_loop_next:
@@ -22,8 +24,8 @@ find_word_loop_next:
 find_word_loop_cmp:
   xor rcx, rcx
 find_word_loop_cmp_loop:
-  mov rdx, [rdi + rcx]
-  cmp [rax + 8 + 1 + rcx], rdx ; base + next ptr (8) + name length (1) = name start
+  mov dl, [rdi + rcx]
+  cmp byte [rax + 8 + 1 + rcx], dl ; base + next ptr (8) + name length (1) = name start
   jne find_word_loop_next
   inc rcx
   cmp rcx, rsi

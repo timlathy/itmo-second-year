@@ -12,10 +12,6 @@ resq 1023
 rstack_head: resq 1
 input_scratch: resb 256
 
-section .data
-
-dict_last_word: dq __dict_last_word__
-
 section .text
 
 %include 'core-conversions.inc'
@@ -23,6 +19,12 @@ section .text
 %include 'core-dict.inc'
 %include 'native.inc'
 %include 'words.inc'
+
+section .data
+
+dict_last_word: dq __dict_last_word__
+
+section .text
 
 global _start
 
@@ -39,8 +41,9 @@ docol:
   jmp next
 
 program:
-  dq xt_lit, 5, xt_lit, 7, xt_plus;, xt_dot, xt_bye
+  dq xt_lit, 5, xt_lit, 7, xt_plus
   dq xt_interpret
+  dq xt_bye
 
 _start:
   mov rstack, rstack_head

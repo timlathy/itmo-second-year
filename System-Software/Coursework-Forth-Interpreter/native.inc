@@ -37,11 +37,6 @@ native '2dup', twodup, 0
   push rax           ; a b a b
 endnative
 
-native '.', dot, 0
-  pop rdi
-  call native_print_int
-endnative
-
 ; math
 
 native '+', plus, 0
@@ -86,8 +81,9 @@ endnative
 ; Execution token is the address of the first command in a word
 native 'cfa', cfa, 0
   pop rax
-  movzx rcx, byte [rax + 8] ; first qword = word ptr, next byte = name length
-  lea rax, [rax + 8 + 1 + rcx] ; skip word ptr, name length, name string
+  movzx rcx, byte [rax + 8] ; first qword = word ptr, next byte = name length and flags
+  shr rcx, 1 ; drop flags
+  lea rax, [rax + 8 + 1 + rcx] ; skip word ptr (8), length and flags (1), name string
   push rax
 endnative
 
@@ -108,6 +104,11 @@ zbranch_not_taken:
 endnative
 
 ; system
+
+native '.', dot, 0
+  pop rdi
+  call native_print_int
+endnative
 
 native 'word', word, 0
   mov rdi, input_scratch
