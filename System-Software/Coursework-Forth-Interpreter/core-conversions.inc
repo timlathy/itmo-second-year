@@ -79,7 +79,7 @@ parse_uint_ret:
 ; * rdx — (out) number of characters parsed (0 if the number could not be parsed)
 parse_int:
   test rsi, rsi     ; string length = 0?
-  jmp parse_int_ret
+  jz parse_int_ret
   cmp byte [rdi], '-'
   je parse_int_negative
   call parse_uint ; if the string does not contain a '-' sign,

@@ -24,6 +24,26 @@ native_print_string:
   syscall
   ret
 
+; ===== native_print_char =====
+; Prints a single character using the sys_write system call.
+;
+; * dil — (in) the character to be printed
+native_print_char:
+  mov byte [output_scratch], dil
+  mov rsi, output_scratch ; rsi <- string pointer
+  mov rdx, 1 ; rdx <- string length
+  mov rax, 1 ; syscall (1 = write)
+  mov rdi, 1 ; fd (1 = stdout)
+  syscall
+  ret
+
+; ===== native_print_newline =====
+; Prints a newline using the sys_write system call.
+native_print_newline:
+  mov dil, 0xa ; '\n'
+  call native_print_char
+  ret
+
 ; === native_print_int ===
 ; Prints a signed 64-bit integer.
 ;

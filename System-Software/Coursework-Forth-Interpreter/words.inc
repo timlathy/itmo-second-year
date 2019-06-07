@@ -35,6 +35,7 @@ interpret_check_number: ; ( str str-len word-header )
   dq xt_drop ; ( str str-len )
   dq xt_number ; ( num parsed-len )
   dq xt_zbranch, interpret_word_not_found ; parsed-len is zero => not a number
+  dq xt_exit
 
 interpret_word_not_found: ; ( num )
   dq xt_drop

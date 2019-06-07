@@ -105,9 +105,26 @@ endnative
 
 ; system
 
+; ( num -- )
 native '.', dot, 0
   pop rdi
   call native_print_int
+  call native_print_newline
+endnative
+
+native '.S', dotstack, 0
+  push rbx
+  mov rbx, rsp
+dotstack_loop:
+  cmp rbx, [stack_start_ptr]
+  je dotstack_ret
+  mov rdi, [rbx]
+  add rbx, 8
+  call native_print_int
+  call native_print_newline
+  jmp dotstack_loop
+dotstack_ret:
+  pop rbx
 endnative
 
 native 'word', word, 0

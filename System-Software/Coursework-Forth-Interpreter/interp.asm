@@ -10,6 +10,7 @@ section .bss
 
 resq 1023
 rstack_head: resq 1
+stack_start_ptr: resq 1
 input_scratch: resb 256
 output_scratch: resb 256
 
@@ -46,6 +47,7 @@ program:
   dq xt_interpreter_loop
 
 _start:
+  mov [stack_start_ptr], rsp
   mov rstack, rstack_head
   mov pc, program
   jmp next
