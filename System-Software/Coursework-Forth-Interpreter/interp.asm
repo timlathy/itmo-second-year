@@ -22,6 +22,7 @@ section .text
 %include 'core-io.inc'
 %include 'core-dict.inc'
 %include 'native.inc'
+%include 'words.inc'
 
 global _start
 
@@ -38,7 +39,8 @@ docol:
   jmp next
 
 program:
-  dq xt_lit, 5, xt_lit, 7, xt_plus, xt_dot, xt_bye
+  dq xt_lit, 5, xt_lit, 7, xt_plus;, xt_dot, xt_bye
+  dq xt_interpret
 
 _start:
   mov rstack, rstack_head

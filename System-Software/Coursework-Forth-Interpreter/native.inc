@@ -7,8 +7,15 @@ endnative
 
 ; stack operations
 
+; ( a b -- a )
 native 'drop', drop, 0
   pop rax
+endnative
+
+; ( a b -- b )
+native 'nip', nip, 0
+  pop rax
+  mov [rsp], rax
 endnative
 
 native 'swap', swap, 0
@@ -20,6 +27,14 @@ endnative
 
 native 'dup', dup, 0
   push qword [rsp]
+endnative
+
+; ( a b -- a b a b )
+native '2dup', twodup, 0
+  mov rdx, [rsp + 8] ; a
+  mov rax, [rsp]     ; b
+  push rdx           ; a b a
+  push rax           ; a b a b
 endnative
 
 native '.', dot, 0
@@ -51,6 +66,13 @@ native 'number', number, 0
 endnative
 
 ; interpreter
+
+; ( execution-token -- )
+native 'execute', execute, 0
+  pop rax
+  mov w, rax
+  jmp [rax]
+endnative
 
 ; ( str str-len -- word-header-ptr )
 native 'find', find, 0
@@ -91,7 +113,8 @@ native 'word', word, 0
   mov rdi, input_scratch
   mov rsi, max_word_length
   call native_read_word
-  push input_scratch
+  push rax ; str
+  push rdx ; str-len
 endnative
 
 native 'exit', exit, 0
