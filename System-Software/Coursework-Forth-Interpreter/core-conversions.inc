@@ -1,30 +1,38 @@
 ; vim: syntax=nasm
 
 ; === native_uint_to_string ===
-; Converts an unsigned 64-bit integer to string, repeatedly dividing it by 10 (radix)
-; and pushing the ASCII codes of remainders on stack.
+; Converts an unsigned 64-bit integer to string at the specified location.
 ;
 ; * rdi — (in) the number to be printed
+; * rsi - (in) target string pointer
 ; * rax — (out) string length
-; * stack — (out) the resulting string
 native_uint_to_string:
-  pop rsi           ; rsi <- return address (the stack'll contain the resuling string)
-  xor rdx, rdx      ; rcx <- string length (0 initially)
-  mov rax, rdi      ; rax is the lower 64 bits of the dividend (the input number)
-  mov rdi, 10       ; 10 is the radix
+  push rbx
+  mov rbx, rsp ; rbx <- old stack pointer (we use the stack as a scratch space)
+  xor rdx, rdx ; rdx <- higher 64 bits of the dividend
+  mov rax, rdi ; rax <- lower 64 bits of the dividend (input number)
+  mov r8, 10   ; r8 <- radix
 uint_to_string_loop:
-  inc rcx           ; string length += 1
-  xor rdx, rdx      ; rdx is the higher 64 bits of the dividend (always 0)
-  div rdi           ; rax <- quotient (remaining number),
-                    ; rdx <- remainder (current digit)
-  add rdx, 0x30     ; ASCII character codes for digits start with 0x30
+  xor rdx, rdx        ; rdx is the higher 64 bits of the dividend (always 0)
+  div r8              ; rax <- quotient (remaining number),
+                      ; rdx <- remainder (current digit)
+  add rdx, 0x30       ; ASCII character codes for digits start with 0x30
   dec rsp
-  mov [rsp], dl     ; move the digit (lower 8 bits) to _the bottom_ of the stack,
-                    ; since diving by radix yields the digits in reverse order.
-  cmp rax, 0        ; if the quotient is 0, we have converted the whole number
-  jne uint_to_string_loop
-  mov rax, rcx      ; rax <- resulting string length
-  push rsi          ; restore return address
+  mov [rsp], dl       ; move the digit (lower 8 bits) to _the bottom_ of the stack,
+                      ; since diving by radix yields the digits in reverse order.
+  test rax, rax       ; if the quotient is 0, we have converted the whole number
+  jnz uint_to_string_loop
+uint_to_string_copy_stack: ; at this point, rax is 0
+                           ; we'll use it as the resulting string length counter
+uint_to_string_copy_stack_loop: ; copy digits in reverse order (pop them off the stack)
+  mov dl, [rsp]
+  inc rsp
+  mov [rsi + rax], dl
+  inc rax
+  cmp rsp, rbx ; when all digits are popped, rsp matches the value stored at the beginning
+  jne uint_to_string_copy_stack_loop
+uint_to_string_ret:
+  pop rbx
   ret
 
 ; ===== parse_uint =====

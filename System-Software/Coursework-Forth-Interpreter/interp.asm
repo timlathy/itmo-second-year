@@ -11,6 +11,7 @@ section .bss
 resq 1023
 rstack_head: resq 1
 input_scratch: resb 256
+output_scratch: resb 256
 
 section .text
 

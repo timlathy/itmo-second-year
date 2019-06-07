@@ -29,24 +29,22 @@ native_print_string:
 ;
 ; * rdi — (in) the number to be printed
 native_print_int:
-  push rbx     ; callee-saved
-  mov rbx, rsp ; rbx <- initial stack position
   test rdi, rdi
   jns native_print_int_positive
 native_print_int_negative:
+  mov byte [output_scratch], '-'
+  lea rsi, [output_scratch + 1]
   neg rdi
-  call native_uint_to_string ; rax <- string length, stack <- string
-  dec rsp
-  mov byte [rsp], '-'
+  call native_uint_to_string ; rax <- num string length
+  inc rax ; rax <- string length including '-'
   jmp native_print_int_epilogue
 native_print_int_positive:
-  call native_uint_to_string ; rax <- string length, stack <- string
+  mov rsi, output_scratch
+  call native_uint_to_string ; rax <- string length
 native_print_int_epilogue:
-  mov rdi, rsp ; rdi <- string pointer
+  mov rdi, output_scratch ; rdi <- string pointer (note that native_uint_to_string thrashes rsi)
   mov rsi, rax ; rsi <- string length
   call native_print_string
-  mov rsp, rbx ; restore the initial stack position, clearing the string off of it
-  pop rbx
   ret
 
 ; === native_read_word ===
