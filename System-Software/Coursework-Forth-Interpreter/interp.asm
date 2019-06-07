@@ -41,9 +41,8 @@ docol:
   jmp next
 
 program:
-  dq xt_lit, 5, xt_lit, 7, xt_plus
-  dq xt_interpret
-  dq xt_bye
+  dq xt_lit, 5, xt_lit, 7
+  dq xt_interpreter_loop
 
 _start:
   mov rstack, rstack_head
