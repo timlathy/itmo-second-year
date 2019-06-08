@@ -5,11 +5,11 @@
 ; ( a b -- c ), c is the result of a comparison
 %macro native_cmp_flags 3
 native %1, %2, 0
+  xor edx, edx ; used to temporarily store the flag
   pop rax
   cmp [rsp], rax
-  %3 al
-  movzx eax, al
-  mov [rsp], rax
+  %3 dl
+  mov [rsp], rdx
 endnative
 %endmacro
 
@@ -65,18 +65,18 @@ endnative
 ; ( a b -- c ), c is a / b
 ; div(s) = division is signed
 native '/', divs, 0
-  xor rdx, rdx ; upper qword of the dividend
+  xor edx, edx ; upper qword of the dividend
   pop rax
-  pop r8
-  idiv r8 ; rax <- quotient, rdx <- remainder
+  pop rcx
+  idiv rcx ; rax <- quotient, rdx <- remainder
   push rax
 endnative
 
 ; ( a b -- c ), c is a % b
 native '%', mods, 0
-  xor rdx, rdx ; upper qword of the dividend
+  xor edx, edx ; upper qword of the dividend
   pop rax
-  pop r8
-  idiv r8 ; rax <- quotient, rdx <- remainder
+  pop rcx
+  idiv rcx ; rax <- quotient, rdx <- remainder
   push rdx
 endnative

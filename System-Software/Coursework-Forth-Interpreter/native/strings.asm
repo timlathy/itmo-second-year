@@ -9,7 +9,7 @@
 ; 
 ; rdx, rsi, rdi are guaranteed to be preserved.
 native_string_copy:
-  xor rcx, rcx ; rcx <- iterator
+  xor ecx, ecx ; rcx <- iterator
 native_string_copy_loop:
   cmp rcx, rdx
   je native_string_copy_ret

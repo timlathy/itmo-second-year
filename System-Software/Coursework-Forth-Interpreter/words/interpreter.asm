@@ -56,7 +56,7 @@ endnative
 ; Execution token is the address of the first command in a word
 native 'cfa', cfa, 0
   pop rax
-  movzx rcx, byte [rax + 8] ; first qword = word ptr, next byte = name length and flags
+  movzx ecx, byte [rax + 8] ; first qword = word ptr, next byte = name length and flags
   shr rcx, 1 ; drop flags
   lea rax, [rax + 8 + 1 + rcx] ; skip word ptr (8), length and flags (1), name string
   push rax

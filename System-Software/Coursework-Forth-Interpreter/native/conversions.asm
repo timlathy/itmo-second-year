@@ -9,18 +9,17 @@
 native_uint_to_string:
   push rbx
   mov rbx, rsp ; rbx <- old stack pointer (we use the stack as a scratch space)
-  xor rdx, rdx ; rdx <- higher 64 bits of the dividend
   mov rax, rdi ; rax <- lower 64 bits of the dividend (input number)
   mov r8, 10   ; r8 <- radix
 uint_to_string_loop:
-  xor rdx, rdx        ; rdx is the higher 64 bits of the dividend (always 0)
-  div r8              ; rax <- quotient (remaining number),
-                      ; rdx <- remainder (current digit)
-  add rdx, 0x30       ; ASCII character codes for digits start with 0x30
+  xor edx, edx  ; rdx <- higher 64 bits of the dividend (always 0)
+  div r8        ; rax <- quotient (remaining number),
+                ; rdx <- remainder (current digit)
+  add dl, 0x30  ; ASCII character codes for digits start with 0x30
   dec rsp
-  mov [rsp], dl       ; move the digit (lower 8 bits) to _the bottom_ of the stack,
-                      ; since diving by radix yields the digits in reverse order.
-  test rax, rax       ; if the quotient is 0, we have converted the whole number
+  mov [rsp], dl ; move the digit (lower 8 bits) to _the bottom_ of the stack,
+                ; since diving by radix yields the digits in reverse order.
+  test rax, rax ; if the quotient is 0, we have converted the whole number
   jnz uint_to_string_loop
 uint_to_string_copy_stack: ; at this point, rax is 0
                            ; we'll use it as the resulting string length counter
@@ -46,15 +45,15 @@ uint_to_string_ret:
 parse_uint:
   push rbx
   mov rbx, rsi     ; rbx <- string length
-  xor rax, rax     ; rax is the number accumulated by adding and shifting digits
-  xor rdx, rdx     ; rdx is the higher 64 bits of the MUL operand (needs to be 0)
-  xor rcx, rcx     ; rcx is the number of digits parsed
-  mov r8, 10       ; r8 is radix
-  xor rsi, rsi     ; rsi is a character buffer for iterating the string
+  xor eax, eax     ; rax <- resulting number, accumulated by adding and shifting digits
+  xor ecx, ecx     ; rcx <- number of digits parsed
+  xor edx, edx     ; rdx <- higher 64 bits of the MUL operand (needs to be 0)
+  mov r8, 10       ; r8 <- radix
+  xor esi, esi     ; rsi <- character buffer for iterating the string
 parse_uint_loop:
   cmp rcx, rbx     ; number of digits parsed = string length?
   je parse_uint_ret
-  mov sil, [rdi+rcx]
+  mov sil, [rdi + rcx]
   cmp sil, 0x30    ; digit character codes start with 0x30
   jb parse_uint_ret
   cmp sil, 0x39    ; digit character codes end with 0x39
@@ -90,7 +89,7 @@ parse_int_negative:
   dec rsi
   call parse_uint
   test rdx, rdx   ; and if the number of digits parsed is more than 0
-  je parse_int_ret
+  jz parse_int_ret
   neg rax         ; we should negate the result
   inc rdx         ; and add up the '-' sign to the parsed character count
 parse_int_ret:

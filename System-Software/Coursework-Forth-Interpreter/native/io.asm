@@ -105,8 +105,8 @@ read_word_write_to_buf:
   cmp r14, r12
   jbe read_word_loop
 read_word_count_exceeded:
-  xor rax, rax
-  xor rdx, rdx
+  xor eax, eax
+  xor edx, edx
   jmp read_word_ret
 read_word_success:
   mov rax, r13
@@ -123,11 +123,11 @@ read_word_ret:
 ; * al — (out) the character read from stdin,
 ;        or 0x0 if stdin has been closed/an error has occurred
 native_read_char:
-  xor rax, rax ; sys_read is system call #0
-  xor rdi, rdi ; fd = 0 (stdin)
+  xor eax, eax ; sys_read is system call #0
+  xor edi, edi ; fd = 0 (stdin)
   mov rdx, 1   ; read 1 char
   dec rsp      ; reserve one byte on the stack, which we'll use a buffer 
-  mov rsi, rsp ; rsp now points to our single-character buffer
+  mov rsi, rsp ; rsi now points to our single-character buffer
   syscall
   cmp rax, 1   ; sys_read returns the number of bytes read;
                ; if it's 0, the stdin has been closed,
@@ -138,6 +138,6 @@ read_char_success:
   inc rsp
   ret
 read_char_error:
-  xor rax, rax
+  xor eax, eax
   inc rsp
   ret
