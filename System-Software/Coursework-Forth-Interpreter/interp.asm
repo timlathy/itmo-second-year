@@ -25,6 +25,10 @@ section .text
 %include 'core-strings.inc'
 %include 'core-io.inc'
 %include 'core-dict.inc'
+
+%include 'words/stack.asm'
+%include 'words/math.asm'
+
 %include 'native.inc'
 %include 'words.inc'
 

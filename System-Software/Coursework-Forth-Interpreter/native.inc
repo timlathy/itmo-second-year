@@ -5,50 +5,6 @@ native 'lit', lit, 0
   add pc, 8
 endnative
 
-; stack operations
-
-; ( a b -- a )
-native 'drop', drop, 0
-  pop rax
-endnative
-
-; ( a b -- b )
-native 'nip', nip, 0
-  pop rax
-  mov [rsp], rax
-endnative
-
-native 'swap', swap, 0
-  pop rax ; stack top
-  pop rbx ; stack top - 1
-  push rax
-  push rbx ; new stack top
-endnative
-
-native 'dup', dup, 0
-  push qword [rsp]
-endnative
-
-; ( a b -- a b a b )
-native '2dup', twodup, 0
-  mov rdx, [rsp + 8] ; a
-  mov rax, [rsp]     ; b
-  push rdx           ; a b a
-  push rax           ; a b a b
-endnative
-
-; math
-
-native '+', plus, 0
-  pop rax
-  add [rsp], rax
-endnative
-
-native '-', minus, 0
-  pop rax
-  sub [rsp], rax
-endnative
-
 ; strings
 
 ; ( str str-len -- num parsed-str-len )
