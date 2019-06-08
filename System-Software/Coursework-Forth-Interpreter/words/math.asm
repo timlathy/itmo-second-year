@@ -1,6 +1,45 @@
 ; vim: syntax=nasm
 
-; === Arithmetic operators ===
+; === Comparison operations ===
+
+; ( a b -- c ), c is the result of a comparison
+%macro native_cmp_flags 3
+native %1, %2, 0
+  pop rax
+  cmp [rsp], rax
+  %3 al
+  movzx eax, al
+  mov [rsp], rax
+endnative
+%endmacro
+
+native_cmp_flags '=', equals, sete   ; a == b
+native_cmp_flags '<', less, setl     ; a < b
+native_cmp_flags '<=', loreqs, setle ; a <= b
+
+; === Logical operations ===
+
+; ( 0/1 -- 1/0 )
+native 'not', lnot, 0
+  cmp qword [rsp], 0
+  setz al
+  movzx eax, al
+  mov [rsp], rax
+endnative
+
+; === Bitwise operations ===
+
+native 'and', bitand, 0
+  pop rax
+  and [rsp], rax
+endnative
+
+native 'or', bitor, 0
+  pop rax
+  or [rsp], rax
+endnative
+
+; === Arithmetic operations ===
 
 ; ( a b -- c ), c is a + b
 native '+', adds, 0
