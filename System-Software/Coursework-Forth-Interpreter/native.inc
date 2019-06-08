@@ -122,13 +122,13 @@ native 'create', create, 0
   ; the next byte is (name length << 1) | immediate flag (= 0)
   pop rdx           ; string length
   lea r8, [rdx * 2] ; we'll need the length later so we use an intermediate register to shift it (* 2 = << 1)
-  mov [rax], r8
+  mov byte [rax], r8b
   ; next comes the name string
   pop rsi            ; name string buffer (copy from)
   lea rdi, [rax + 1] ; word header name string buffer (copy to)
-  call native_string_copy
-  lea rax, [rax + 1 + rdx] ; compute execution token address (native_string_copy preserves rdx)
-  mov [HERE], rax          ; HERE now points at the first byte after the header
+  call native_string_copy ; thrashes rax!
+  add rdi, rdx    ; rdi <- execution token address (native_string_copy preserves rdi and rdx)
+  mov [HERE], rdi ; HERE now points at the first byte after the header
 endnative
 
 ; ( ptr -- )
@@ -165,7 +165,7 @@ native '.', dot, 0
 endnative
 
 native '.S', dotstack, 0
-  push rbx
+  mov [rsp - 8], rbx ; save (push) rbx without changing the stack pointer
   mov rbx, rsp
 dotstack_loop:
   cmp rbx, [stack_start_ptr]
@@ -176,7 +176,7 @@ dotstack_loop:
   call native_print_newline
   jmp dotstack_loop
 dotstack_ret:
-  pop rbx
+  mov rbx, [rsp - 8] ; restore rbx
 endnative
 
 native 'word', word, 0

@@ -7,7 +7,7 @@
 ; * rdi — (in) target buffer ptr
 ; * rdx — string length
 ; 
-; rdx is guaranteed to be preserved.
+; rdx, rsi, rdi are guaranteed to be preserved.
 native_string_copy:
   xor rcx, rcx ; rcx <- iterator
 native_string_copy_loop:

@@ -39,6 +39,12 @@ interpret_check_number: ; ( str str-len word-header )
   dq xt_drop ; ( str str-len )
   dq xt_number ; ( num parsed-len )
   dq xt_zbranch, interpret_word_not_found ; parsed-len is zero => not a number
+  dq xt_immediate_mode_q, xt_zbranch, intrepret_compile_number
+intrepret_immediate_number: ; ( num )
+  dq xt_exit ; in immediate mode, just leave the number on top of the stack
+intrepret_compile_number: ; ( num )
+  dq xt_lit, xt_lit, xt_comma ; append lit to current word definition
+  dq xt_comma ; write the number after lit
   dq xt_exit
 interpret_word_not_found: ; ( num )
   dq xt_drop
@@ -56,6 +62,6 @@ colon ':', colon
 ; === semicolon ===
 ; Ends the compilation of the current word
 colon ';', semicolon, 1
-  dq xt_lit, i_exit, xt_comma ; insert exit at the end of the word definition
+  dq xt_lit, xt_exit, xt_comma ; insert exit at the end of the word definition
   dq xt_rbrac ; exit compile mode
   dq xt_exit
