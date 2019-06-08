@@ -1,22 +1,18 @@
 ; vim: syntax=nasm
 
+; Pushes the next qword in the instruction stream and skips it.
 native 'lit', lit, 0
   push qword [pc]
   add pc, 8
 endnative
 
-; strings
-
-; ( str str-len -- num parsed-str-len )
-native 'number', number, 0
-  pop rsi ; rsi <- string length
-  pop rdi ; rdi <- string
-  call parse_int
-  push rax ; number
-  push rdx ; parsed-str-len
+; ( ptr -- )
+; Pops the top of the to HERE and advances HERE
+native ',', comma, 0
+  mov rax, [HERE]
+  pop qword [rax]
+  add qword [HERE], 8
 endnative
-
-; interpreter
 
 ; [ (left bracket) enters compile mode
 native '[', lbrac, 1
@@ -87,14 +83,6 @@ native 'create', create, 0
   mov [HERE], rdi ; HERE now points at the first byte after the header
 endnative
 
-; ( ptr -- )
-; Stores the top of the stack at HERE and advances HERE
-native ',', comma, 0
-  mov rax, [HERE]
-  pop qword [rax]
-  add qword [HERE], 8
-endnative
-
 ; compile-only
 
 native 'branch', branch, 0
@@ -110,43 +98,3 @@ endnative
 zbranch_not_taken:
   add pc, 8 ; skip the target address qword
 endnative
-
-; system
-
-; ( num -- )
-native '.', dot, 0
-  pop rdi
-  call native_print_int
-  call native_print_newline
-endnative
-
-native '.S', dotstack, 0
-  mov [rsp - 8], rbx ; save (push) rbx without changing the stack pointer
-  mov rbx, rsp
-dotstack_loop:
-  cmp rbx, [stack_start_ptr]
-  je dotstack_ret
-  mov rdi, [rbx]
-  add rbx, 8
-  call native_print_int
-  call native_print_newline
-  jmp dotstack_loop
-dotstack_ret:
-  mov rbx, [rsp - 8] ; restore rbx
-endnative
-
-native 'word', word, 0
-  mov rdi, input_scratch
-  mov rsi, max_word_length
-  call native_read_word
-  push rax ; str
-  push rdx ; str-len
-endnative
-
-native 'exit', exit, 0
-  mov pc, [rstack]
-  add rstack, 8
-endnative
-
-native 'bye', bye, 0
-  call native_exit

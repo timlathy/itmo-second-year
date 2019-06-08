@@ -21,15 +21,17 @@ runtime_dict: resq 32768
 
 section .text
 
-%include 'core-conversions.inc'
-%include 'core-strings.inc'
-%include 'core-io.inc'
-%include 'core-dict.inc'
+%include 'native/dictionary.asm'
+%include 'native/conversions.asm'
+%include 'native/strings.asm'
+%include 'native/io.asm'
 
-%include 'words/stack.asm'
+%include 'words/interpreter.asm'
 %include 'words/math.asm'
+%include 'words/stack.asm'
+%include 'words/strings.asm'
+%include 'words/system.asm'
 
-%include 'native.inc'
 %include 'words.inc'
 
 section .data
