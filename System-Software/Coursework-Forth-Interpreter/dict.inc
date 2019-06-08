@@ -31,16 +31,20 @@
 
 ; Non-native words consist of execution tokens only. The first token always points to _docol_.
 
-%macro colon 2
+%macro colon 3
   %strlen __dict_name_len__ %1
 
   section .data
   wh_%+ %2: dq __dict_last_word__
-  db (__dict_name_len__ << 1) ; immediate flag (in the lower bit) is always 0
+  db (__dict_name_len__ << 1) | %3 ; word name shifted by 1 and immediate flag in the lower bit
   db %1
 
   %define __dict_last_word__ wh_%+ %2
 
   xt_%+ %2:
   dq docol
+%endmacro
+
+%macro colon 2
+  colon %1, %2, 0
 %endmacro

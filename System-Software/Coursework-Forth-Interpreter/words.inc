@@ -21,23 +21,41 @@ colon 'interpret', interpret
   dq xt_find ; ( str str-len word-header )
   dq xt_dup ; ( str str-len word-header word-header )
   dq xt_zbranch, interpret_check_number ; word-header is null => word not found
-
 interpret_word:
-  dq xt_cfa ; ( str str-len exec-token )
-
-  ; TODO: check immediate flag & current mode
-
-  dq xt_nip, xt_nip ; ( exec-token )
-  dq xt_execute
-  dq xt_exit 
-
+  dq xt_nip, xt_nip ; ( word-header )
+  dq xt_immediate_mode_q ; ( word-header immed )
+  dq xt_zbranch, interpret_compile_mode
+interpret_immediate:
+  dq xt_cfa ; ( exec-token )
+  dq xt_execute, xt_exit
+interpret_compile_mode:
+  dq xt_dup, xt_immediate_word_q ; ( word-header immed-flag )
+  dq xt_zbranch, interpret_compile_word
+  dq xt_branch, interpret_immediate
+interpret_compile_word:
+  dq xt_cfa ; ( exec-token )
+  dq xt_comma, xt_exit ; append execution token to the current word definition
 interpret_check_number: ; ( str str-len word-header )
   dq xt_drop ; ( str str-len )
   dq xt_number ; ( num parsed-len )
   dq xt_zbranch, interpret_word_not_found ; parsed-len is zero => not a number
   dq xt_exit
-
 interpret_word_not_found: ; ( num )
   dq xt_drop
-
   ; TODO: print error message
+
+; === colon ===
+; Reads a word and creates a new dictionary entry for it
+colon ':', colon
+  dq xt_word   ; ( str str-len )
+  dq xt_create ; ( )
+  dq xt_lit, docol, xt_comma ; insert docol at the beginning of the word definition
+  dq xt_lbrac ; enter compile mode
+  dq xt_exit
+
+; === semicolon ===
+; Ends the compilation of the current word
+colon ';', semicolon, 1
+  dq xt_lit, i_exit, xt_comma ; insert exit at the end of the word definition
+  dq xt_rbrac ; exit compile mode
+  dq xt_exit

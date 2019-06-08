@@ -62,14 +62,37 @@ endnative
 
 ; interpreter
 
-; ( execution-token -- )
+; [ (left bracket) enters compile mode
+native '[', lbrac, 1
+  xor immed, immed ; immediate? = 0
+endnative
+
+; ] (right bracket) exits compile mode
+native ']', rbrac, 1
+  mov immed, 1 ; immediate? = 1
+endnative
+
+; Pushes interpreter state (1 = immediate mode, 0 = compile mode)
+native 'immediate-mode?', immediate_mode_q, 0
+  push immed
+endnative
+
+; ( word-header -- immed-flag )
+native 'immediate-word?', immediate_word_q, 0
+  pop rax
+  mov al, byte [rax + 8] ; the next byte after the prev word ptr is (name length << 1) | flag
+  and rax, 1
+  push rax
+endnative
+
+; ( exec-token -- )
 native 'execute', execute, 0
   pop rax
   mov w, rax
   jmp [rax]
 endnative
 
-; ( str str-len -- word-header-ptr )
+; ( str str-len -- word-header )
 native 'find', find, 0
   pop rsi ; rsi <- string length
   pop rdi ; rdi <- string
@@ -77,7 +100,7 @@ native 'find', find, 0
   push rax 
 endnative
 
-; ( word-header-ptr -- execution-token-ptr )
+; ( word-header -- exec-token )
 ; Execution token is the address of the first command in a word
 native 'cfa', cfa, 0
   pop rax
@@ -103,8 +126,8 @@ native 'create', create, 0
   ; next comes the name string
   pop rsi            ; name string buffer (copy from)
   lea rdi, [rax + 1] ; word header name string buffer (copy to)
-  call native_copy_string
-  lea rax, [rax + 1 + rdx] ; compute execution token address (native_copy_string preserves rdx)
+  call native_string_copy
+  lea rax, [rax + 1 + rdx] ; compute execution token address (native_string_copy preserves rdx)
   mov [HERE], rax          ; HERE now points at the first byte after the header
 endnative
 

@@ -3,6 +3,9 @@
 %define pc     r15 ; next instruction address
 %define w      r14 ; current word address
 %define rstack r13 ; call stack for nested words
+%define immed  r12 ; interpreter state
+  ; (1 = immediate mode, words are read and executed,
+  ;  0 = compile mode, words are read and appended to the current word definition)
 
 %include 'dict.inc'
 
@@ -51,6 +54,7 @@ program:
   dq xt_interpreter_loop
 
 _start:
+  mov immed, 1
   mov [stack_start_ptr], rsp
   mov rstack, rstack_head
   mov pc, program
