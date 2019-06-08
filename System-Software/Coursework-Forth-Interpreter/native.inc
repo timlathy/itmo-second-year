@@ -87,6 +87,35 @@ native 'cfa', cfa, 0
   push rax
 endnative
 
+; ( str str-len -- )
+; Creates a new dictionary entry for a word with the specified name and immediate flag set to 0.
+native 'create', create, 0
+  mov rsi, [dict_last_word] ; rsi <- last word address
+  mov rax, [HERE]           ; rax <- start of the new word
+  ; filling in the word header:
+  mov [rax], rsi            ; the first qword in a WH is the previous word ptr
+  mov [dict_last_word], rax ; the new word is now the last defined word
+  add rax, 8
+  ; the next byte is (name length << 1) | immediate flag (= 0)
+  pop rdx           ; string length
+  lea r8, [rdx * 2] ; we'll need the length later so we use an intermediate register to shift it (* 2 = << 1)
+  mov [rax], r8
+  ; next comes the name string
+  pop rsi            ; name string buffer (copy from)
+  lea rdi, [rax + 1] ; word header name string buffer (copy to)
+  call native_copy_string
+  lea rax, [rax + 1 + rdx] ; compute execution token address (native_copy_string preserves rdx)
+  mov [HERE], rax          ; HERE now points at the first byte after the header
+endnative
+
+; ( ptr -- )
+; Stores the top of the stack at HERE and advances HERE
+native ',', comma, 0
+  mov rax, [HERE]
+  pop qword [rax]
+  add qword [HERE], 8
+endnative
+
 ; compile-only
 
 native 'branch', branch, 0

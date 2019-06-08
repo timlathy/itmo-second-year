@@ -14,9 +14,12 @@ stack_start_ptr: resq 1
 input_scratch: resb 256
 output_scratch: resb 256
 
+runtime_dict: resq 32768
+
 section .text
 
 %include 'core-conversions.inc'
+%include 'core-strings.inc'
 %include 'core-io.inc'
 %include 'core-dict.inc'
 %include 'native.inc'
@@ -25,6 +28,7 @@ section .text
 section .data
 
 dict_last_word: dq __dict_last_word__
+HERE: dq runtime_dict
 
 section .text
 
