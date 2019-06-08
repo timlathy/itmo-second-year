@@ -1,5 +1,31 @@
 ; vim: syntax=nasm
 
+; === Return stack ===
+
+; ( a -- )
+; Pushes the value off the data stack onto the return stack.
+native '>r', rstackpush, 0
+  pop rax
+  sub rstack, 8
+  mov [rstack], rax
+endnative
+
+; ( -- a )
+; Pops the value off the return stack onto the data stack.
+native 'r>', rstackpop, 0
+  mov rax, [rstack]
+  add rstack, 8
+  push rax
+endnative
+
+; ( -- a )
+; Copies the top of the return stack onto the data stack.
+native 'r@', rstackcopy, 0
+  push qword [rstack]
+endnative
+
+; === Data stack ===
+
 ; ( a b -- a )
 native 'drop', drop, 0
   pop rax
