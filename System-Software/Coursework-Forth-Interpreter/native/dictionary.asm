@@ -7,7 +7,7 @@
 ; * rsi — (in) string length
 ; * rax — (out) word header address (0 if not found)
 native_find_word:
-  mov rax, [dict_last_word]
+  mov rax, [LAST_WORD]
 find_word_loop:
   test rax, rax             ; rax is the pointer to a word header
   jz find_word_return       ; rax == 0 => we've traversed the whole dictionary

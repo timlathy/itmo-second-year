@@ -65,11 +65,11 @@ endnative
 ; ( str str-len -- )
 ; Creates a new dictionary entry for a word with the specified name and immediate flag set to 0.
 native 'create', create, 0
-  mov rsi, [dict_last_word] ; rsi <- last word address
-  mov rax, [HERE]           ; rax <- start of the new word
+  mov rsi, [LAST_WORD] ; rsi <- last word address
+  mov rax, [HERE]      ; rax <- start of the new word
   ; filling in the word header:
-  mov [rax], rsi            ; the first qword in a WH is the previous word ptr
-  mov [dict_last_word], rax ; the new word is now the last defined word
+  mov [rax], rsi       ; the first qword in a WH is the previous word ptr
+  mov [LAST_WORD], rax ; the new word is now the last defined word
   add rax, 8
   ; the next byte is (name length << 1) | immediate flag (= 0)
   pop rdx           ; string length

@@ -38,7 +38,7 @@ section .text
 
 section .data
 
-dict_last_word: dq __dict_last_word__
+LAST_WORD: dq __dict_last_word__
 HERE: dq runtime_dict
 MEM: dq runtime_mem
 
