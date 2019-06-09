@@ -53,6 +53,16 @@ native '-', subs, 0
   sub [rsp], rax
 endnative
 
+; ( a -- a+1 )
+native '1+', incr, 0
+  inc qword [rsp]
+endnative
+
+; ( a -- a-1 )
+native '1-', decr, 0
+  dec qword [rsp]
+endnative
+
 ; ( a b -- c ), c is a * b
 ; mul(s) = multiplication is signed
 native '*', muls, 0

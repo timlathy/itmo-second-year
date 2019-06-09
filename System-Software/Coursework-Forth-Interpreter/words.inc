@@ -1,15 +1,22 @@
 ; vim: syntax=nasm
 
+msg_word_not_found: db 'Word not found', 0xa
+len_word_not_found: equ $-msg_word_not_found
+
 ; === interpreter-loop ===
 ; Main interpreter routine. Reads and executes words until encountering EOF.
 
 colon 'interpreter-loop', interpreter_loop
 interpreter_loop:
   dq xt_word ; ( str str-len )
+  dq xt_over ; ( str str-len str )
+  dq xt_zbranch, interpreter_loop_eof ; str is null when an EOF is reached
   dq xt_dup ; ( str str-len str-len )
-  dq xt_zbranch, interpreter_loop_eof ; ( FIXME: this checks for any empty string, which can also occur when the user moves to a new line )
+  dq xt_zbranch, interpreter_loop_empty_line
   dq xt_interpret ; ( )
   dq xt_branch, interpreter_loop
+interpreter_loop_empty_line:
+  dq xt_twodrop, xt_branch, interpreter_loop
 interpreter_loop_eof:
   dq xt_bye
 
@@ -48,7 +55,8 @@ intrepret_compile_number: ; ( num )
   dq xt_exit
 interpret_word_not_found: ; ( num )
   dq xt_drop
-  ; TODO: print error message
+  dq xt_lit, msg_word_not_found, xt_lit, len_word_not_found, xt_type
+  dq xt_exit
 
 ; === colon ===
 ; Reads a word and creates a new dictionary entry for it
@@ -65,3 +73,17 @@ colon ';', semicolon, 1
   dq xt_lit, xt_exit, xt_comma ; insert exit at the end of the word definition
   dq xt_rbrac ; exit compile mode
   dq xt_exit
+
+; === type ===
+; Prints cnt characters starting at the given address.
+; ( addr cnt -- )
+colon 'type', type, 0
+type_loop:
+  dq xt_dup, xt_zbranch, type_ret ; cnt is 0?
+  dq xt_swap, xt_dup ; ( cnt addr addr )
+  dq xt_readbyteat ; ( cnt addr char )
+  dq xt_emit ; ( cnt addr )
+  dq xt_incr, xt_swap, xt_decr ; ( addr+1 cnt-1 )
+  dq xt_branch, type_loop
+type_ret:
+  dq xt_twodrop, xt_exit

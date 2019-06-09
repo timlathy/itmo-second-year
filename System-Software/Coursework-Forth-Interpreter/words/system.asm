@@ -21,6 +21,11 @@ dotstack_ret:
   mov rbx, [rsp - 8] ; restore rbx
 endnative
 
+native 'emit', emit, 0
+  pop rdi
+  call native_print_char
+endnative
+
 native 'word', word, 0
   mov rdi, input_scratch
   mov rsi, max_word_length

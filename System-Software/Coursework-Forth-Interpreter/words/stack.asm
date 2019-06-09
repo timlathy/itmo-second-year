@@ -28,6 +28,11 @@ endnative
 
 ; ( a b -- a )
 native 'drop', drop, 0
+  pop rax ; pop rax is one byte, add rsp, 8 is four
+endnative
+
+native '2drop', twodrop, 0
+  pop rax ; still smaller than add rsp, 16
   pop rax
 endnative
 
@@ -43,6 +48,11 @@ native 'swap', swap, 0
   pop rbx ; stack top - 1
   push rax
   push rbx ; new stack top
+endnative
+
+; ( a b -- a b a )
+native 'over', over, 0
+  push qword [rsp + 8]
 endnative
 
 ; ( a -- a a )
