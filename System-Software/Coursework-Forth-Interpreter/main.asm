@@ -18,6 +18,7 @@ input_scratch: resb 256
 output_scratch: resb 256
 
 runtime_dict: resq 32768
+runtime_mem: resq 32768
 
 section .text
 
@@ -28,6 +29,7 @@ section .text
 
 %include 'words/interpreter.asm'
 %include 'words/math.asm'
+%include 'words/memory.asm'
 %include 'words/stack.asm'
 %include 'words/strings.asm'
 %include 'words/system.asm'
@@ -38,6 +40,7 @@ section .data
 
 dict_last_word: dq __dict_last_word__
 HERE: dq runtime_dict
+MEM: dq runtime_mem
 
 section .text
 
@@ -56,7 +59,6 @@ docol:
   jmp next
 
 program:
-  dq xt_lit, 5, xt_lit, 7
   dq xt_interpreter_loop
 
 _start:
