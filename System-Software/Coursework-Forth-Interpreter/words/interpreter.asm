@@ -1,5 +1,10 @@
 ; vim: syntax=nasm
 
+; ( -- HERE )
+native 'here', hereptr, 0
+  push qword [HERE]
+endnative
+
 ; Pushes the next qword in the instruction stream and skips it.
 native 'lit', lit, 0
   push qword [pc]
@@ -7,7 +12,7 @@ native 'lit', lit, 0
 endnative
 
 ; ( ptr -- )
-; Pops the top of the to HERE and advances HERE
+; Pops the value off the stack, writes it to HERE and advances HERE
 native ',', comma, 0
   mov rax, [HERE]
   pop qword [rax]
@@ -81,6 +86,15 @@ native 'create', create, 0
   call native_string_copy ; thrashes rax!
   add rdi, rdx    ; rdi <- execution token address (native_string_copy preserves rdi and rdx)
   mov [HERE], rdi ; HERE now points at the first byte after the header
+endnative
+
+; ( )
+; Marks the last defined word as immediate (sets the flag to 1).
+native 'immediate', immediate, 0
+  mov rax, [LAST_WORD]
+  mov dl, byte [rax + 8] ; skip the word ptr (8 bytes) and load (name length << 1) | flag
+  or dl, 1               ; set the flag
+  mov byte [rax + 8], dl
 endnative
 
 ; compile-only
