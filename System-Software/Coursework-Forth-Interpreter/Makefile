@@ -1,11 +1,11 @@
 CC=gcc
 
-all: lab7
+all: forth
 
-lab7: *.asm
+forth: *.asm
 	nasm -g -F dwarf -f elf64 main.asm
 	ld -o forth *.o
 	@rm *.o
 
 clean:
-	@rm lab7
+	@rm forth
