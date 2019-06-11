@@ -1,0 +1,88 @@
+\documentclass[listings]{labreport}
+\departmentsubject{Кафедра вычислительной техники}{Системное программное обеспечение}
+\titleparts{Лабораторная работа №6}{Основы awk}
+\students{Лабушев Тимофей Михайлович}
+\usepackage{multicol}
+
+\usepackage{etoolbox}
+\makeatletter
+\preto{\@verbatim}{\topsep=1pt \partopsep=1pt}
+\makeatother
+
+\begin{document}
+
+\maketitlepage
+
+\section*{Задание \#1. Файл db}
+
+\noindent Пример строки из файла:
+\begin{verbatim}
+Mike Harrington:(510) 548-1278:250:100:175
+\end{verbatim}
+
+\begin{enumerate}
+\item Вывести все номера телефонов:
+\begin{verbatim}
+awk -F : '{ print $2 }' db
+\end{verbatim}
+
+\begin{small}
+  \verb|$0| содержит всю строку, \verb|$1| — первое поле в строке и т.д.\\
+  Разделитель полей устанавливается с помощью ключа \verb|-F|
+\end{small}
+
+\item Вывести номер телефона, принадлежащий сотруднику Dan:
+\begin{verbatim}
+awk -F : '/^Dan/ { print $2 }' db
+\end{verbatim}
+
+\item Вывести имя, фамилию и номер телефона сотрудницы Susan:
+\begin{verbatim}
+awk -F : '/^Susan/ { print $1, $2 }' db
+\end{verbatim}
+
+\begin{small}
+  В выражении \verb|print| пробел между элементами вставляется с помощью \verb|,|
+\end{small}
+
+\item Вывести все фамилии, начинающиеся с буквы D:
+\begin{verbatim}
+awk -F '[ :]' '$2 ~ /^D/ { print $2 }' db
+\end{verbatim}
+
+\begin{small}
+  Разделитель полей (\verb|-F|) задается регулярным выражением.
+\end{small}
+
+\item Вывести все имена, начинающиеся с буквы C или E:
+\begin{verbatim}
+awk '$1 ~ /^[CE]/ { print $1 }' db
+\end{verbatim}
+
+\begin{small}
+  Здесь достаточно стандартного разделителя полей — последовательности
+  из одного или более пробела или символа табуляции.
+\end{small}
+
+\item Вывести все имена, состоящие только из четырех букв:
+\begin{verbatim}
+awk '$1 ~ /^\w{4}$/ { print $1 }' db
+\end{verbatim}
+
+\item Вывести имена сотрудников, префикс номера телефона которых 916:
+\begin{verbatim}
+awk -F '[ :]' '$3 == "(916)" { print $1 }' db
+\end{verbatim}
+
+\item Вывести денежные вклады сотрудника Mike, предваряя каждую сумму знаком \verb|$|:
+\begin{verbatim}
+awk -F ':' '/^Mike/ { printf "$%s, $%s, $%s\n", $3, $4, $5 }' db
+\end{verbatim}
+
+\item Вывести инициалы всех сотрудников:
+\begin{verbatim}
+awk -F '[ :]' '{ print substr($1, 0, 1), substr($2, 0, 1) }' db
+\end{verbatim}
+
+\end{enumerate}
+\end{document}
