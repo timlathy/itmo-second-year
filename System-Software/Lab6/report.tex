@@ -84,5 +84,127 @@ awk -F ':' '/^Mike/ { printf "$%s, $%s, $%s\n", $3, $4, $5 }' db
 awk -F '[ :]' '{ print substr($1, 0, 1), substr($2, 0, 1) }' db
 \end{verbatim}
 
+\item Создать командный файл awk, который: 
+\begin{enumerate}
+\item печатает полные имена и номера телефонов всех сотрудников по фамилии Savage
+\item печатает денежные вклады сотрудника по имени Chet
+\item печатает сотрудников, денежные вклады которых в первом месяце составили 250\$
+\item подсчитывает сумму вкладов за каждый месяц в отдельности и вывести это в виде оформленной таблицы
+\item подсчитывает средний вклад за каждый месяц и выводит результаты округлённо до второго знака после запятой
+\item в конце выводит текущее время и результат выполнения команды ls
 \end{enumerate}
+
+\begin{verbatim}
+BEGIN {
+  FS = ":";
+  IGNORED_FIELDS = 2;
+}
+{
+  if ($1 ~ /Savage$/)
+    savage_contacts[NR] = $1 " " $2;
+
+  empl_stats[NR]["name"] = $1;
+  for (i = 1 + IGNORED_FIELDS; i <= NF; i++) {
+    empl_stats[NR]["deposits"][i - IGNORED_FIELDS] = $(i);
+    empl_stats[NR]["deposits"]["total"] += $(i);
+    monthly_deposits[i - IGNORED_FIELDS] += $(i);
+  }
+  months = NF - IGNORED_FIELDS;
+}
+END {
+  print "a) Savage' contact data";
+  for (i in savage_contacts)
+    print savage_contacts[i];
+  print "b) Chet's deposits:";
+  for (i = 1; i <= NR; i++) {
+    if (empl_stats[i]["name"] ~ /Chet/)
+      for (m = 1; m <= months; m++)
+        print empl_stats[i]["deposits"][m];
+  }
+  print "c) $250 first month deposits:";
+  for (i = 1; i <= NR; i++) {
+    if (empl_stats[i]["deposits"][1] == 250)
+      print empl_stats[i]["name"];
+  }
+  print "d) Total monthly deposits:";
+  printf("month 1");
+  for (m = 2; m <= months; m++) printf(" | month %d", m);
+  printf("\n");
+  printf("%7d", monthly_deposits[1]);
+  for (m = 2; m <= months; m++) printf(" | %7d", monthly_deposits[m]);
+  printf("\n");
+  print "e) Average monthly deposit:";
+  printf("month 1");
+  for (m = 2; m <= months; m++) printf(" | month %d", m);
+  printf("\n");
+  printf("%7.2f", monthly_deposits[1] / NR);
+  for (m = 2; m <= months; m++) printf(" | %7.2f", monthly_deposits[m] / NR);
+  printf("\n");
+  print "f) Current time, directory contents";
+  system("date +%R");
+  system("ls");
+}
+\end{verbatim}
+
+\end{enumerate}
+
+\section*{Задание \#2}
+
+\verb|nawk| — AT\&T версия утилиты \verb|awk|. В современных дистрибутивах Linux
+встречается GNU версия утилиты \verb|awk|, \verb|gawk|.
+
+\begin{enumerate}
+\item \verb|nawk '/west/' datafile|\\
+Выводятся строки, содержащие последовательность \verb|west|.
+
+\item \verb|nawk '/^north/' datafile|\\
+Выводятся строки, начинающиеся с последовательности \verb|north|.
+
+\item \verb-nawk '/^(no|so)/' datafile-\\
+Выводятся строки, начинающиеся с \verb|no| или \verb|so|.
+
+\item \verb|nawk '{print $3, $2}' datafile|\\
+Через пробел выводятся сначала третье, затем второе поле каждой строки.
+
+\item \verb|nawk '{print $3 $2}' datafile|\\
+Слитно выводятся снала третье, затем второе поле каждой строки.
+
+\item \verb|nawk '{print $0}' datafile|\\
+Выводится каждая строка, то есть содержимое файла.
+
+\item \verb|nawk '{print "Number of fields: "NF}' datafile|\\
+Для каждой строки выводится строка Number of fields: $n$, где $n$ равен числу полей в строке.
+
+\item \verb|nawk '/northeast/{print $3, $2}' datafile|\\
+Через пробел выводятся третье и второе поля строк, содержащих последовательность \verb|northeast|.
+
+\item \verb|nawk '/E/' datafile|\\
+Выводятся строки, содержащие \verb|E|.
+
+\item \verb|nawk '/^[ns]/{print $1}' datafile|\\
+Выводится первое поле каждой строки, начинающейся с \verb|n| или \verb|s|.
+
+\item \verb|nawk '$5 ~ /\.[7-9]+/' datafile|\\
+Выводятся строки, в которых пятое поле удовлетворяет шаблону. Шаблон определяет, что
+в строке должна быть точка, за которой следует одна или несколько цифр \verb|8|, \verb|9|, \verb|10|.
+
+\item \verb|nawk '$2 !~ /E/{print $1, $2}' datafile|\\
+Для строк, второе поле которых не содержит \verb|E|, через пробел выводятся первое и второе поле.
+
+\item \verb|nawk '$3 ~ /^Joel/{print $3 " is a nice guy."}' datafile|\\
+Для строк, третье поле которых начинается на \verb|Joel|, выводится сообщение \verb|$3 is a nice guy.|, где
+\verb|$3| — значение третьего поля.
+
+\item \verb|nawk '$8 ~ /[1-9][0-2]$/{print $8}' datafile|\\
+Для строк, восьмое поле которых заканчивается на цифру от \verb|1| до \verb|9| и следующую за ней цифру \verb|0|, \verb|1| или \verb|2|,
+выводится восьмое поле.
+
+\item \verb|nawk '$4 ~ /Chin$/{print "The price is $" $8 "."}' datafile|\\
+Для строк, четвертое поле которых заканчивается на \verb|Chin|, выводится сообщение \verb|The price is $[].|, где \verb|[]| — восьмое поле.
+
+\item \verb|nawk '/TJ/{print $0}' datafile|\\
+Выводятся строки, содержащие \verb|TJ|.
+
+\end{enumerate}
+
 \end{document}
