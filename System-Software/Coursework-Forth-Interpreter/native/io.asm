@@ -72,6 +72,11 @@ native_print_int_epilogue:
 ; Accepts a word size limit; if the word read from stdin exceeds it, returns 0,
 ; otherwise returns the word buffer pointer.
 ;
+; In addition to that, native_read_word handles backslash (\) comments:
+; if a word is read that consists of a single \ character, all subsequent input
+; until the end of the line is discarded, and the first word on the next line is 
+; returned.
+;
 ; * rdi — (in) pointer to the word buffer
 ; * rsi — (in) maximum word size
 ; * rax — (out) the word buffer pointer if the word fits
@@ -100,15 +105,29 @@ read_word_write_to_buf:
   je read_word_success
   cmp al, 0xA             ; newline
   je read_word_success
-  mov [r13+r14], al
+  mov [r13 + r14], al
   inc r14
   cmp r14, r12
-  jbe read_word_loop
+  jne read_word_loop
 read_word_count_exceeded:
   xor eax, eax
   xor edx, edx
   jmp read_word_ret
 read_word_success:
+  cmp r14, 1
+  jne read_word_success_ret
+read_word_check_backslash:
+  cmp byte [r13], '\'
+  jne read_word_success_ret
+  xor r14, r14 ; reset word length
+read_word_skip_backslash_loop:
+  call native_read_char
+  cmp al, 0x0 ; stdin closed
+  je read_word_success_ret
+  cmp al, 0xA ; newline
+  je read_word_skip_spaces ; go to the start 
+  jmp read_word_skip_backslash_loop
+read_word_success_ret:
   mov rax, r13
   mov rdx, r14
 read_word_ret:
