@@ -11,7 +11,7 @@ native 'lit', lit, 0
   add pc, 8
 endnative
 
-; ( ptr -- )
+; ( value -- )
 ; Pops the value off the stack, writes it to HERE and advances HERE
 native ',', comma, 0
   mov rax, [HERE]

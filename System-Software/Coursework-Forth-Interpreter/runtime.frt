@@ -21,3 +21,23 @@
     here swap !  \ and store the current address (start of false-body) there => when the if condition fails we branch to else
 ; immediate
 
+\ Indefinite loops
+\ * begin [condition-body] while [loop-body] repeat
+\     condition-body leaves a flag on the stack;
+\     while pops it off, and if it's truthy, proceeds to loop-body, otherwise skips it
+
+: begin
+    here \ push condition-body address
+; immediate
+
+: while
+    lit 0branch , \ check the result of condition-body
+    here \ push the address of 0branch target (later replaced with the loop end address)
+    0 , \ reserve it
+; immediate
+
+: repeat
+    lit branch , \ unconditionally branch
+    swap ,       \ to condition-body (the first address we've pushed on the stack)
+    here swap !  \ set the target for the 0branch compiled in while to current location (first word after the loop)
+; immediate
