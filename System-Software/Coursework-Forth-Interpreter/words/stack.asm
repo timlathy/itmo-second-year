@@ -44,10 +44,10 @@ endnative
 
 ; ( a b -- b a )
 native 'swap', swap, 0
-  pop rax ; stack top
-  pop rbx ; stack top - 1
-  push rax
-  push rbx ; new stack top
+  pop rax ; rax <- b
+  pop rdx ; rdx <- a
+  push rax ; b
+  push rdx ; a
 endnative
 
 ; ( a b -- a b a )

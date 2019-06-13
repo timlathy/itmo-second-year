@@ -41,3 +41,25 @@
     swap ,       \ to condition-body (the first address we've pushed on the stack)
     here swap !  \ set the target for the 0branch compiled in while to current location (first word after the loop)
 ; immediate
+
+\ Definite loops
+\ * [limit] [index] for [loop-body] endfor
+\       if index < limit then execute loop-body, increment index, repeat; otherwise exit the loop
+
+: for
+    lit swap , lit >r , lit >r , \ insert the initialization sequence: move limit and index to the return stack, with index on top
+    here                         \ after initialization, we evaluate loop condition — this is the target for branch at the end of the loop, store it!
+    lit r> , lit dup , lit r@ ,  \ runtime data stack: ( index, index, limit ), return stack: ( limit )
+    lit < ,                      \ ( index, index < limit? )
+    lit 0branch ,                \ exit the loop. runtime data stack at this point is ( index ), return stack is ( limit )
+    here 0 ,                     \ (we'll put the address of the loop terminator there)
+    lit >r ,                     \ runtime data stack: ( ), return stack: ( limit index )
+; immediate
+
+: endfor
+    lit r> , lit 1+ , lit >r , \ increment the index
+    swap                       \ bring the address of the loop condition target to the top
+    lit branch , ,             \ branch to the loop condition
+    here swap !                \ set the target for the loop terminator
+    lit r> , lit 2drop ,       \ loop terminator: pop the limit from the retstack and drop it along with index
+; immediate
